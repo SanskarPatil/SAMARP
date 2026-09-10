@@ -25,7 +25,8 @@
 - [x] **Header-only packet counter** (`ingest/counters.py`) — packets, bytes, protocol/direction/IP-version breakdowns on closed vocabularies, TCP flag counters, rates.
 - [x] **Bounded flow tracker** (`ingest/flow_tracker.py`) — LRU cap, idle timeout, absolute lifetime, bounded sweep budget; produces `flow_summary` per V6.3 §6.2.
 - [x] **Capture-loss accounting** — measured lower bound; `kernel_drops`/`ring_drops` null (NOT_OBSERVABLE, no sensor on this path); `capture_loss` capability `DEGRADED` on a snapped capture.
-- [x] 209 tests pass (72 foundation + 91 replay + 46 STEP 5).
+- [x] **NetFlow v9 / IPFIX adapter** (`ingest/flow_record_adapter.py`) — one shared template decoder, bounded cache, template register/replace/expire, unknown-template deferral, same normalized contract. **P1-5 complete; H13 gate item satisfied.**
+- [x] 248 tests pass (72 foundation + 91 replay + 46 STEP 5 + 39 STEP 7).
 - [ ] Suricata EVE tail with partial-line handling *(STEP 6 — adapter only on this box, see blocker)*.
 - [ ] veth pair / one-way enclave *(STEP 10 — Linux box required)*.
 

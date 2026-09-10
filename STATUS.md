@@ -61,7 +61,8 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 
 - **`ingest/` normalized-event foundation (P1).** `identity.py` (canonical serialisation, frozen 16-hex identifiers, `NOT_OBSERVABLE` sentinel), `capability.py` (two-axis capability, per-input-mode baselines), `address_plan.py` (direction inference, bogon exclusion), `normalized_event.py` (single normalizer for all five input modes).
 - **`ingest/` PCAP replay path (P1).** `pcap.py` (classic libpcap reader, all four magics, both endiannesses, PCAPNG rejected), `headers.py` (header-only Ethernet/VLAN/IPv4/IPv6/TCP/UDP/ICMP decode), `clock.py` (unified replay clock, start-once), `replay.py` (deterministic driver, speed control).
-- **`ingest/` counters, bounded flow tracking and capture loss (P1).** `counters.py` (header-only `PacketCounter`, `CaptureLossAccount` reporting an explicit lower bound), `flow_tracker.py` (LRU-bounded flow table producing `flow_summary` per V6.3 §6.2 — from the in-process tracker, never Suricata EVE flow output). 2 813 lines across eleven modules.
+- **`ingest/` counters, bounded flow tracking and capture loss (P1).** `counters.py` (header-only `PacketCounter`, `CaptureLossAccount` reporting an explicit lower bound), `flow_tracker.py` (LRU-bounded flow table producing `flow_summary` per V6.3 §6.2 — from the in-process tracker, never Suricata EVE flow output).
+- **`ingest/flow_record_adapter.py` — NetFlow v9 / IPFIX (P1).** One shared template-based decoder for both protocols per V6.3 §2.4, not two parsers. Bounded LRU template cache with idle expiry, scoped by exporter and observation domain. Emits the same normalized event contract as the packet path. 3 455 lines across twelve modules.
 - No other runtime component exists. No detector, API, persistence or dashboard code.
 
 ---
@@ -75,7 +76,9 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 ## Latest Verification
 
 - **Test:** `python -m pytest tests/ -q`
-- **Result:** **209 passed**, 0 failed, 2.69 s. (72 foundation + 91 replay + 46 STEP 5.)
+- **Result:** **248 passed**, 0 failed, 4.26 s. (72 foundation + 91 replay + 46 STEP 5 + 39 STEP 7.)
+- **STEP 7 measured:** NetFlow v9 fixture decodes 3 records, IPFIX fixture decodes 2; both validate against the frozen schema. Same five-tuple yields the same `flow_id` `4242dae276b9f525` across **both protocols and the packet path** — one identity rule, three input modes. Template register → replace → decode-with-new-layout → expire all demonstrated. Data-before-template deferred (not guessed) then decoded once the template arrives. 2 000 template IDs against a 32 cap → active 32, peak 32, 1 968 evictions, **cap never exceeded**.
+- **`NOT_OBSERVABLE` preserved:** `dns_names`, `dns_responses`, `tls_handshake`, `quic_metadata`, `ja3`, `ja3s`, `ja4` all `NOT_OBSERVABLE` on flow-record input; `flow_records` `OBSERVABLE`; `bidirectional_visibility` `DEGRADED`. No `dns`/`tls`/`quic`/`shape` block is emitted — flow records cannot supply them and none is invented.
 - **STEP 5 measured on the deterministic fixture:** 5 packets / 298 wire bytes / 278 captured; `by_protocol {TCP: 3, UDP: 2}`; all four directions counted; 4 flows created from 5 packets (the two directions of one conversation share a flow).
 - **Bounded state proven:** 10 000 distinct 5-tuples against a 100-flow cap → active 100, peak 100, 9 900 evictions counted, **cap never exceeded at any point**. Idle expiry, absolute-lifetime rotation and LRU capacity eviction each demonstrated and accounted separately.
 - **Capture loss:** `sensor_drop_pct 16.67`, `estimator "pcap_parse_and_snaplen"`, `is_lower_bound true`, `kernel_drops`/`ring_drops` **null** (no sensor on this path — NOT_OBSERVABLE, not zero); `capture_loss` capability `DEGRADED`.
