@@ -91,7 +91,7 @@ All six shared contracts are already frozen, so no track is blocked on contract 
 ## 3. Phase 0 — Foundation
 
 ### Phase 0 — Hours 0–1, all four together
-**Status:** NOT_STARTED
+**Status:** COMPLETE (project owner reported Phase 0 exit passed)
 **Owner:** P1 + P2 + P3 + P4 together
 
 **Objective:** Freeze every shared contract and prove the environment before any track diverges.
@@ -251,7 +251,7 @@ All six shared contracts are already frozen, so no track is blocked on contract 
 ## 5. P2 — Detection / ML
 
 ### P2-1 Ground Truth — Hours 1–6
-**Status:** NOT_STARTED
+**Status:** IN PROGRESS
 **Owner:** P2
 
 **Objective:** Reproducible corpora and manifests exist before any detector is tuned against them.

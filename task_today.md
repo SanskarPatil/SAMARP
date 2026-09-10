@@ -1,9 +1,9 @@
 # Task Today
 
 **Updated:** 2026-09-10
-**Timebox:** not yet set — build window has not opened
-**Current Phase:** Phase 0 — Foundation
-**Current Gate:** Phase 0 exit gate (H1)
+**Timebox:** Phase 1 P2 implementation
+**Current Phase:** P2-1 — Ground Truth
+**Current Gate:** P2-1 corpus and offline-intelligence milestone
 **Overall Status:** GREEN
 
 > Keep this file small and short-lived. It holds only the current focused work period — roughly the next two hours. Project state is in `STATUS.md`; the roadmap is in `implementation_plan.md`.
@@ -12,11 +12,25 @@
 
 ## Current Objective
 
-Close out the four open contract decisions and freeze every shared contract, so all three tracks can build against fixed interfaces from hour 1.
+Build deterministic Detection / ML inputs and reusable passive-metadata features without waiting for P1 live capture.
 
 ---
 
 ## Priority Tasks
+
+### 1. Stateless feature foundation — DONE
+
+- [x] Implement deterministic entropy, median/MAD, robust z-score, inter-arrival and qtype primitives.
+- [x] Implement lexical DGA, DNS qtype, and TLS/QUIC metadata-shape extraction using only frozen normalised-event fields.
+- [x] Preserve the frozen `FEATURE_ORDER` with deterministic vector encoding.
+- [x] Add and pass five deterministic feature tests.
+
+### 2. Ground truth and offline intelligence — NEXT
+
+- [ ] Deterministic synthetic benign/attack corpus and seed manifest.
+- [ ] Time, entity and DGA-family holdout definitions with leakage tests.
+- [ ] Immutable baseline snapshot generation.
+- [ ] Offline allowlist, DGA-family and Tranco-derived sample assets plus version manifest.
 
 ### 1. Resolve the four open contract decisions — DONE
 
@@ -61,13 +75,12 @@ Rationale recorded in `memory.md`; `bugs.md` `DOC-004`, `DOC-006`, `DOC-007`, `D
 
 ## Current Blocker
 
-None. All contract decisions are frozen, all four tracks are assigned, and the coverage sweep confirms no unowned responsibility.
+None for P2. The repository has no P1 normalizer yet, so P2 uses deterministic synthetic events until the declared handoff.
 
 ---
 
 ## Do Not Work On
 
-- Any detector. The first development action is not a detector.
 - Threat map, PDF export, clock servo, Lomb-Scargle, fusion, SHAP — all Tier 2.
 - Unrelated refactors.
 - Documentation beyond what a decision requires (the documentation layer already exists).

@@ -1,0 +1,10 @@
+{
+  "version": "0.1.0",
+  "generated_from": "deterministic-synthetic-benign-corpus",
+  "adaptive_updates": false,
+  "metrics": {
+    "packets_per_second": {"median": 100.0, "mad": 10.0},
+    "outbound_byte_ratio": {"median": 1.0, "mad": 0.1},
+    "unique_destination_ports": {"median": 5.0, "mad": 2.0}
+  }
+}

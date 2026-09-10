@@ -1,9 +1,9 @@
 # Project Status
 
 **Last Updated:** 2026-09-10
-**Current Hour:** Pre-window (build window not opened)
-**Current Phase:** Phase 0 — Foundation (not started)
-**Current Gate:** Phase 0 exit gate (H1)
+**Current Hour:** Phase 1
+**Current Phase:** P2-1 — Ground Truth (in progress)
+**Current Gate:** P2-1 corpus and offline-intelligence milestone
 **Overall Status:** GREEN
 
 > This file is the project's current state in under a minute. Immediate work is in `task_today.md`; the full roadmap is in `implementation_plan.md`.
@@ -25,7 +25,8 @@
 
 ## In Progress
 
-- Phase 0 remainder: Suricata build and capability probe, isolated veth lab with egress DROP, and contract tests in `tests/schema/`. No feature implementation has begun.
+- Phase 0 exit is recorded as passed by the project owner. P2 is implementing against deterministic synthetic events while P1's live normalizer remains a future handoff.
+- P2 feature foundation: deterministic passive-metadata primitives, lexical/DNS/qtype extraction, and frozen-order vectorization are implemented and test-green.
 
 ---
 
@@ -43,7 +44,7 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 
 ## Working Systems
 
-- None. The frozen contracts exist as artifacts; no runtime component has been built.
+- P2 stateless feature extraction: entropy, robust statistics, inter-arrival features, DNS qtype distribution including TXT/NULL/CNAME, TLS/QUIC metadata shape extraction, and deterministic `FEATURE_ORDER` vectorization.
 
 ---
 
@@ -55,32 +56,21 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 
 ## Latest Verification
 
-- **Test:** cross-document consistency review of the three source documents against the generated documentation layer.
-- **Result:** eleven discrepancies found and recorded; the six PS class strings, the eight detector modules, the frozen `input_mode` enum, the five mandatory alert fields, `flow_id`/`flow_ref_type` semantics, the latency budget, the kill ladder and the never-cut list are represented consistently across all generated files.
+- **Test:** `python -m unittest discover -s tests/detectors -p test_features.py -v`
+- **Result:** PASS — 5 deterministic feature tests passed: primitives, inter-arrival statistics, qtype distributions, extraction purity/determinism, and frozen feature ordering.
 - **Time:** 2026-09-10.
-- **No automated test has been run** — there is no implementation and no test suite yet.
 
 ---
 
 ## Next Gate
 
-**Phase 0 exit (H1).** Contract tests exist and pass; the JA3/JA3S/JA4 capability result is recorded; the lab interface has no route and no egress.
+**P2-1 ground-truth milestone.** Deterministic synthetic corpus, holdout definitions, baseline snapshot and versioned offline-intelligence assets must be test-green before model training and detector tuning.
 
 ---
 
 ## Immediate Next Action
 
-Complete the remaining Phase 0 environment work, in this order:
-
-1. Confirm the OS/box decision and record the machine specification. **WSL2 is not acceptable** for the published throughput number.
-2. Build and version-check Suricata (7.0.3 or later for JA4).
-3. Run the capability probe against a known fixture PCAP; record every acceptance line, including the JA3/JA3S/JA4 verdict and `flow events == 0`.
-4. Build the isolated veth lab; set egress DROP.
-5. Write the contract tests in `tests/schema/` against the now-frozen schemas (**P4**).
-
-Items 1–4 are P1's and need the Linux lab machine. Item 5 is P4's and needs nothing but the frozen schemas.
-
-Then the Phase 0 exit gate can be assessed. **Feature implementation does not begin until that gate is green.**
+Build P2's deterministic synthetic corpus and holdout definitions, then generate the immutable baseline snapshot and offline intelligence bundle assets. The DGA LightGBM model follows only after those inputs and leakage tests exist.
 
 ### Track readiness at Phase 1 start
 

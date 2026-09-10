@@ -1,0 +1,10 @@
+{
+  "bundle_version": "0.1.0",
+  "offline_only": true,
+  "components": {
+    "allowlists": "0.1.0",
+    "dga_families": "0.1.0",
+    "tranco_baseline": "0.1.0",
+    "baseline_snapshot": "0.1.0"
+  }
+}
