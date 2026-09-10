@@ -33,6 +33,22 @@
 
 - Nothing. All four Phase 0 contract decisions have been made and applied; `DOC-004`, `DOC-006`, `DOC-007` and `DOC-009` are closed.
 
+## Open Finding — P1, needs a decision before the H6 gate
+
+**`external.*` in `config/address_plan.yaml` is still empty, and how it is filled matters.**
+
+Python's `ipaddress` treats RFC 5737 documentation ranges as private. If `external.benign`, `external.synthetic_malicious` or `external.amplifier_hosts` are populated with documentation space, the reflection reserved-source share returns to ~100 % on benign traffic — **the exact trap section 2A.3 exists to prevent, reintroduced one level down**, and the false-alerts-per-hour figure is destroyed again.
+
+The plan already requires *"curated public ranges, GeoLite2-resolvable"*. This finding records **why** that wording is load-bearing rather than stylistic. Owner: P1 (plan) with P2 (reflection detector). Pinned by `tests/ingest/test_address_plan.py::test_documentation_ranges_count_as_reserved_not_public`.
+
+## Open Finding — P1, needs a decision before the H6 gate
+
+**`external.*` in `config/address_plan.yaml` is still empty, and how it is filled matters.**
+
+Python's `ipaddress` treats RFC 5737 documentation ranges as private. If `external.benign`, `external.synthetic_malicious` or `external.amplifier_hosts` are populated with documentation space, the reflection reserved-source share returns to ~100 % on benign traffic — **the exact trap section 2A.3 exists to prevent, reintroduced one level down** — and the false-alerts-per-hour figure is destroyed again.
+
+The plan already requires *"curated public ranges, GeoLite2-resolvable"*. This finding records **why** that wording is load-bearing rather than stylistic. Owner: P1 (plan) with P2 (reflection detector). Pinned by `tests/ingest/test_address_plan.py::test_documentation_ranges_count_as_reserved_not_public`.
+
 ## Ownership Coverage
 
 **Complete.** All six previously unnamed responsibilities are confirmed: hash chain → **P4**; offline intel bundle and version manifest → **P2**; baseline snapshot generation → **P2**; model card and evaluation report → **P2**; cold boot and offline asset audit → **P1**; backup recording and screenshots → **P3**.
@@ -43,7 +59,8 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 
 ## Working Systems
 
-- None. The frozen contracts exist as artifacts; no runtime component has been built.
+- **`ingest/` normalized-event foundation (P1).** `identity.py` (canonical serialisation, frozen 16-hex identifiers, `NOT_OBSERVABLE` sentinel), `capability.py` (two-axis capability, per-input-mode baselines), `address_plan.py` (direction inference, bogon exclusion), `normalized_event.py` (single normalizer for all five input modes). Emits events validated against the frozen schema.
+- No other runtime component exists. No detector, API, persistence or dashboard code.
 
 ---
 
@@ -55,10 +72,16 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 
 ## Latest Verification
 
-- **Test:** cross-document consistency review of the three source documents against the generated documentation layer.
-- **Result:** eleven discrepancies found and recorded; the six PS class strings, the eight detector modules, the frozen `input_mode` enum, the five mandatory alert fields, `flow_id`/`flow_ref_type` semantics, the latency budget, the kill ladder and the never-cut list are represented consistently across all generated files.
+- **Test:** `python -m pytest tests/ingest/ -q`
+- **Result:** **72 passed**, 0 failed, 1.64 s.
+- **Coverage:** canonical serialisation and the frozen `sha256(...).hexdigest()[:16]` identifier (incl. an explicit assertion that the 16-*byte* misreading is not produced); bidirectional flow identity; `NOT_OBSERVABLE` sentinel substitution; direction inference for all four enum values; the RFC 1918 bogon-exclusion trap; schema conformance for all five input modes; capability two-axis separation; sFlow not claiming packet-level visibility.
+- **Static boundary check:** `ingest/` imports no `socket`, `http`, `urllib`, `subprocess` or crypto module; contains no `connect`/`send`/`bind` call, no file write, and no payload access. Passive by construction.
 - **Time:** 2026-09-10.
-- **No automated test has been run** — there is no implementation and no test suite yet.
+
+### Two failures found and fixed during this milestone
+
+1. `display_time` is typed `string` (**not** nullable) by the frozen schema, unlike every other optional field. The normalizer emitted an explicit null under `drop_none=False` and failed validation. Fixed in code — the schema was not touched.
+2. Python's `ipaddress` classifies RFC 5737 documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) as **private**. A test fixture used one as "external and routable" and correctly failed. See the open finding below.
 
 ---
 

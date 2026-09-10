@@ -12,7 +12,19 @@
 
 ## Current Objective
 
-Close out the four open contract decisions and freeze every shared contract, so all three tracks can build against fixed interfaces from hour 1.
+**P1 — P1-1 Transport and Clock.** Build the sensor spine: one PCAP becomes contract-valid normalized events through a single clock.
+
+### P1-1 progress
+
+- [x] **Normalized-event foundation** — `ingest/identity.py`, `ingest/capability.py`, `ingest/address_plan.py`, `ingest/normalized_event.py`. 72 tests pass.
+- [x] `config/address_plan.yaml` loaded; `direction` populated for all four enum values.
+- [ ] PCAP reader (header-only, pure stdlib) + deterministic replay driver with speed control.
+- [ ] Unified replay clock — `t_replay_start` captured **once**, written to the manifest.
+- [ ] Header-only packet counter.
+- [ ] Bounded flow tracker producing `flow_summary`.
+- [ ] Capture-loss fields.
+- [ ] Suricata EVE tail with partial-line handling *(adapter only on this box — see blocker)*.
+- [ ] veth pair / one-way enclave *(Linux box required)*.
 
 ---
 
@@ -61,7 +73,9 @@ Rationale recorded in `memory.md`; `bugs.md` `DOC-004`, `DOC-006`, `DOC-007`, `D
 
 ## Current Blocker
 
-None. All contract decisions are frozen, all four tracks are assigned, and the coverage sweep confirms no unowned responsibility.
+**Environment.** The current development box is Windows. Suricata, `veth`, `tcpreplay` and live tap are Linux-only, and V6.3 rules WSL2 unacceptable for the published throughput number. The pure-Python ingest pipeline (PCAP parse → normalize → flow track → NetFlow/IPFIX/sFlow) can be built and fully unit-tested here; **Suricata integration, veth/lab wiring, live tap and the published throughput measurement require the declared Linux box.** Those parts will be written as adapters with binary-free tests and executed on the lab machine.
+
+Not blocking foundation work.
 
 ---
 
