@@ -54,8 +54,8 @@ def extract_registered_domain(qname: str) -> str:
     if not clean:
         return NOT_OBSERVABLE
     labels = clean.split(".")
-    if len(labels) == 1:
-        return labels[0]
+    if len(labels) < 2:
+        return NOT_OBSERVABLE
     if labels[-1] in COMMON_TLDS and len(labels) >= 2:
         return f"{labels[-2]}.{labels[-1]}"
     return ".".join(labels[-2:])
@@ -135,11 +135,10 @@ class DNSTunnelDetector:
             self._domains.pop(k, None)
             self._alerted.discard(k)
 
-        if len(self._domains) > self.max_domains:
-            oldest = sorted(self._domains.items(), key=lambda kv: kv[1].last_seen)[: len(self._domains) - self.max_domains]
-            for k, _ in oldest:
-                self._domains.pop(k, None)
-                self._alerted.discard(k)
+        while len(self._domains) >= self.max_domains:
+            oldest_key = min(self._domains.keys(), key=lambda k: self._domains[k].last_seen)
+            self._domains.pop(oldest_key, None)
+            self._alerted.discard(oldest_key)
 
     def evaluate_event(self, ev: NormalizedEvent) -> dict[str, Any] | None:
         """Evaluate a single NormalizedEvent containing DNS data."""
@@ -153,7 +152,8 @@ class DNSTunnelDetector:
         now = float(ev.observed_time.timestamp()) if isinstance(ev.observed_time, datetime) else float(ev.observed_time)
         self._prune(now)
 
-        reg_domain = ev.dns.get("registered_domain") or extract_registered_domain(qname)
+        raw_reg = (ev.dns.get("registered_domain") or "").strip()
+        reg_domain = raw_reg or extract_registered_domain(qname)
         key = (ev.src_ip, reg_domain)
 
         state = self._domains.get(key)
@@ -218,7 +218,7 @@ class DNSTunnelDetector:
 
         # Dedup key from frozen config: [ps_class, src_ip, registered_domain]
         # Unavailable components take the exact NOT_OBSERVABLE sentinel
-        reg_domain_comp = state.registered_domain if state.registered_domain else NOT_OBSERVABLE
+        reg_domain_comp = state.registered_domain if state.registered_domain and state.registered_domain != NOT_OBSERVABLE else NOT_OBSERVABLE
         dedup_key = [PS_CLASS, state.src_ip, reg_domain_comp]
         inc_id = identifier(dedup_key)
         fl_id = identifier([state.src_ip, reg_domain_comp])
@@ -244,7 +244,10 @@ class DNSTunnelDetector:
         }
 
         score_val = min(1.0, max(0.0, (avg_len / self.qname_len_min) * 0.5 + (avg_entropy / self.entropy_min) * 0.5))
-        input_mode = str(ev.input_mode) if ev.input_mode else "pcap_replay"
+        input_mode = ev.input_mode.value if hasattr(ev.input_mode, "value") else str(ev.input_mode) if ev.input_mode else "pcap_replay"
+
+        cap_state = "OBSERVABLE" if reg_domain_comp != NOT_OBSERVABLE else "DEGRADED"
+        missing_ev = [] if reg_domain_comp != NOT_OBSERVABLE else ["registered_domain"]
 
         alert: dict[str, Any] = {
             "schema_version": "1.3",
@@ -262,9 +265,9 @@ class DNSTunnelDetector:
             "incident_id": inc_id,
             "dedup_key": canonical(dedup_key),
             "capability": {
-                "detector_state": "OBSERVABLE",
+                "detector_state": cap_state,
                 "input_mode": input_mode,
-                "missing_evidence": [],
+                "missing_evidence": missing_ev,
             },
             "status": "NEW",
             "severity": "HIGH" if (txt_ratio > 0.3 or null_ratio > 0.2 or avg_len > 70) else "MEDIUM",

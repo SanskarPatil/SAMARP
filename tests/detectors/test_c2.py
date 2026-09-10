@@ -94,3 +94,26 @@ def test_periodic_c2_beacon_detection(alert_validator: jsonschema.Draft202012Val
     assert alert["evidence"]["iat_cv"] <= 0.15
     assert 9.0 <= alert["evidence"]["iat_mean"] <= 11.0
     assert alert["evidence"]["event_count"] >= 8
+
+
+def test_c2_burst_filtering_not_beaconing() -> None:
+    detector = C2Detector(cv_max=0.15, min_events=8)
+    src = "10.10.0.18"
+    dst = "198.51.100.20"
+    port = 80
+
+    # Rapid burst (e.g. 10ms intervals): bulk download / port scan, mean IAT < 50ms
+    t = 500.0
+    for _ in range(12):
+        t += 0.01
+        res = detector.evaluate_event(_beacon_event(src, dst, port, t))
+        assert res is None
+
+
+def test_c2_bounded_state_eviction() -> None:
+    # Set max_tracked=5 and ensure tracker doesn't grow unbounded
+    detector = C2Detector(max_tracked=5, window_s=60.0)
+    for i in range(20):
+        detector.evaluate_event(_beacon_event(f"10.10.0.{i}", "198.51.100.1", 443, 100.0 + i))
+    assert len(detector._conversations) <= 5
+

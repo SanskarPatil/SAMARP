@@ -132,7 +132,53 @@ def test_no_sni_direct_ip_tls_detection(alert_validator: jsonschema.Draft202012V
     assert alert is not None
     alert_validator.validate(alert)
 
-    # When JA3 is missing, sentinel NOT_OBSERVABLE must be used in dedup key
     assert alert["incident_id"] == identifier(["Malware in encrypted sessions", src, NOT_OBSERVABLE, dst])
     assert alert["capability"]["detector_state"] == "DEGRADED"
     assert "ja3" in alert["capability"]["missing_evidence"]
+
+
+def test_stealth_shape_detection(alert_validator: jsonschema.Draft202012Validator) -> None:
+    detector = TLSQuicDetector()
+    src = "10.10.0.50"
+    dst = "198.51.100.111"
+
+    # Stealth beaconing shape: repeated 180-byte packets with low jitter
+    alert = None
+    t = 1000.0
+    for i in range(8):
+        t += 5.0 + (0.05 if i % 2 == 0 else -0.05)
+        ev = NormalizedEvent(
+            observed_time=t,
+            input_mode=InputMode.PCAP_REPLAY,
+            capability=CapabilityState(InputMode.PCAP_REPLAY),
+            src_ip=src,
+            dst_ip=dst,
+            src_port=49800,
+            dst_port=443,
+            protocol="TCP",
+            bytes=180,
+            direction="outbound" if i % 2 == 0 else "inbound",
+            tls={"sni": "legit-looking.cdn"},
+        )
+        res = detector.evaluate_event(ev)
+        if res:
+            alert = res
+
+    assert alert is not None
+    alert_validator.validate(alert)
+    ev_data = alert["evidence"]
+    assert ev_data["packet_size_first_n"] is not None
+    assert ev_data["direction_first_n"] is not None
+    assert ev_data["packet_size_mean"] == 180.0
+    assert ev_data["iat_median"] is not None
+    assert ev_data["iat_cv"] < 0.20
+    assert ev_data["upstream_packet_ratio"] is not None
+    assert ev_data["downstream_packet_ratio"] is not None
+
+
+def test_tls_quic_bounded_state() -> None:
+    detector = TLSQuicDetector(max_sessions=5, window_s=60.0)
+    for i in range(20):
+        detector.evaluate_event(_tls_ev("10.10.0.1", f"198.51.100.{i}", 443, ts=100.0 + i))
+    assert len(detector._sessions) <= 5
+

@@ -102,3 +102,38 @@ def test_dns_tunnel_detection(alert_validator: jsonschema.Draft202012Validator) 
     assert ev["avg_length"] >= 45
     assert ev["avg_entropy"] >= 3.0
     assert len(ev["sample_queries"]) > 0
+
+
+def test_dns_tunnel_not_observable_registered_domain(alert_validator: jsonschema.Draft202012Validator) -> None:
+    detector = DNSTunnelDetector(qname_len_min=20, entropy_min=3.0, min_queries=5)
+    src = "10.10.0.99"
+
+    # Query without extractable registered domain
+    alert = None
+    for i in range(6):
+        ev = NormalizedEvent(
+            observed_time=300.0 + i,
+            input_mode=InputMode.PCAP_REPLAY,
+            capability=CapabilityState(InputMode.PCAP_REPLAY),
+            src_ip=src,
+            dst_ip="10.10.0.53",
+            src_port=53535,
+            dst_port=53,
+            protocol="UDP",
+            dns={"qname": "a" * 60, "qtype": "TXT", "registered_domain": ""},
+        )
+        res = detector.evaluate_event(ev)
+        if res:
+            alert = res
+
+    assert alert is not None
+    alert_validator.validate(alert)
+    assert "NOT_OBSERVABLE" in alert["dedup_key"]
+
+
+def test_dns_tunnel_bounded_state() -> None:
+    detector = DNSTunnelDetector(max_domains=5, window_s=60.0)
+    for i in range(20):
+        detector.evaluate_event(_dns_ev("10.10.0.1", f"sub{i}.domain{i}.com", "A", 100.0 + i))
+    assert len(detector._domains) <= 5
+

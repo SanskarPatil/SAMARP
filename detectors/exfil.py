@@ -91,12 +91,14 @@ class ExfilDetector:
         min_outbound_bytes: int = DEFAULT_MIN_OUTBOUND_BYTES,
         window_s: float = DEFAULT_WINDOW_S,
         max_conversations: int = DEFAULT_MAX_CONVERSATIONS,
+        baseline: dict[str, Any] | None = None,
     ) -> None:
         self.outbound_ratio_min = outbound_ratio_min
         self.robust_z = robust_z
         self.min_outbound_bytes = min_outbound_bytes
         self.window_s = window_s
         self.max_conversations = max_conversations
+        self.baseline = baseline
 
         # Map (src_ip, dst_ip) -> _ExfilConversationState
         self._conversations: dict[tuple[str, str], _ExfilConversationState] = {}
@@ -109,11 +111,10 @@ class ExfilDetector:
             self._conversations.pop(k, None)
             self._alerted.discard(k)
 
-        if len(self._conversations) > self.max_conversations:
-            oldest = sorted(self._conversations.items(), key=lambda kv: kv[1].last_seen)[: len(self._conversations) - self.max_conversations]
-            for k, _ in oldest:
-                self._conversations.pop(k, None)
-                self._alerted.discard(k)
+        while len(self._conversations) >= self.max_conversations:
+            oldest_key = min(self._conversations.keys(), key=lambda k: self._conversations[k].last_seen)
+            self._conversations.pop(oldest_key, None)
+            self._alerted.discard(oldest_key)
 
     def evaluate_event(self, ev: NormalizedEvent) -> dict[str, Any] | None:
         """Evaluate a NormalizedEvent for outbound volume asymmetry."""
@@ -149,15 +150,24 @@ class ExfilDetector:
         return alerts
 
     def _check_state(self, state: _ExfilConversationState, now: float, ev: NormalizedEvent) -> dict[str, Any] | None:
-        if state.outbound_bytes < self.min_outbound_bytes:
-            return None
-
         key = (state.src_ip, state.dst_ip)
         if key in self._alerted:
             return None
 
         ratio = state.outbound_bytes / max(state.inbound_bytes, 1)
-        if ratio < self.outbound_ratio_min:
+
+        # Calculate robust z-score if baseline is provided
+        robust_z_val: float | None = None
+        if self.baseline and "median_bytes" in self.baseline and "mad_bytes" in self.baseline:
+            med = float(self.baseline["median_bytes"])
+            mad = float(self.baseline["mad_bytes"])
+            if mad > 0:
+                robust_z_val = round((state.outbound_bytes - med) / (1.4826 * mad), 2)
+
+        ratio_triggered = (ratio >= self.outbound_ratio_min and state.outbound_bytes >= self.min_outbound_bytes)
+        z_triggered = (robust_z_val is not None and robust_z_val >= self.robust_z)
+
+        if not (ratio_triggered or z_triggered):
             return None
 
         self._alerted.add(key)
@@ -169,25 +179,44 @@ class ExfilDetector:
 
         duration = max(state.last_seen - state.first_seen, 0.001)
 
+        interpretation_parts = [
+            f"Data exfiltration pattern detected: {state.src_ip} -> {state.dst_ip}",
+            f"transferred {state.outbound_bytes:,} outbound bytes vs {state.inbound_bytes:,} inbound bytes",
+            f"(asymmetry ratio {ratio:.1f} >= {self.outbound_ratio_min})",
+        ]
+        if z_triggered and robust_z_val is not None:
+            interpretation_parts.append(f", robust z-score {robust_z_val} >= {self.robust_z}")
+
         evidence: dict[str, Any] = {
-            "interpretation": (
-                f"Data exfiltration pattern detected: {state.src_ip} -> {state.dst_ip} "
-                f"transferred {state.outbound_bytes:,} outbound bytes vs {state.inbound_bytes:,} inbound bytes "
-                f"(asymmetry ratio {ratio:.1f} >= {self.outbound_ratio_min})"
-            ),
+            "interpretation": " ".join(interpretation_parts),
             "outbound_bytes": state.outbound_bytes,
             "inbound_bytes": state.inbound_bytes,
             "outbound_ratio": round(ratio, 2),
+            "robust_z": robust_z_val,
             "outbound_packets": state.outbound_packets,
             "inbound_packets": state.inbound_packets,
             "duration_s": round(duration, 2),
             "source": state.src_ip,
             "destination": state.dst_ip,
             "direction": "outbound",
+            "burst_or_sustained": "sustained" if duration >= 30.0 else "burst",
+            "protocol": ev.protocol or "TCP",
         }
 
-        score_val = min(1.0, max(0.0, (ratio / self.outbound_ratio_min) * 0.4 + (state.outbound_bytes / (self.min_outbound_bytes * 2)) * 0.6))
-        input_mode = str(ev.input_mode) if ev.input_mode else "pcap_replay"
+        if z_triggered and robust_z_val is not None:
+            score_type = "robust_z"
+            score_val = robust_z_val
+        else:
+            score_type = "anomaly_score"
+            score_val = min(1.0, max(0.0, (ratio / self.outbound_ratio_min) * 0.4 + (state.outbound_bytes / (self.min_outbound_bytes * 2)) * 0.6))
+
+        input_mode = ev.input_mode.value if hasattr(ev.input_mode, "value") else str(ev.input_mode) if ev.input_mode else "pcap_replay"
+
+        baseline_record = (
+            self.baseline
+            if self.baseline
+            else {"min_outbound_bytes": self.min_outbound_bytes, "outbound_ratio_min": self.outbound_ratio_min}
+        )
 
         alert: dict[str, Any] = {
             "schema_version": "1.3",
@@ -199,9 +228,10 @@ class ExfilDetector:
             "detector": DETECTOR_NAME,
             "confidence": None,
             "score": round(score_val, 3),
-            "score_type": "anomaly_score",
+            "score_type": score_type,
             "calibrated": False,
             "evidence": evidence,
+            "baseline": baseline_record,
             "incident_id": inc_id,
             "dedup_key": canonical(dedup_key),
             "capability": {

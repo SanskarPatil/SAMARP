@@ -94,11 +94,10 @@ class C2Detector:
             self._conversations.pop(k, None)
             self._alerted.discard(k)
 
-        if len(self._conversations) > self.max_tracked:
-            oldest = sorted(self._conversations.items(), key=lambda kv: kv[1].last_seen)[: len(self._conversations) - self.max_tracked]
-            for k, _ in oldest:
-                self._conversations.pop(k, None)
-                self._alerted.discard(k)
+        while len(self._conversations) >= self.max_tracked:
+            oldest_key = min(self._conversations.keys(), key=lambda k: self._conversations[k].last_seen)
+            self._conversations.pop(oldest_key, None)
+            self._alerted.discard(oldest_key)
 
     def evaluate_event(self, ev: NormalizedEvent) -> dict[str, Any] | None:
         """Evaluate a NormalizedEvent for periodic beaconing behaviour."""
@@ -184,7 +183,7 @@ class C2Detector:
 
         # Score is inverted CV (higher regularity = higher anomaly score)
         score_val = min(1.0, max(0.0, 1.0 - (cv / self.cv_max) * 0.5))
-        input_mode = str(ev.input_mode) if ev.input_mode else "pcap_replay"
+        input_mode = ev.input_mode.value if hasattr(ev.input_mode, "value") else str(ev.input_mode) if ev.input_mode else "pcap_replay"
 
         alert: dict[str, Any] = {
             "schema_version": "1.3",

@@ -85,7 +85,40 @@ def test_data_exfiltration_detection(alert_validator: jsonschema.Draft202012Vali
     assert alert["flow_ref_type"] == "aggregate"
     assert alert["incident_id"] == identifier(["Data exfiltration", src, dst])
 
-    ev = alert["evidence"]
-    assert ev["outbound_bytes"] >= 300_000
-    assert ev["outbound_ratio"] >= 10.0
-    assert ev["direction"] == "outbound"
+    ev_data = alert["evidence"]
+    assert ev_data["outbound_bytes"] >= 300_000
+    assert ev_data["outbound_ratio"] >= 10.0
+    assert ev_data["direction"] == "outbound"
+    assert ev_data["burst_or_sustained"] in ("burst", "sustained")
+
+
+def test_data_exfiltration_robust_z_with_baseline(alert_validator: jsonschema.Draft202012Validator) -> None:
+    # Baseline median=10,000 bytes, MAD=2,000 bytes
+    baseline = {"median_bytes": 10_000, "mad_bytes": 2_000}
+    detector = ExfilDetector(
+        outbound_ratio_min=10.0,
+        robust_z=5.0,
+        min_outbound_bytes=100_000,  # Even though volume < 100k, robust z >= 5.0 triggers
+        baseline=baseline,
+    )
+    src = "10.10.0.12"
+    dst = "198.51.100.80"
+
+    # Outbound transfer of 30,000 bytes -> robust z = (30,000 - 10,000) / (1.4826 * 2,000) = 6.74 >= 5.0
+    ev = _flow_ev(src, dst, bytes_=30_000, direction="outbound", ts=300.0)
+    alert = detector.evaluate_event(ev)
+
+    assert alert is not None
+    alert_validator.validate(alert)
+    assert alert["score_type"] == "robust_z"
+    assert alert["calibrated"] is False
+    assert alert["evidence"]["robust_z"] >= 5.0
+    assert alert["baseline"] == baseline
+
+
+def test_exfil_bounded_state() -> None:
+    detector = ExfilDetector(max_conversations=5, window_s=60.0)
+    for i in range(20):
+        detector.evaluate_event(_flow_ev("10.10.0.1", f"198.51.100.{i}", bytes_=100, direction="outbound", ts=100.0 + i))
+    assert len(detector._conversations) <= 5
+

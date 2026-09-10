@@ -136,11 +136,10 @@ class TLSQuicDetector:
             self._sessions.pop(k, None)
             self._alerted.discard(k)
 
-        if len(self._sessions) > self.max_sessions:
-            oldest = sorted(self._sessions.items(), key=lambda kv: kv[1].last_seen)[: len(self._sessions) - self.max_sessions]
-            for k, _ in oldest:
-                self._sessions.pop(k, None)
-                self._alerted.discard(k)
+        while len(self._sessions) >= self.max_sessions:
+            oldest_key = min(self._sessions.keys(), key=lambda k: self._sessions[k].last_seen)
+            self._sessions.pop(oldest_key, None)
+            self._alerted.discard(oldest_key)
 
     def evaluate_event(self, ev: NormalizedEvent) -> dict[str, Any] | None:
         """Evaluate a NormalizedEvent for encrypted session anomalies."""
@@ -236,6 +235,26 @@ class TLSQuicDetector:
         inc_id = identifier(dedup_key)
         fl_id = identifier([state.src_ip, ja3_comp, state.dst_ip])
 
+        # Calculate packet size and direction statistics
+        if state.packet_sizes:
+            s_sizes = sorted(state.packet_sizes)
+            p95_size_idx = int(len(s_sizes) * 0.95)
+            packet_size_p95 = float(s_sizes[min(p95_size_idx, len(s_sizes) - 1)])
+            packet_size_mean = round(float(statistics.mean(state.packet_sizes)), 2)
+        else:
+            packet_size_p95 = None
+            packet_size_mean = None
+
+        total_dirs = len(state.directions)
+        if total_dirs > 0:
+            up_count = sum(1 for d in state.directions if d in ("outbound", "upstream", "tx"))
+            down_count = sum(1 for d in state.directions if d in ("inbound", "downstream", "rx"))
+            upstream_packet_ratio = round(up_count / total_dirs, 3)
+            downstream_packet_ratio = round(down_count / total_dirs, 3)
+        else:
+            upstream_packet_ratio = None
+            downstream_packet_ratio = None
+
         reasons = []
         if is_suspicious_ja3:
             reasons.append(f"Matching suspicious JA3 fingerprint ({state.ja3})")
@@ -256,7 +275,11 @@ class TLSQuicDetector:
             "ja3s": state.ja3s,
             "ja4": state.ja4,
             "packet_size_first_n": state.packet_sizes[:10] if state.packet_sizes else None,
+            "packet_size_mean": packet_size_mean,
+            "packet_size_p95": packet_size_p95,
             "direction_first_n": state.directions[:10] if state.directions else None,
+            "upstream_packet_ratio": upstream_packet_ratio,
+            "downstream_packet_ratio": downstream_packet_ratio,
             "iat_median": round(iat_median, 3),
             "iat_p95": round(iat_p95, 3),
             "iat_cv": round(iat_cv, 4),
@@ -267,7 +290,7 @@ class TLSQuicDetector:
 
         cap_state = "OBSERVABLE" if state.ja3 else "DEGRADED"
         missing_ev = [] if state.ja3 else ["ja3"]
-        input_mode = str(ev.input_mode) if ev.input_mode else "pcap_replay"
+        input_mode = ev.input_mode.value if hasattr(ev.input_mode, "value") else str(ev.input_mode) if ev.input_mode else "pcap_replay"
 
         alert: dict[str, Any] = {
             "schema_version": "1.3",
