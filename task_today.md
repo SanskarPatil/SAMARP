@@ -32,11 +32,17 @@ Build deterministic Detection / ML inputs and reusable passive-metadata features
 - [x] Immutable baseline snapshot generation.
 - [x] Offline allowlist, DGA-family and Tranco-derived sample assets plus version manifest.
 
-### 3. Statistical detector modules — NEXT
+### 3. Statistical detector modules — DONE
 
-- [ ] DDoS/Slowloris/reflection and reconnaissance.
-- [ ] C2, DNS tunnel, TLS/QUIC metadata and exfiltration.
-- [ ] Schema-valid alert/evidence factory and detector acceptance tests.
+- [x] DDoS/Slowloris/reflection and reconnaissance.
+- [x] C2, DNS tunnel, TLS/QUIC metadata and exfiltration.
+- [x] Schema-valid alert/evidence factory and detector acceptance tests.
+
+### 4. Single LightGBM DGA model — NEXT
+
+- [ ] Train only the DGA LightGBM classifier from the deterministic corpus.
+- [ ] Add Platt calibration, reliability/Brier evaluation and model card.
+- [ ] Implement DGA inference and fallback behavior.
 
 ### 1. Resolve the four open contract decisions — DONE
 

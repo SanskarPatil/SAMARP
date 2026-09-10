@@ -28,6 +28,7 @@
 - Phase 0 exit is recorded as passed by the project owner. P2 is implementing against deterministic synthetic events while P1's live normalizer remains a future handoff.
 - P2 feature foundation: deterministic passive-metadata primitives, lexical/DNS/qtype extraction, and frozen-order vectorization are implemented and test-green.
 - P2 ground truth: deterministic DGA corpus with hard negatives, mutually exclusive time/entity/family holdouts, immutable baseline generation, and an offline intelligence manifest/assets are implemented and test-green.
+- P2 non-ML detection: DDoS/Slowloris/reflection, scan, C2, DNS tunnelling, TLS/QUIC metadata and exfiltration paths now emit schema-valid alerts or explicit capability outcomes; 13 P2 tests pass.
 
 ---
 
@@ -47,6 +48,7 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 
 - P2 stateless feature extraction: entropy, robust statistics, inter-arrival features, DNS qtype distribution including TXT/NULL/CNAME, TLS/QUIC metadata shape extraction, and deterministic `FEATURE_ORDER` vectorization.
 - P2 deterministic training inputs: locally generated DGA families, hard-negative domains, holdout definitions, allowlist/Tranco samples, and baseline snapshot generator.
+- P2 non-ML detectors: all seven rule/statistical detector modules, with standard-alert construction confined to detector output (no P4 persistence/API change).
 
 ---
 
@@ -59,7 +61,7 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 ## Latest Verification
 
 - **Test:** `python -m unittest discover -s tests/detectors -p test_features.py -v`
-- **Result:** PASS — 8 P2 tests passed: feature primitives/extraction/order plus DGA corpus determinism, hard negatives, leakage-safe holdouts, and immutable baseline generation.
+- **Result:** PASS — 13 P2 tests passed, including DDoS, Slowloris, reflection, scan, C2, DNS tunnel, TLS/QUIC metadata, exfiltration, alert-schema conformance and `NOT_OBSERVABLE` behavior.
 - **Time:** 2026-09-10.
 
 ---
