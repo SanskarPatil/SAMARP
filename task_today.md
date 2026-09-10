@@ -77,9 +77,16 @@ Rationale recorded in `memory.md`; `bugs.md` `DOC-004`, `DOC-006`, `DOC-007`, `D
 
 ## Current Blocker
 
-**Environment.** The current development box is Windows. Suricata, `veth`, `tcpreplay` and live tap are Linux-only, and V6.3 rules WSL2 unacceptable for the published throughput number. The pure-Python ingest pipeline (PCAP parse → normalize → flow track → NetFlow/IPFIX/sFlow) can be built and fully unit-tested here; **Suricata integration, veth/lab wiring, live tap and the published throughput measurement require the declared Linux box.** Those parts will be written as adapters with binary-free tests and executed on the lab machine.
+**P1 is temporarily FROZEN at STEP 7.** Checkpoint `4040ac6`, 248/248 pass. Do not start STEP 8, STEP 9 or further optional ingestion work. Preserve the current working state. Team priority moves to cross-team vertical integration: Normalized Events → Features → Detectors → Alerts → Backend/API → Dashboard.
 
-Not blocking foundation work.
+**Environment (unchanged).** The development box is Windows. Suricata, `veth`, `tcpreplay` and live tap are Linux-only, and V6.3 rules WSL2 unacceptable for the published throughput number.
+
+- **STEP 6 Suricata** — Linux-gated. Adapter writable here; probe and EVE tail must run on the lab machine.
+- **STEP 8 sFlow** — **not** Linux-gated. Pure Python, buildable here. Deferred by decision. `sflow` is already a valid frozen `input_mode` and its capability baseline already exists in `ingest/capability.py`.
+- **STEP 9 throughput** — partial. Capture-loss accounting landed in STEP 5. The published throughput figure needs the declared Linux box.
+- **STEP 10 veth / lab** — Linux-gated.
+
+Ingest pipeline delivered so far is complete and testable on this box: PCAP parse, normalize, flow track, NetFlow v9 / IPFIX.
 
 ---
 

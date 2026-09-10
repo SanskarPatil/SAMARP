@@ -25,7 +25,24 @@
 
 ## In Progress
 
-- Phase 0 remainder: Suricata build and capability probe, isolated veth lab with egress DROP, and contract tests in `tests/schema/`. No feature implementation has begun.
+**P1 is temporarily FROZEN at STEP 7** (checkpoint `4040ac6`, 248/248 pass). No further P1 feature work until integration is done. Preserve current working state.
+
+Next priority is cross-team vertical integration: Normalized Events → Features → Detectors → Alerts → Backend/API → Dashboard.
+
+### P1 step status
+
+| Step | State | Blocker |
+|---|---|---|
+| STEP 3 normalized-event foundation | **DONE** | — |
+| STEP 4 PCAP replay + unified clock | **DONE** | — |
+| STEP 5 counters, bounded flow tracker, capture loss | **DONE** | — |
+| STEP 7 NetFlow v9 / IPFIX adapter (phase P1-5) | **DONE** — satisfies H13 gate item | — |
+| STEP 6 Suricata integration | **NOT STARTED** | Needs Linux box. Suricata is Linux-only. Adapter can be written blind here; probe and EVE tail must run on the lab machine |
+| STEP 8 sFlow capability handling | **NOT STARTED** | No blocker — pure Python, buildable here. Deferred by decision, not by dependency. `sflow` already a valid frozen `input_mode`; capability baseline already defined in `ingest/capability.py` |
+| STEP 9 throughput / capture-loss instrumentation | **PARTIAL** | Loss accounting done in STEP 5. Published throughput number needs the declared Linux box — V6.3 rules WSL2 unacceptable for that figure |
+| STEP 10 veth / lab integration | **NOT STARTED** | Needs Linux box. `veth` and `tcpreplay` are Linux-only |
+
+Also outstanding: Phase 0 remainder (Suricata build, capability probe, veth lab with egress DROP) — all P1, all Linux-gated. Contract tests in `tests/schema/` are P4, not started.
 
 ---
 
