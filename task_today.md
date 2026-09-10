@@ -22,9 +22,10 @@
 - [x] **Header-only decode** (`ingest/headers.py`) — Ethernet/VLAN/QinQ, IPv4 (options, fragments), IPv6 (bounded extension chain), TCP/UDP/ICMP. No payload-capable field.
 - [x] **Unified replay clock** (`ingest/clock.py`) — `t_replay_start` captured **exactly once**, written to the manifest; second start refused.
 - [x] **Deterministic replay driver** (`ingest/replay.py`) — speed control, counters, measured parse loss, capture-loss capability.
-- [x] 163 tests pass (72 from Milestone 1 + 91 new).
-- [ ] Header-only packet counter *(STEP 5)*.
-- [ ] Bounded flow tracker producing `flow_summary` *(STEP 5)*.
+- [x] **Header-only packet counter** (`ingest/counters.py`) — packets, bytes, protocol/direction/IP-version breakdowns on closed vocabularies, TCP flag counters, rates.
+- [x] **Bounded flow tracker** (`ingest/flow_tracker.py`) — LRU cap, idle timeout, absolute lifetime, bounded sweep budget; produces `flow_summary` per V6.3 §6.2.
+- [x] **Capture-loss accounting** — measured lower bound; `kernel_drops`/`ring_drops` null (NOT_OBSERVABLE, no sensor on this path); `capture_loss` capability `DEGRADED` on a snapped capture.
+- [x] 209 tests pass (72 foundation + 91 replay + 46 STEP 5).
 - [ ] Suricata EVE tail with partial-line handling *(STEP 6 — adapter only on this box, see blocker)*.
 - [ ] veth pair / one-way enclave *(STEP 10 — Linux box required)*.
 

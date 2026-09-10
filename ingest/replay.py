@@ -29,6 +29,8 @@ from typing import Callable, Iterator
 from .address_plan import AddressPlan
 from .capability import Capability, CapabilityState, InputMode
 from .clock import ReplayClock
+from .counters import CaptureLossAccount, PacketCounter
+from .flow_tracker import FlowTracker
 from .headers import HeaderParseError, parse_packet
 from .normalized_event import NormalizedEvent
 from .pcap import PcapError, PcapReader, peek_first_timestamp
@@ -114,6 +116,9 @@ class PcapReplay:
         "_sleep",
         "_monotonic",
         "stats",
+        "counter",
+        "flows",
+        "loss",
     )
 
     def __init__(
@@ -127,6 +132,7 @@ class PcapReplay:
         realtime: bool = False,
         sleep: Callable[[float], None] | None = None,
         monotonic: Callable[[], float] | None = None,
+        flow_tracker: FlowTracker | None = None,
     ) -> None:
         self._path = Path(path)
         # ONE clock for the whole replay. Every consumer shares this instance;
@@ -138,6 +144,12 @@ class PcapReplay:
         self._sleep = sleep or time.sleep
         self._monotonic = monotonic or time.monotonic
         self.stats = ReplayStats()
+        #: Header-only fast-path counters.
+        self.counter = PacketCounter()
+        #: Bounded flow table. flow_summary comes from here, never from EVE.
+        self.flows = flow_tracker if flow_tracker is not None else FlowTracker()
+        #: Measured visibility loss, reported as a lower bound.
+        self.loss = CaptureLossAccount()
 
     @property
     def clock(self) -> ReplayClock:
@@ -197,6 +209,9 @@ class PcapReplay:
                     hdr = parse_packet(record.data, linktype, wire_bytes=record.wirelen)
                 except HeaderParseError as exc:
                     self.stats.packets_unparseable += 1
+                    self.loss.observe_packet(
+                        parsed=False, truncated=record.truncated
+                    )
                     reason = str(exc).split("(")[0].strip()
                     self.stats.unparseable_reasons[reason] = (
                         self.stats.unparseable_reasons.get(reason, 0) + 1
@@ -204,6 +219,23 @@ class PcapReplay:
                     continue
 
                 self.stats.packets_parsed += 1
+                self.loss.observe_packet(parsed=True, truncated=record.truncated)
+
+                direction = (
+                    self._plan.direction(hdr.src_ip, hdr.dst_ip)
+                    if self._plan is not None
+                    else None
+                )
+
+                # Header-only counters and bounded flow state. flow_summary
+                # is produced HERE, not by Suricata EVE flow output (V6.3 6.2).
+                self.counter.observe(
+                    hdr,
+                    record.timestamp,
+                    direction=direction,
+                    captured_bytes=record.caplen,
+                )
+                flow = self.flows.observe(hdr, record.timestamp)
 
                 event = NormalizedEvent.from_flow(
                     observed_time=self._clock.observed_time(record.timestamp),
@@ -221,11 +253,16 @@ class PcapReplay:
                     packets=1,
                     bytes=record.wirelen,
                     capture_source=capture_source,
+                    direction=direction,
+                    flow_summary=flow.to_summary(),
+                    sensor_loss=self.loss.to_sensor_loss(),
                 )
                 self.stats.events_emitted += 1
                 yield event
 
             self.stats.records_malformed = reader.stats.records_malformed
+            self.loss.records_malformed = reader.stats.records_malformed
+            self.loss.flows_evicted = self.flows.stats.flows_evicted_capacity
 
         self.stats.wall_seconds = self._monotonic() - wall_start
 
@@ -258,6 +295,9 @@ class PcapReplay:
         if self._clock.started:
             entry.update(self._clock.manifest_entry())
         entry["stats"] = self.stats.as_dict()
+        entry["counters"] = self.counter.as_dict()
+        entry["flows"] = self.flows.stats.as_dict()
+        entry["capture_loss"] = self.loss.as_dict()
         return entry
 
     def __repr__(self) -> str:  # pragma: no cover - debug aid

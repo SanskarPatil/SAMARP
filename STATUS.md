@@ -60,7 +60,8 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 ## Working Systems
 
 - **`ingest/` normalized-event foundation (P1).** `identity.py` (canonical serialisation, frozen 16-hex identifiers, `NOT_OBSERVABLE` sentinel), `capability.py` (two-axis capability, per-input-mode baselines), `address_plan.py` (direction inference, bogon exclusion), `normalized_event.py` (single normalizer for all five input modes).
-- **`ingest/` PCAP replay path (P1).** `pcap.py` (classic libpcap reader, all four magics, both endiannesses, PCAPNG rejected), `headers.py` (header-only Ethernet/VLAN/IPv4/IPv6/TCP/UDP/ICMP decode), `clock.py` (unified replay clock, start-once), `replay.py` (deterministic driver, speed control, counters, measured loss). 2 224 lines across nine modules.
+- **`ingest/` PCAP replay path (P1).** `pcap.py` (classic libpcap reader, all four magics, both endiannesses, PCAPNG rejected), `headers.py` (header-only Ethernet/VLAN/IPv4/IPv6/TCP/UDP/ICMP decode), `clock.py` (unified replay clock, start-once), `replay.py` (deterministic driver, speed control).
+- **`ingest/` counters, bounded flow tracking and capture loss (P1).** `counters.py` (header-only `PacketCounter`, `CaptureLossAccount` reporting an explicit lower bound), `flow_tracker.py` (LRU-bounded flow table producing `flow_summary` per V6.3 §6.2 — from the in-process tracker, never Suricata EVE flow output). 2 813 lines across eleven modules.
 - No other runtime component exists. No detector, API, persistence or dashboard code.
 
 ---
@@ -74,7 +75,10 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 ## Latest Verification
 
 - **Test:** `python -m pytest tests/ -q`
-- **Result:** **163 passed**, 0 failed, 1.99 s. (Milestone 1's 72 all still pass; STEP 4 added 91.)
+- **Result:** **209 passed**, 0 failed, 2.69 s. (72 foundation + 91 replay + 46 STEP 5.)
+- **STEP 5 measured on the deterministic fixture:** 5 packets / 298 wire bytes / 278 captured; `by_protocol {TCP: 3, UDP: 2}`; all four directions counted; 4 flows created from 5 packets (the two directions of one conversation share a flow).
+- **Bounded state proven:** 10 000 distinct 5-tuples against a 100-flow cap → active 100, peak 100, 9 900 evictions counted, **cap never exceeded at any point**. Idle expiry, absolute-lifetime rotation and LRU capacity eviction each demonstrated and accounted separately.
+- **Capture loss:** `sensor_drop_pct 16.67`, `estimator "pcap_parse_and_snaplen"`, `is_lower_bound true`, `kernel_drops`/`ring_drops` **null** (no sensor on this path — NOT_OBSERVABLE, not zero); `capture_loss` capability `DEGRADED`.
 - **Replay demonstrated:** representative event validates against the frozen schema; three independent replays are byte-identical; display spacing mirrors capture spacing exactly (5 s capture span → 5 s display span, no drift); speed control scales display span 5 s → 2.5 s → 0.5 s at 1×/2×/10×; counters account for every packet (6 read = 5 parsed + 1 unparseable, 1 truncated, measured parse loss 16.67 %).
 - **`t_replay_start` captured exactly once**, written to the manifest; starting twice is refused by contract.
 - **Static boundary check across all nine `ingest/` modules:** no egress-capable import, no `connect`/`sendto`/`bind`/`listen`, **no file writes at all** (read-only), no payload-capable field.
@@ -96,6 +100,10 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 3. **Big-endian PCAP writer bug (real).** The fixture builder wrote the byte-swapped magic `0xd4c3b2a1` in big-endian order, producing a file that read back as *little-endian*. A big-endian capture stores the canonical `0xa1b2c3d4` in big-endian byte order. Caught by the parametrised magic test.
 4. **`capture_loss` capability semantics.** A snapped capture gives *partial* loss visibility — truncation is observable from `caplen` vs `wirelen`, but kernel/ring drops are not. `DEGRADED` is the honest state; `OBSERVABLE` would claim precision we lack and `NOT_OBSERVABLE` would hide evidence we have.
 5. **A test asserted the wrong invariant.** It required a constant 1 s display gap, but the canonical fixture contains an ARP frame that yields no event, so one legitimate gap is 2 s. The real invariant — display spacing *mirrors* capture spacing — is now asserted per-pair and on the total span, which is a strictly stronger check.
+
+**STEP 5**
+6. **`flow_id` divergence between tracker and normalizer (real, and the most serious so far).** The flow tracker hashed the raw numeric IP protocol (`6`) while the normalizer hashed the canonical name (`"TCP"`), so the same flow produced **two different `flow_id`s** — an event's `flow_summary.flow_id` disagreed with its own `flow_id`. Caught by the integration test. Fixed by canonicalising protocol once, in the same helper both paths use; pinned by `test_tracker_and_normalizer_agree_on_flow_id`. This is the same class of failure DOC-006 exists to prevent, one level down.
+7. **Counter protocol keys** had the same root cause — `by_protocol` was keyed `{'6', '17'}` rather than `{TCP, UDP}`. Cosmetic (internal telemetry, not a schema field) but fixed alongside so counter output cannot disagree with event output.
 
 ---
 
