@@ -59,7 +59,8 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 
 ## Working Systems
 
-- **`ingest/` normalized-event foundation (P1).** `identity.py` (canonical serialisation, frozen 16-hex identifiers, `NOT_OBSERVABLE` sentinel), `capability.py` (two-axis capability, per-input-mode baselines), `address_plan.py` (direction inference, bogon exclusion), `normalized_event.py` (single normalizer for all five input modes). Emits events validated against the frozen schema.
+- **`ingest/` normalized-event foundation (P1).** `identity.py` (canonical serialisation, frozen 16-hex identifiers, `NOT_OBSERVABLE` sentinel), `capability.py` (two-axis capability, per-input-mode baselines), `address_plan.py` (direction inference, bogon exclusion), `normalized_event.py` (single normalizer for all five input modes).
+- **`ingest/` PCAP replay path (P1).** `pcap.py` (classic libpcap reader, all four magics, both endiannesses, PCAPNG rejected), `headers.py` (header-only Ethernet/VLAN/IPv4/IPv6/TCP/UDP/ICMP decode), `clock.py` (unified replay clock, start-once), `replay.py` (deterministic driver, speed control, counters, measured loss). 2 224 lines across nine modules.
 - No other runtime component exists. No detector, API, persistence or dashboard code.
 
 ---
@@ -72,16 +73,29 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 
 ## Latest Verification
 
-- **Test:** `python -m pytest tests/ingest/ -q`
-- **Result:** **72 passed**, 0 failed, 1.64 s.
+- **Test:** `python -m pytest tests/ -q`
+- **Result:** **163 passed**, 0 failed, 1.99 s. (Milestone 1's 72 all still pass; STEP 4 added 91.)
+- **Replay demonstrated:** representative event validates against the frozen schema; three independent replays are byte-identical; display spacing mirrors capture spacing exactly (5 s capture span → 5 s display span, no drift); speed control scales display span 5 s → 2.5 s → 0.5 s at 1×/2×/10×; counters account for every packet (6 read = 5 parsed + 1 unparseable, 1 truncated, measured parse loss 16.67 %).
+- **`t_replay_start` captured exactly once**, written to the manifest; starting twice is refused by contract.
+- **Static boundary check across all nine `ingest/` modules:** no egress-capable import, no `connect`/`sendto`/`bind`/`listen`, **no file writes at all** (read-only), no payload-capable field.
+
+### Milestone 1 verification (retained)
+
+- 72 ingest-foundation tests: canonical serialisation, the frozen `sha256(...).hexdigest()[:16]` identifier, bidirectional flow identity, sentinel substitution, direction inference, the RFC 1918 bogon trap, schema conformance for all five input modes.
 - **Coverage:** canonical serialisation and the frozen `sha256(...).hexdigest()[:16]` identifier (incl. an explicit assertion that the 16-*byte* misreading is not produced); bidirectional flow identity; `NOT_OBSERVABLE` sentinel substitution; direction inference for all four enum values; the RFC 1918 bogon-exclusion trap; schema conformance for all five input modes; capability two-axis separation; sFlow not claiming packet-level visibility.
 - **Static boundary check:** `ingest/` imports no `socket`, `http`, `urllib`, `subprocess` or crypto module; contains no `connect`/`send`/`bind` call, no file write, and no payload access. Passive by construction.
 - **Time:** 2026-09-10.
 
-### Two failures found and fixed during this milestone
+### Defects found and fixed by the tests
 
+**Milestone 1**
 1. `display_time` is typed `string` (**not** nullable) by the frozen schema, unlike every other optional field. The normalizer emitted an explicit null under `drop_none=False` and failed validation. Fixed in code — the schema was not touched.
-2. Python's `ipaddress` classifies RFC 5737 documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) as **private**. A test fixture used one as "external and routable" and correctly failed. See the open finding below.
+2. Python's `ipaddress` classifies RFC 5737 documentation ranges as **private**. A fixture used one as "external and routable" and correctly failed. See the open finding below.
+
+**STEP 4**
+3. **Big-endian PCAP writer bug (real).** The fixture builder wrote the byte-swapped magic `0xd4c3b2a1` in big-endian order, producing a file that read back as *little-endian*. A big-endian capture stores the canonical `0xa1b2c3d4` in big-endian byte order. Caught by the parametrised magic test.
+4. **`capture_loss` capability semantics.** A snapped capture gives *partial* loss visibility — truncation is observable from `caplen` vs `wirelen`, but kernel/ring drops are not. `DEGRADED` is the honest state; `OBSERVABLE` would claim precision we lack and `NOT_OBSERVABLE` would hide evidence we have.
+5. **A test asserted the wrong invariant.** It required a constant 1 s display gap, but the canonical fixture contains an ARP frame that yields no event, so one legitimate gap is 2 s. The real invariant — display spacing *mirrors* capture spacing — is now asserted per-pair and on the total span, which is a strictly stronger check.
 
 ---
 

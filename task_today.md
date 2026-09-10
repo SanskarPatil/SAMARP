@@ -16,15 +16,17 @@
 
 ### P1-1 progress
 
-- [x] **Normalized-event foundation** — `ingest/identity.py`, `ingest/capability.py`, `ingest/address_plan.py`, `ingest/normalized_event.py`. 72 tests pass.
+- [x] **Normalized-event foundation** — `ingest/identity.py`, `ingest/capability.py`, `ingest/address_plan.py`, `ingest/normalized_event.py`.
 - [x] `config/address_plan.yaml` loaded; `direction` populated for all four enum values.
-- [ ] PCAP reader (header-only, pure stdlib) + deterministic replay driver with speed control.
-- [ ] Unified replay clock — `t_replay_start` captured **once**, written to the manifest.
-- [ ] Header-only packet counter.
-- [ ] Bounded flow tracker producing `flow_summary`.
-- [ ] Capture-loss fields.
-- [ ] Suricata EVE tail with partial-line handling *(adapter only on this box — see blocker)*.
-- [ ] veth pair / one-way enclave *(Linux box required)*.
+- [x] **PCAP reader** (`ingest/pcap.py`) — header-only, pure stdlib, all four magics, both endiannesses, PCAPNG rejected with an actionable message, malformed records counted and skipped.
+- [x] **Header-only decode** (`ingest/headers.py`) — Ethernet/VLAN/QinQ, IPv4 (options, fragments), IPv6 (bounded extension chain), TCP/UDP/ICMP. No payload-capable field.
+- [x] **Unified replay clock** (`ingest/clock.py`) — `t_replay_start` captured **exactly once**, written to the manifest; second start refused.
+- [x] **Deterministic replay driver** (`ingest/replay.py`) — speed control, counters, measured parse loss, capture-loss capability.
+- [x] 163 tests pass (72 from Milestone 1 + 91 new).
+- [ ] Header-only packet counter *(STEP 5)*.
+- [ ] Bounded flow tracker producing `flow_summary` *(STEP 5)*.
+- [ ] Suricata EVE tail with partial-line handling *(STEP 6 — adapter only on this box, see blocker)*.
+- [ ] veth pair / one-way enclave *(STEP 10 — Linux box required)*.
 
 ---
 
