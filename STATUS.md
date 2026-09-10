@@ -1,0 +1,120 @@
+# Project Status
+
+**Last Updated:** 2026-09-10
+**Current Hour:** Pre-window (build window not opened)
+**Current Phase:** Phase 0 — Foundation (not started)
+**Current Gate:** Phase 0 exit gate (H1)
+**Overall Status:** GREEN
+
+> This file is the project's current state in under a minute. Immediate work is in `task_today.md`; the full roadmap is in `implementation_plan.md`.
+
+---
+
+## Completed
+
+- Source documents reviewed in full: `ps26145_traceability_matrix.md`, `FINAL_DEVELOPMENT_PLAN_V6.3.md`, `create_project_md_files_V2.md`.
+- Cross-document consistency analysis completed; contradictions and omissions recorded in `bugs.md` as `DOC-001` through `DOC-011`.
+- Documentation layer generated: `PRD.md`, `design.md`, `implementation_plan.md`, `CLAUDE.md`, `agents.md`, `testing.md`, `git.md`, `STATUS.md`, `task_today.md`, `memory.md`, `bugs.md`.
+- **Phase 0 decisions taken and applied** — throughput acceptance target, canonical identifier form, dedup sentinel, test subtree. Rationale in `memory.md`; defect history in `bugs.md`.
+- **Frozen contracts written:** `schemas/normalized_event.schema.json`, `schemas/alert.schema.json`, `features/feature_order.py`, `config/thresholds.yaml`, `config/address_plan.yaml`, `config/dedup_keys.yaml`.
+- Test subtree created, including the two previously missing directories.
+- **Four-person ownership split applied** — P1 Sensor/Infrastructure, P2 Detection/ML, P3 UI/UX, P4 Backend/API/Integration. `agents.md` rewritten; `implementation_plan.md` phases renamed and Track C split into P3 and P4.
+- **Six supplementary responsibilities confirmed and recorded**; hash-chain duplication between P1-3 and P4-2 removed, and the tamper-demonstration artifact moved with the chain to P4-4.
+
+---
+
+## In Progress
+
+- Phase 0 remainder: Suricata build and capability probe, isolated veth lab with egress DROP, and contract tests in `tests/schema/`. No feature implementation has begun.
+
+---
+
+## Blocked
+
+- Nothing. All four Phase 0 contract decisions have been made and applied; `DOC-004`, `DOC-006`, `DOC-007` and `DOC-009` are closed.
+
+## Ownership Coverage
+
+**Complete.** All six previously unnamed responsibilities are confirmed: hash chain → **P4**; offline intel bundle and version manifest → **P2**; baseline snapshot generation → **P2**; model card and evaluation report → **P2**; cold boot and offline asset audit → **P1**; backup recording and screenshots → **P3**.
+
+Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 15 repository directories and all 46 Definition-of-Done items have a named owner. **No unowned responsibility remains** — `agents.md` section 12.
+
+---
+
+## Working Systems
+
+- None. The frozen contracts exist as artifacts; no runtime component has been built.
+
+---
+
+## Known Failures
+
+- None from execution. Twelve documentation-level defects are recorded in `bugs.md`. Seven were resolved by authority precedence, four by explicit Phase 0 decision, and one (`DOC-012`, the demo-script timeline overlap) is deliberately documented rather than resolved so the V6.3 source timestamps stay intact. **No defect remains OPEN.**
+
+---
+
+## Latest Verification
+
+- **Test:** cross-document consistency review of the three source documents against the generated documentation layer.
+- **Result:** eleven discrepancies found and recorded; the six PS class strings, the eight detector modules, the frozen `input_mode` enum, the five mandatory alert fields, `flow_id`/`flow_ref_type` semantics, the latency budget, the kill ladder and the never-cut list are represented consistently across all generated files.
+- **Time:** 2026-09-10.
+- **No automated test has been run** — there is no implementation and no test suite yet.
+
+---
+
+## Next Gate
+
+**Phase 0 exit (H1).** Contract tests exist and pass; the JA3/JA3S/JA4 capability result is recorded; the lab interface has no route and no egress.
+
+---
+
+## Immediate Next Action
+
+Complete the remaining Phase 0 environment work, in this order:
+
+1. Confirm the OS/box decision and record the machine specification. **WSL2 is not acceptable** for the published throughput number.
+2. Build and version-check Suricata (7.0.3 or later for JA4).
+3. Run the capability probe against a known fixture PCAP; record every acceptance line, including the JA3/JA3S/JA4 verdict and `flow events == 0`.
+4. Build the isolated veth lab; set egress DROP.
+5. Write the contract tests in `tests/schema/` against the now-frozen schemas (**P4**).
+
+Items 1–4 are P1's and need the Linux lab machine. Item 5 is P4's and needs nothing but the frozen schemas.
+
+Then the Phase 0 exit gate can be assessed. **Feature implementation does not begin until that gate is green.**
+
+### Track readiness at Phase 1 start
+
+| Track | Blocked on | Can start immediately with |
+|---|---|---|
+| P1 | Lab machine, Suricata build | Nothing until the box exists |
+| P2 | Nothing | Synthetic event generator, corpora, DGA data |
+| P3 | Nothing | **Mock fixtures generated from the frozen alert schema** — explicitly not blocked on P4 |
+| P4 | Nothing | FastAPI shell, route contract test, `tests/schema/` |
+
+---
+
+## Feature Freeze Status
+
+**NOT REACHED** (freeze begins at H19).
+
+---
+
+## Demo Readiness
+
+| Area | Owner | State |
+|---|---|---|
+| Sensor / ingestion | P1 | Not started |
+| Detection | P2 | Not started |
+| Dashboard | P3 | Not started |
+| Backend / API | P4 | Not started |
+| Evidence | P2 emits, P3 renders | Not started |
+| Export | P4 endpoint, P3 surface | Not started |
+| End-to-end integration | P4 | Not started |
+| Boundary proof | P1 | Not started |
+| Rehearsal | All | Not started |
+
+---
+
+## Scope Reminder
+
+Six PS threat classes, eight detector modules, one trained model (DGA LightGBM). Passive and read-only; no TLS/QUIC payload decryption; streaming rather than batch; measured throughput published in flows/sec first; every alert carries `timestamp`, non-null `flow_id`, threat class, `confidence` and `evidence`.

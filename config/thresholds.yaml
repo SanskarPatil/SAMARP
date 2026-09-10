@@ -1,0 +1,82 @@
+# Thresholds and Budgets - seeded at Phase 0
+# Source: FINAL_DEVELOPMENT_PLAN_V6.3.md section 22.1 (detector + latency seeds)
+#         Phase 0 decision DOC-004 (throughput block)
+#
+# All tunable values belong here. Do not scatter thresholds through
+# detector code.
+#
+# THESE ARE STARTING POINTS, NOT PUBLISHED VALUES.
+# Every threshold that reaches the deck or the evaluation report must first
+# be replaced by a sweep result with its artifact.
+
+version: 1
+
+ddos:
+  robust_z: 6.0
+  min_pps: 5000
+  hysteresis_windows: 2
+  warmup_windows: 30          # adaptive delta only - never gates detection
+
+scan:
+  unique_dst_min: 50
+  unique_port_min: 100
+  window_s: 10
+
+dga:
+  score_threshold: 0.85
+  min_queries: 5
+  nxdomain_rate_min: 0.4
+
+dns_tunnel:
+  qname_len_min: 50
+  entropy_min: 3.5
+  qps_per_domain_min: 10
+
+c2:
+  cv_max: 0.15
+  min_events: 8
+  window_s: 300
+
+exfil:
+  outbound_ratio_min: 10.0
+  robust_z: 5.0
+
+tls_quic:
+  novelty_days: 7
+
+latency:
+  # FROZEN budget. Structural floor ~1.6 s.
+  # NEVER shrink the watermark to improve a latency number - that drops late
+  # packets silently and trades a visible number for invisible missed
+  # detections. Fix order: batch_push_ms, then window size, then detector cost.
+  watermark_ms: 300
+  window_s: 1.0
+  detector_budget_ms: 100
+  batch_push_ms: 250
+  slo_p95_ms: 2000
+
+throughput:
+  # FROZEN acceptance targets - Phase 0 decision DOC-004.
+  #
+  # flows/sec, pps and Mbps are THREE INDEPENDENT MEASUREMENTS.
+  # Never derive one from another. A derived figure is not a measurement
+  # and does not get published.
+  sustain_seconds: 60
+  loss_ceiling_pct: 1.0
+
+  primary:
+    # Primary PS-aligned KPI. Published first.
+    metric: normalized_flows_per_sec
+    target_min: 1000
+
+  secondary:
+    # Retained unchanged from V6.3 section 14.1.
+    - metric: packets_per_sec
+      target_min: 50000
+    - metric: mbps
+      target_min: 400
+
+  # The number is meaningless without the box spec beside it.
+  # Never extrapolate beyond the measured hardware.
+  require_machine_spec: true
+  allow_extrapolation: false

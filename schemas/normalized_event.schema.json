@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ps26145.local/schemas/normalized_event.schema.json",
+  "title": "Normalized Event",
+  "description": "Frozen internal event contract. All input paths - packet/EVE and NetFlow v9/IPFIX flow records - converge here. The only difference between paths is the capability state attached by the adapter. Source: FINAL_DEVELOPMENT_PLAN_V6.3.md section 6.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "observed_time", "input_mode", "capability"],
+  "properties": {
+    "schema_version": { "const": 1 },
+
+    "observed_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Original packet/record timestamp. Never silently treated as current live time."
+    },
+    "display_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Replay-rebased time. t_replay_start + (t_packet - t_pcap_start) / replay_speed, where t_replay_start is captured ONCE at replay start. Never re-evaluate 'now' per packet - that drifts the clock at roughly 2x."
+    },
+
+    "src_ip": { "type": ["string", "null"] },
+    "dst_ip": { "type": ["string", "null"] },
+    "src_port": { "type": ["integer", "null"], "minimum": 0, "maximum": 65535 },
+    "dst_port": { "type": ["integer", "null"], "minimum": 0, "maximum": 65535 },
+    "protocol": { "type": ["string", "null"] },
+    "ip_version": { "type": ["integer", "null"], "enum": [4, 6, null] },
+    "tcp_flags": { "type": ["string", "null"] },
+
+    "packets": { "type": ["integer", "null"], "minimum": 0 },
+    "bytes": { "type": ["integer", "null"], "minimum": 0 },
+
+    "direction": {
+      "type": ["string", "null"],
+      "enum": ["inbound", "outbound", "internal", "external", null],
+      "description": "Derived from config/address_plan.yaml enclave prefixes. exfil.py cannot exist without this."
+    },
+
+    "flow_id": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{16}$",
+      "description": "Present where an alertable observation exists. sha256(canonical_value).hexdigest()[:16] - exactly 16 lowercase hex chars, a 64-bit truncated SHA-256. NOT 16 bytes. Phase 0 decision DOC-006."
+    },
+    "flow_ref_type": {
+      "type": ["string", "null"],
+      "enum": ["flow_5tuple", "aggregate", "entity", null]
+    },
+
+    "flow_summary": {
+      "type": ["object", "null"],
+      "description": "Produced by the bounded in-process flow tracker on the header path, NOT by Suricata EVE flow output. EVE flow events stay disabled (section 6.2); the capability probe asserts flow events == 0.",
+      "additionalProperties": true
+    },
+
+    "dns": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "qname": { "type": ["string", "null"] },
+        "qtype": { "type": ["string", "null"] },
+        "rcode": { "type": ["string", "null"] },
+        "nxdomain": { "type": ["boolean", "null"] },
+        "response_seen": { "type": ["boolean", "null"] },
+        "registered_domain": {
+          "type": ["string", "null"],
+          "description": "eTLD+1 after TLD stripping. Used as a dns_tunnel dedup-key component; takes the NOT_OBSERVABLE sentinel when unavailable."
+        }
+      }
+    },
+
+    "tls": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "Handshake metadata and fingerprints only. No decrypted or payload-content field exists in this contract, so decryption cannot enter the pipeline even by accident. Missing fingerprints are capability state, not evidence of benign traffic.",
+      "properties": {
+        "sni": { "type": ["string", "null"] },
+        "ja3": { "type": ["string", "null"] },
+        "ja3s": { "type": ["string", "null"] },
+        "ja4": { "type": ["string", "null"] },
+        "version": { "type": ["string", "null"] }
+      }
+    },
+
+    "quic": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": ["string", "null"] },
+        "ja3": { "type": ["string", "null"] },
+        "ja4": { "type": ["string", "null"] }
+      }
+    },
+
+    "shape": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "Concrete traffic metadata, never a generic anomaly label (section 10.6). Never inspects decrypted payload bytes.",
+      "properties": {
+        "packet_size_first_n": { "type": ["array", "null"], "items": { "type": "integer" } },
+        "direction_first_n": { "type": ["array", "null"], "items": { "type": "string" } },
+        "iat_median": { "type": ["number", "null"] },
+        "iat_p95": { "type": ["number", "null"] },
+        "iat_cv": { "type": ["number", "null"] },
+        "upstream_packet_ratio": { "type": ["number", "null"] },
+        "downstream_packet_ratio": { "type": ["number", "null"] }
+      }
+    },
+
+    "input_mode": {
+      "type": "string",
+      "enum": ["pcap_replay", "live_tap", "ipfix", "netflow_v9", "sflow"],
+      "description": "FROZEN enum. Describes the primary input contract, not an internal combination such as pcap_replay+eve. Sensor subpaths live in capability state. 'sflow' is a valid input mode - NOT_OBSERVABLE is a per-detector evidence state, never a property of an input mode."
+    },
+
+    "capture_source": { "type": ["string", "null"] },
+
+    "sensor_loss": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "Loss is surfaced as evidence, never hidden. Where only one estimator exists, report kernel_drops and label it a lower bound. Do not invent a more precise number.",
+      "properties": {
+        "kernel_drops": { "type": ["integer", "null"], "minimum": 0 },
+        "ring_drops": { "type": ["integer", "null"], "minimum": 0 },
+        "sensor_drop_pct": { "type": ["number", "null"], "minimum": 0 },
+        "estimator": { "type": ["string", "null"] },
+        "is_lower_bound": { "type": ["boolean", "null"] }
+      }
+    },
+
+    "exporter": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "NetFlow v9 / IPFIX only. Template state is bounded and evicted by exporter/template identity and timeout; a malformed or attacker-controlled template stream must not create unbounded parser state.",
+      "properties": {
+        "exporter_id": { "type": ["string", "null"] },
+        "template_id": { "type": ["integer", "null"] },
+        "observation_time": { "type": ["string", "null"], "format": "date-time" },
+        "sampling_rate": { "type": ["integer", "null"], "minimum": 1 },
+        "sampled": { "type": ["boolean", "null"] }
+      }
+    },
+
+    "capability": {
+      "type": "object",
+      "description": "Evidence-visibility axis. Missing evidence is NEVER converted into a benign result.",
+      "additionalProperties": false,
+      "required": ["input_mode"],
+      "properties": {
+        "input_mode": { "type": "string", "enum": ["pcap_replay", "live_tap", "ipfix", "netflow_v9", "sflow"] },
+        "ipv4": { "$ref": "#/$defs/capability_state" },
+        "ipv6": { "$ref": "#/$defs/capability_state" },
+        "dns_names": { "$ref": "#/$defs/capability_state" },
+        "dns_responses": { "$ref": "#/$defs/capability_state" },
+        "tls_handshake": { "$ref": "#/$defs/capability_state" },
+        "quic_metadata": { "$ref": "#/$defs/capability_state" },
+        "ja3": { "$ref": "#/$defs/capability_state" },
+        "ja3s": { "$ref": "#/$defs/capability_state" },
+        "ja4": { "$ref": "#/$defs/capability_state" },
+        "flow_records": { "$ref": "#/$defs/capability_state" },
+        "flow_sampling": { "$ref": "#/$defs/capability_state" },
+        "geo": { "$ref": "#/$defs/capability_state" },
+        "capture_loss": { "$ref": "#/$defs/capability_state" },
+        "bidirectional_visibility": { "$ref": "#/$defs/capability_state" }
+      }
+    }
+  },
+
+  "$defs": {
+    "capability_state": {
+      "type": "string",
+      "enum": ["OBSERVABLE", "DEGRADED", "NOT_OBSERVABLE"],
+      "description": "Evidence-visibility axis, per detector or field. Distinct from the component-health axis (HEALTHY | DEGRADED | UNAVAILABLE), which describes a component being down and never appears here."
+    }
+  }
+}

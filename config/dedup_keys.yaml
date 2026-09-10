@@ -1,0 +1,76 @@
+# Deduplication Keys - FROZEN at Phase 0
+# Source: FINAL_DEVELOPMENT_PLAN_V6.3.md section 13.1
+# Sentinel rule: Phase 0 decision DOC-007
+#
+# Asserted by a contract test. One key per class.
+# An unenumerated key guarantees two developers pick differently:
+# a wrong key produces either an alert storm or two unrelated events
+# merged into one incident.
+
+version: 1
+frozen: true
+
+keys:
+  ddos:        [ps_class, dst_ip, dst_port]
+  reflection:  [ps_class, dst_ip, amplifier_port]
+  scan:        [ps_class, src_ip]
+  dga:         [ps_class, src_ip]
+  dns_tunnel:  [ps_class, src_ip, registered_domain]
+  c2:          [ps_class, src_ip, dst_ip, dst_port]
+  exfil:       [ps_class, src_ip, dst_ip]
+  tls_quic:    [ps_class, src_ip, ja3, dst_ip]
+
+# Two of these are counter-intuitive and both were wrong by default.
+notes:
+  ddos: >-
+    NEVER keys on source. Sources are spoofed, so a source key produces one
+    incident per packet - the precise failure the incident model exists to
+    prevent.
+  dga: >-
+    NEVER keys on domain. A DGA burst is hundreds of distinct domains.
+    Domains are evidence rows INSIDE one incident, not incident identities.
+  dns_tunnel: >-
+    Keys on the registered domain (eTLD+1 after TLD stripping), not the full
+    query name - the full name is the thing that varies.
+
+unavailable_component:
+  # Phase 0 decision DOC-007.
+  # Where a key component is unavailable under the current observation mode,
+  # it takes this exact canonical sentinel string.
+  #
+  # NEVER substitute null, empty string, zero, "unknown", or another sentinel.
+  sentinel: NOT_OBSERVABLE
+
+  # Deduplication operates on the canonical serialized key containing the
+  # sentinel, so identity stays deterministic and stable across input modes.
+  operate_on_canonical_key: true
+
+  # Known cases, from the capability model (design.md section 23):
+  known_cases:
+    - detector: tls_quic
+      component: ja3
+      when: NetFlow/IPFIX input - TLS fingerprints not exported
+    - detector: dns_tunnel
+      component: registered_domain
+      when: DNS names not observable
+    - detector: reflection
+      component: amplifier_port
+      when: flow records with incomplete source-port/service detail
+
+  # IMPORTANT - this is an IDENTITY rule, not a DETECTION rule.
+  # It governs how an incident is identified once a detector has decided to
+  # alert. It does NOT authorise alerting on absent evidence: the capability
+  # check and the minimum-evidence check run first, and a detector whose
+  # required evidence is missing reports NOT_OBSERVABLE as its CAPABILITY
+  # STATE instead of emitting an incident.
+  #
+  # The same string serves both mechanisms deliberately. Do not collapse them.
+
+identity:
+  # Phase 0 decision DOC-006.
+  # incident_id = sha256(canonical(key)).hexdigest()[:16]
+  # Exactly 16 lowercase hex characters. Stable across restarts.
+  algorithm: sha256
+  representation: hexdigest
+  truncate_chars: 16
+  pattern: "^[0-9a-f]{16}$"

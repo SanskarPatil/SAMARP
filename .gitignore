@@ -1,0 +1,160 @@
+# ─────────────────────────────────────────────────────────────
+# Cyber Sentinel — PS26145
+# Nothing here excludes a project source file. See git.md section 1.
+# ─────────────────────────────────────────────────────────────
+
+# ── Secrets and credentials — NEVER commit ───────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.keystore
+*.jks
+id_rsa*
+id_ed25519*
+*.ppk
+credentials
+credentials.*
+secrets.*
+*secret*.yaml
+*secret*.yml
+*secret*.json
+.htpasswd
+.netrc
+.npmrc
+.pypirc
+*.token
+auth.json
+service-account*.json
+
+# ── Virtual environments ─────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.virtualenv/
+pip-wheel-metadata/
+.python-version
+
+# ── Python caches and build artifacts ────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+build/
+dist/
+*.egg-info/
+.eggs/
+.ipynb_checkpoints/
+
+# ── Node / frontend ──────────────────────────────────────────
+node_modules/
+.pnpm-store/
+.yarn/
+.npm/
+dashboard/dist/
+dashboard/build/
+dashboard/.vite/
+.vite/
+*.tsbuildinfo
+.eslintcache
+.parcel-cache/
+
+# ── Databases and runtime state ──────────────────────────────
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# ── Captured traffic — large binaries, vendored out of band ──
+# PCAPs are hashed and recorded in the scenario manifest, which is
+# committed. The capture files themselves are distributed with the
+# offline asset bundle, not through git. See git.md section 1.
+*.pcap
+*.pcapng
+*.cap
+*.erf
+*.snoop
+scenarios/pcaps/
+scenarios/flow_records/**/*.bin
+scenarios/flow_records/**/*.ipfix
+scenarios/flow_records/**/*.nfcapd
+!scenarios/**/*.manifest.json
+!scenarios/**/expected_alerts/**
+
+# ── Sensor output ────────────────────────────────────────────
+eve.json
+eve.json.*
+fast.log
+stats.log
+suricata.log
+sensor/logs/
+*.evebox
+
+# ── Trained model artifacts and large offline intel ──────────
+# The model artifact is vendored into the offline bundle, not git.
+models/artifact/
+*.lgb
+*.txt.model
+*.pkl
+*.joblib
+*.onnx
+intel/geolite2/
+*.mmdb
+intel/tranco/*.csv
+
+# ── Generated measurement output and reports ─────────────────
+artifacts/
+docs/threshold_sweep/*.png
+docs/threshold_sweep/*.svg
+benchmark_*.json
+*.prof
+
+# ── Demo media ───────────────────────────────────────────────
+*.mp4
+*.mov
+*.mkv
+*.webm
+recordings/
+screenshots/
+
+# ── Archives and large blobs ─────────────────────────────────
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.gz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.iso
+*.img
+
+# ── Editor / OS noise ────────────────────────────────────────
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
