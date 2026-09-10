@@ -25,12 +25,18 @@ Build deterministic Detection / ML inputs and reusable passive-metadata features
 - [x] Preserve the frozen `FEATURE_ORDER` with deterministic vector encoding.
 - [x] Add and pass five deterministic feature tests.
 
-### 2. Ground truth and offline intelligence — NEXT
+### 2. Ground truth and offline intelligence — DONE
 
-- [ ] Deterministic synthetic benign/attack corpus and seed manifest.
-- [ ] Time, entity and DGA-family holdout definitions with leakage tests.
-- [ ] Immutable baseline snapshot generation.
-- [ ] Offline allowlist, DGA-family and Tranco-derived sample assets plus version manifest.
+- [x] Deterministic synthetic benign/attack corpus and seed manifest.
+- [x] Time, entity and DGA-family holdout definitions with leakage tests.
+- [x] Immutable baseline snapshot generation.
+- [x] Offline allowlist, DGA-family and Tranco-derived sample assets plus version manifest.
+
+### 3. Statistical detector modules — NEXT
+
+- [ ] DDoS/Slowloris/reflection and reconnaissance.
+- [ ] C2, DNS tunnel, TLS/QUIC metadata and exfiltration.
+- [ ] Schema-valid alert/evidence factory and detector acceptance tests.
 
 ### 1. Resolve the four open contract decisions — DONE
 

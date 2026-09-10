@@ -27,6 +27,7 @@
 
 - Phase 0 exit is recorded as passed by the project owner. P2 is implementing against deterministic synthetic events while P1's live normalizer remains a future handoff.
 - P2 feature foundation: deterministic passive-metadata primitives, lexical/DNS/qtype extraction, and frozen-order vectorization are implemented and test-green.
+- P2 ground truth: deterministic DGA corpus with hard negatives, mutually exclusive time/entity/family holdouts, immutable baseline generation, and an offline intelligence manifest/assets are implemented and test-green.
 
 ---
 
@@ -45,6 +46,7 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 ## Working Systems
 
 - P2 stateless feature extraction: entropy, robust statistics, inter-arrival features, DNS qtype distribution including TXT/NULL/CNAME, TLS/QUIC metadata shape extraction, and deterministic `FEATURE_ORDER` vectorization.
+- P2 deterministic training inputs: locally generated DGA families, hard-negative domains, holdout definitions, allowlist/Tranco samples, and baseline snapshot generator.
 
 ---
 
@@ -57,7 +59,7 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 ## Latest Verification
 
 - **Test:** `python -m unittest discover -s tests/detectors -p test_features.py -v`
-- **Result:** PASS — 5 deterministic feature tests passed: primitives, inter-arrival statistics, qtype distributions, extraction purity/determinism, and frozen feature ordering.
+- **Result:** PASS — 8 P2 tests passed: feature primitives/extraction/order plus DGA corpus determinism, hard negatives, leakage-safe holdouts, and immutable baseline generation.
 - **Time:** 2026-09-10.
 
 ---

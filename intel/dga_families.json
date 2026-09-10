@@ -1,0 +1,1 @@
+{"version":"0.1.0","families":["numeric_seed","hexflux","wordmix"],"source":"locally reimplemented deterministic fixtures; no runtime DGArchive dependency"}

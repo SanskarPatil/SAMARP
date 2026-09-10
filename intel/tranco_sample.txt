@@ -1,0 +1,5 @@
+github.com
+microsoft.com
+mozilla.org
+cloudflare.com
+digicert.com
