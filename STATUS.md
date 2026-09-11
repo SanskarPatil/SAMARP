@@ -8,22 +8,24 @@
 
 > This file is the project's current state in under a minute. Immediate work is in `task_today.md`; the full roadmap is in `implementation_plan.md`.
 
+**HEAD at last verification:** `5f62f42` — `test(hardening): verify throughput KPI and freeze clean canonical replay exports`.
+
 ---
 
 ## Completed
 
 - Source documents reviewed in full: `ps26145_traceability_matrix.md`, `FINAL_DEVELOPMENT_PLAN_V6.3.md`, `create_project_md_files_V2.md`.
-- Cross-document consistency analysis completed; contradictions and omissions recorded in `bugs.md` as `DOC-001` through `DOC-011`.
+- Cross-document consistency analysis completed; contradictions and omissions recorded in `bugs.md` as `DOC-001` through `DOC-012`.
 - Documentation layer generated: `PRD.md`, `design.md`, `implementation_plan.md`, `CLAUDE.md`, `agents.md`, `testing.md`, `git.md`, `STATUS.md`, `task_today.md`, `memory.md`, `bugs.md`.
 - **Phase 0 decisions taken and applied** — throughput acceptance target, canonical identifier form, dedup sentinel, test subtree. Rationale in `memory.md`; defect history in `bugs.md`.
 - **Frozen contracts written:** `schemas/normalized_event.schema.json`, `schemas/alert.schema.json`, `features/feature_order.py`, `config/thresholds.yaml`, `config/address_plan.yaml`, `config/dedup_keys.yaml`.
-- Test subtree created, including the two previously missing directories.
-- **Four-person ownership split applied** — P1 Sensor/Infrastructure, P2 Detection/ML, P3 UI/UX, P4 Backend/API/Integration. `agents.md` rewritten; `implementation_plan.md` phases renamed and Track C split into P3 and P4.
+- **Four-person ownership split applied** — P1 Sensor/Infrastructure, P2 Detection/ML, P3 UI/UX, P4 Backend/API/Integration.
 - **Six supplementary responsibilities confirmed and recorded**; hash-chain duplication between P1-3 and P4-2 removed, and the tamper-demonstration artifact moved with the chain to P4-4.
+- **P2, P3 and P4 delivered and integrated.** The full vertical path runs end to end: Normalized Events → Features → Detectors → Deduplication/Scoring → SQLite / Hash Chain → FastAPI / WebSocket → Dashboard.
 
 ---
 
-## In Progress
+## Track Status
 
 - Phase 0 exit is recorded as passed by the project owner. P2 is implementing against deterministic synthetic events while P1's live normalizer remains a future handoff.
 - P2 feature foundation: deterministic passive-metadata primitives, lexical/DNS/qtype extraction, and frozen-order vectorization are implemented and test-green.
@@ -34,13 +36,29 @@
 
 ## Blocked
 
-- Nothing. All four Phase 0 contract decisions have been made and applied; `DOC-004`, `DOC-006`, `DOC-007` and `DOC-009` are closed.
+- Nothing blocking the demo. All four Phase 0 contract decisions have been made and applied; `DOC-004`, `DOC-006`, `DOC-007` and `DOC-009` are closed.
+
+## Open Finding — P1
+
+**`external.*` in `config/address_plan.yaml` is still empty, and how it is filled matters.**
+
+Python's `ipaddress` treats RFC 5737 documentation ranges as private. If `external.benign`, `external.synthetic_malicious` or `external.amplifier_hosts` are populated with documentation space, the reflection reserved-source share returns to ~100 % on benign traffic — **the exact trap section 2A.3 exists to prevent, reintroduced one level down** — and the false-alerts-per-hour figure is destroyed again.
+
+The plan already requires *"curated public ranges, GeoLite2-resolvable"*. This finding records **why** that wording is load-bearing rather than stylistic. Owner: P1 (plan) with P2 (reflection detector). Pinned by `tests/ingest/test_address_plan.py::test_documentation_ranges_count_as_reserved_not_public`.
+
+## Open Finding — detector module count
+
+**`detectors/reflection.py` is deferred and is not implemented.** Seven detector modules ship: `c2.py`, `ddos.py`, `dga.py`, `dns.py`, `exfil.py`, `scan.py`, `tls_quic.py`.
+
+`reflection.py` is **not** a Definition-of-Done item in `FINAL_DEVELOPMENT_PLAN_V6.3.md` section 46, is not on the never-cut list (section 40), and is not a kill-ladder row. The V6.3 traceability rule requires every externally presented PS class to have **at least one** implementation module; *Volumetric DDoS / flooding* is served by `ddos.py`, which emits real incidents in the canonical campaign. The `reflection` value remains in the frozen `detector` enum in `schemas/alert.schema.json` and its deduplication key remains defined in `config/dedup_keys.yaml`; neither obliges emission.
+
+`PRD.md`, `design.md` and V6.3 describe eight internal modules. **External material must say seven detector modules across six PS classes** until `reflection.py` exists. Do not implement it — new detector work is closed.
 
 ## Ownership Coverage
 
 **Complete.** All six previously unnamed responsibilities are confirmed: hash chain → **P4**; offline intel bundle and version manifest → **P2**; baseline snapshot generation → **P2**; model card and evaluation report → **P2**; cold boot and offline asset audit → **P1**; backup recording and screenshots → **P3**.
 
-Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 15 repository directories and all 46 Definition-of-Done items have a named owner. **No unowned responsibility remains** — `agents.md` section 12.
+Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 15 repository directories and all 46 Definition-of-Done items have a named owner — `agents.md` section 12. **No unowned responsibility remains.**
 
 ---
 
@@ -54,7 +72,7 @@ Coverage sweep against `FINAL_DEVELOPMENT_PLAN_V6.3.md` sections 21 and 46: all 
 
 ## Known Failures
 
-- None from execution. Twelve documentation-level defects are recorded in `bugs.md`. Seven were resolved by authority precedence, four by explicit Phase 0 decision, and one (`DOC-012`, the demo-script timeline overlap) is deliberately documented rather than resolved so the V6.3 source timestamps stay intact. **No defect remains OPEN.**
+- None from execution. Documentation-level defects are recorded in `bugs.md`. `DOC-012`, the demo-script timeline overlap, is deliberately documented rather than resolved so the V6.3 source timestamps stay intact. **No defect remains OPEN.**
 
 ---
 
@@ -89,7 +107,7 @@ Build P2's deterministic synthetic corpus and holdout definitions, then generate
 
 ## Feature Freeze Status
 
-**NOT REACHED** (freeze begins at H19).
+**IN EFFECT.** P1/P2/P3/P4 are frozen and accepted. No new detector work, no architecture change, no schema change.
 
 ---
 
@@ -97,18 +115,26 @@ Build P2's deterministic synthetic corpus and holdout definitions, then generate
 
 | Area | Owner | State |
 |---|---|---|
-| Sensor / ingestion | P1 | Not started |
-| Detection | P2 | Not started |
-| Dashboard | P3 | Not started |
-| Backend / API | P4 | Not started |
-| Evidence | P2 emits, P3 renders | Not started |
-| Export | P4 endpoint, P3 surface | Not started |
-| End-to-end integration | P4 | Not started |
-| Boundary proof | P1 | Not started |
-| Rehearsal | All | Not started |
+| Sensor / ingestion | P1 | **Ready** — PCAP replay, NetFlow v9 / IPFIX, bounded flow tracking |
+| Detection | P2 | **Ready** — seven detector modules, six PS classes demonstrated |
+| Dashboard | P3 | **Ready** — build green, feed, drawer and capability banner |
+| Backend / API | P4 | **Ready** — seven `GET` routes plus WebSocket, mutating methods 405 |
+| Evidence | P2 emits, P3 renders | **Ready** |
+| Export | P4 endpoint, P3 surface | **Ready** — JSON and CSV, byte-reproducible |
+| End-to-end integration | P4 | **Ready** — canonical campaign replay |
+| Boundary proof | P1 | **Ready** — static ingest check plus the live 405 |
+| Rehearsal | All | Outstanding |
+
+### Known presentation limits
+
+- `latency_ms` is null on live alerts, so the p95 latency figure is not demonstrable from alert data. Do not quote a latency number that was not measured.
+- `model_version` and `intel_version` are populated only on the `dga` alert.
+- `confidence` is null on every alert because no detector is calibrated. This is correct: present `score`, `score_type` and `calibrated: false`, and never append a percent sign.
+- No LightGBM artifact ships. The documented rule fallback is in use, so publish no Brier score and no reliability diagram.
+- The published throughput figure still needs the declared Linux box.
 
 ---
 
 ## Scope Reminder
 
-Six PS threat classes, eight detector modules, one trained model (DGA LightGBM). Passive and read-only; no TLS/QUIC payload decryption; streaming rather than batch; measured throughput published in flows/sec first; every alert carries `timestamp`, non-null `flow_id`, threat class, `confidence` and `evidence`.
+Six PS threat classes, seven implemented detector modules (`reflection.py` deferred — see the open finding above), one trained model planned and currently running its documented rule fallback. Passive and read-only; no TLS/QUIC payload decryption; streaming rather than batch; measured throughput published in flows/sec first; every alert carries `timestamp`, non-null `flow_id`, threat class, `confidence` and `evidence`.
