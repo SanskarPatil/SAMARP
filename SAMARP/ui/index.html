@@ -99,9 +99,9 @@
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
-        <span class="topbar-title">Departments</span>
+        <span class="topbar-title">SAMARP</span>
         <div class="topbar-breadcrumbs">
-          <span>Map</span> / <span>Departments</span> / <span class="active">Status</span>
+          <span>Cyber</span> / <span>Threat Detection</span> / <span class="active">Live Monitor</span>
         </div>
       </div>
 
@@ -141,10 +141,10 @@
           <span style="font-size:9px">🟡</span><span>API CONNECT</span>
         </div>
 
-        <!-- Shield Badge: PREMIUM DIODE -->
+        <!-- Shield Badge: 1-WAY DATA DIODE -->
         <div class="diode-shield-badge" id="diodeStatusBadge" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4); color: var(--green-light);">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-          <span>PREMIUM</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"/></svg>
+          <span>1-WAY DIODE</span>
         </div>
 
         <!-- Night/Day Toggle -->
@@ -169,13 +169,10 @@
           </button>
         </div>
 
-        <!-- User Profile Pill: Timur K. -->
+        <!-- User Profile: SOC Analyst -->
         <div class="user-profile-badge" id="userProfileBtn">
-          <div class="user-avatar" style="background: linear-gradient(135deg, #f59e0b, #ec4899);">TK</div>
-          <span class="user-name">Timur K.</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
+          <div class="user-avatar" style="background: linear-gradient(135deg, #00f0ff, #2563eb);">SA</div>
+          <span class="user-name">SOC Analyst</span>
         </div>
       </div>
     </header>
@@ -217,229 +214,178 @@
     <main class="content-body">
 
       <!-- ================================================================
-           TAB 1: GLOBE OVERVIEW (Exact Reference Screenshot Layout)
+           TAB 1: GLOBE OVERVIEW
            ================================================================ -->
       <section class="view-section active" id="tab-dashboard">
         <div class="globe-dashboard-stage">
 
-          <!-- Central Canvas for 3D Cyber Globe & Topology -->
+          <!-- Central Canvas for 3D Cyber Globe -->
           <canvas class="globe-canvas" id="cyberGlobeCanvas"></canvas>
 
-          <!-- Left Column: Total, Status Categories, Parcels -->
+          <!-- Left HUD: Threat Telemetry Stats -->
           <div class="hud-left-column">
-            <!-- Card 1: Top-Left "Total 2.4k+" with Sparkline -->
+            <!-- Total Incidents -->
             <div class="hud-card hud-top-left">
               <div class="hud-stat-header">
-                <span class="hud-label">Total</span>
-                <span class="hud-select-pill">This week &or;</span>
+                <span class="hud-label">Incidents</span>
+                <span class="hud-select-pill" style="color: var(--crimson-alert); border-color: rgba(244,63,94,0.3);">LIVE ●</span>
               </div>
               <div class="hud-stat-main">
-                <span class="hud-number-lg" id="hudTotalPackets">2.4k+</span>
+                <span class="hud-number-lg" id="hudTotalPackets">0</span>
                 <svg class="sparkline-svg" viewBox="0 0 72 28">
-                  <path d="M 2,20 Q 18,26 30,12 T 54,16 T 70,4" fill="none" stroke="#4ade80" stroke-width="2.2" stroke-linecap="round"/>
+                  <path d="M 2,20 Q 18,26 30,12 T 54,16 T 70,4" fill="none" stroke="var(--cyan-neon)" stroke-width="2.2" stroke-linecap="round"/>
                 </svg>
               </div>
             </div>
 
-            <!-- Card 2: Mid-Left Category List with Icons -->
+            <!-- Threat Breakdown -->
             <div class="hud-card hud-mid-left">
-              <!-- Row 1: On the way -->
+              <!-- Critical -->
               <div class="category-row">
-                <div class="cat-icon-box blue">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 19 21 12 17 5 21 12 2"></polygon></svg>
+                <div class="cat-icon-box" style="background: rgba(244,63,94,0.15); color: var(--crimson-alert);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                 </div>
                 <div class="cat-info">
-                  <span class="cat-title">On the way</span>
-                  <span class="cat-value" id="hudOnTheWay">15.7k+</span>
+                  <span class="cat-title">Critical</span>
+                  <span class="cat-value" id="hudCritical" style="color: var(--crimson-alert);">0</span>
                 </div>
               </div>
-
-              <!-- Row 2: Delivered -->
+              <!-- High -->
               <div class="category-row">
-                <div class="cat-icon-box green">
+                <div class="cat-icon-box" style="background: rgba(245,158,11,0.15); color: var(--amber-gold);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+                </div>
+                <div class="cat-info">
+                  <span class="cat-title">High</span>
+                  <span class="cat-value" id="hudHigh" style="color: var(--amber-gold);">0</span>
+                </div>
+              </div>
+              <!-- Blocked -->
+              <div class="category-row">
+                <div class="cat-icon-box" style="background: rgba(16,185,129,0.15); color: var(--green-emerald);">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
                 <div class="cat-info">
-                  <span class="cat-title">Delivered</span>
-                  <span class="cat-value" id="hudDelivered">56.4k+</span>
-                </div>
-              </div>
-
-              <!-- Row 3: Waiting -->
-              <div class="category-row">
-                <div class="cat-icon-box amber">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                </div>
-                <div class="cat-info">
-                  <span class="cat-title">Waiting</span>
-                  <span class="cat-value" id="hudWaiting">8.2k+</span>
+                  <span class="cat-title">Blocked</span>
+                  <span class="cat-value" id="hudDelivered" style="color: var(--green-emerald);">0</span>
                 </div>
               </div>
             </div>
 
-            <!-- Card 3: Bottom-Left Parcels / Packets Volume -->
+            <!-- Detection Stats -->
             <div class="hud-card hud-bottom-left">
-              <span class="hud-section-title">PARCELS</span>
-              
+              <span class="hud-section-title">DETECTION</span>
               <div class="metric-row">
-                <span class="metric-sublabel">Monthly</span>
+                <span class="metric-sublabel">Detection Rate</span>
                 <div class="metric-val-row">
-                  <span class="metric-num">32,540</span>
-                  <span class="badge-delta">&Delta; +10%</span>
+                  <span class="metric-num" style="color: var(--cyan-neon);">96.8%</span>
+                  <span class="badge-delta">Δ +0.4%</span>
                 </div>
-                <span style="font-size: 9px; color: var(--text-muted);">Compared to 21,495 last month</span>
+                <span style="font-size: 9px; color: var(--text-muted);">AI Ensemble (7-class)</span>
               </div>
-
               <div class="metric-row">
-                <span class="metric-sublabel">Yearly</span>
+                <span class="metric-sublabel">Inference Latency</span>
                 <div class="metric-val-row">
-                  <span class="metric-num">1,387,456</span>
-                  <span class="badge-delta">&Delta; +12%</span>
+                  <span class="metric-num">0.7 ms</span>
+                  <span class="badge-delta" style="color: var(--blue-bright);">FPGA+GPU</span>
                 </div>
-                <span style="font-size: 9px; color: var(--text-muted);">Compared to 1,221,495 last year</span>
+                <span style="font-size: 9px; color: var(--text-muted);">Real-time packet scoring</span>
               </div>
             </div>
           </div>
 
-          <!-- Card 4: Center-Bottom Floating Pill -->
+          <!-- Bottom-Center: Live Feed Pill -->
           <div class="hud-card hud-center-bottom">
             <div class="floating-stream-row">
               <div class="stream-title-dot">
-                <span class="stream-dot"></span>
-                <span>Parcels in the way</span>
+                <span class="stream-dot" style="background: var(--green-emerald); box-shadow: 0 0 8px var(--green-emerald);"></span>
+                <span>Unidirectional Feed Active</span>
               </div>
               <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
             </div>
-            <div class="stream-fraction" id="hudActiveStreamFraction">24 / 75</div>
-            <div class="stream-subtext">
-              <span>&Delta; +15% vs. last month</span>
-            </div>
+            <div class="stream-fraction" id="hudActiveStreamFraction">1-WAY</div>
+            <div class="stream-subtext"><span>0 Backchannel Return Path</span></div>
           </div>
 
-          <!-- Card 5: Bottom-Right Dual Progress Gauges (Delivered & In the way) -->
+          <!-- Bottom-Right: Diode Status Gauges -->
           <div class="hud-card hud-bottom-right-gauges">
-            <!-- Ring 1: 75% Delivered -->
             <div class="ring-gauge-item">
               <svg class="gauge-svg" viewBox="0 0 58 58">
                 <circle class="gauge-bg" cx="29" cy="29" r="25"></circle>
-                <circle class="gauge-fill-amber" cx="29" cy="29" r="25"></circle>
+                <circle class="gauge-fill-amber" cx="29" cy="29" r="25" style="stroke: var(--green-emerald);"></circle>
               </svg>
-              <span class="gauge-center-text" id="gaugePctDelivered">75%</span>
-              <span class="gauge-label">Delivered</span>
+              <span class="gauge-center-text" id="gaugePctDelivered" style="color: var(--green-emerald);">98%</span>
+              <span class="gauge-label">Integrity</span>
             </div>
-
-            <!-- Ring 2: 25% In the way -->
             <div class="ring-gauge-item">
               <svg class="gauge-svg" viewBox="0 0 58 58">
                 <circle class="gauge-bg" cx="29" cy="29" r="25"></circle>
                 <circle class="gauge-fill-teal" cx="29" cy="29" r="25"></circle>
               </svg>
-              <span class="gauge-center-text" id="gaugePctInTransit">25%</span>
-              <span class="gauge-label">In the way</span>
+              <span class="gauge-center-text" id="gaugePctInTransit">0%</span>
+              <span class="gauge-label">Threat %</span>
             </div>
           </div>
 
-          <!-- Right Column: Total Orders & Quantity Bars -->
+          <!-- Right HUD: Threat Intelligence Panel -->
           <div class="hud-right-column">
-            <!-- Card 6: Top-Right "Total Orders 2.4k+" with Wavy Area Chart -->
+            <!-- Active Threats Card -->
             <div class="hud-card hud-top-right">
               <div class="hud-stat-header">
-                <span class="hud-label">Total orders</span>
+                <span class="hud-label">Active Threats</span>
                 <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
               </div>
               <div class="hud-stat-main">
-                <span class="hud-number-lg">2.4k+</span>
-                <span class="badge-delta" style="background: rgba(16,185,129,0.15); padding: 3px 8px; border-radius: 6px;">&uarr; 12%</span>
+                <span class="hud-number-lg" id="hudWaiting" style="color: var(--crimson-alert);">0</span>
+                <span class="badge-delta" style="background: rgba(244,63,94,0.15); color: var(--crimson-alert); padding: 3px 8px; border-radius: 6px;">▲ LIVE</span>
               </div>
               <svg class="hud-wave-chart" viewBox="0 0 200 48" preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="waveGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#4ade80" stop-opacity="0.35"/>
-                    <stop offset="100%" stop-color="#4ade80" stop-opacity="0.0"/>
+                    <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#00f0ff" stop-opacity="0.0"/>
                   </linearGradient>
                 </defs>
                 <path d="M 0,38 Q 40,42 70,22 T 140,26 T 200,8 L 200,48 L 0,48 Z" fill="url(#waveGrad)"/>
-                <path d="M 0,38 Q 40,42 70,22 T 140,26 T 200,8" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
-                <circle cx="180" cy="12" r="4" fill="#4ade80"/>
+                <path d="M 0,38 Q 40,42 70,22 T 140,26 T 200,8" fill="none" stroke="var(--cyan-neon)" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="180" cy="12" r="4" fill="var(--cyan-neon)"/>
               </svg>
             </div>
 
-            <!-- Card 7: Middle-Right "Quantity - Average by category" Bar Chart -->
+            <!-- Threat Distribution Card -->
             <div class="hud-card hud-mid-right">
               <div class="hud-stat-header">
                 <div>
-                  <div style="font-size: 13px; font-weight: 700; color: #fff;">Quantity</div>
-                  <div style="font-size: 10px; color: var(--text-muted);">Average by category</div>
+                  <div style="font-size: 13px; font-weight: 700; color: #fff;">Threat Distribution</div>
+                  <div style="font-size: 10px; color: var(--text-muted);">By attack class</div>
                 </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
               </div>
-
-              <!-- Vertical Neon Bars -->
               <div class="bars-chart-container">
-                <!-- Bar 1: 28.3% Blue -->
                 <div class="bar-col">
-                  <span class="bar-pct-label">28.3%</span>
-                  <div class="bar-fill-track">
-                    <div class="bar-fill-actual blue" style="height: 60%;"></div>
-                  </div>
+                  <span class="bar-pct-label">DDoS</span>
+                  <div class="bar-fill-track"><div class="bar-fill-actual" style="height: 75%; background: var(--crimson-alert);"></div></div>
                 </div>
-
-                <!-- Bar 2: 39.7% Green -->
                 <div class="bar-col">
-                  <span class="bar-pct-label">39.7%</span>
-                  <div class="bar-fill-track">
-                    <div class="bar-fill-actual green" style="height: 90%;"></div>
-                  </div>
+                  <span class="bar-pct-label">C2</span>
+                  <div class="bar-fill-track"><div class="bar-fill-actual" style="height: 55%; background: var(--amber-gold);"></div></div>
                 </div>
-
-                <!-- Bar 3: 14.6% Teal -->
                 <div class="bar-col">
-                  <span class="bar-pct-label">14.6%</span>
-                  <div class="bar-fill-track">
-                    <div class="bar-fill-actual teal" style="height: 38%;"></div>
-                  </div>
+                  <span class="bar-pct-label">Exfil</span>
+                  <div class="bar-fill-track"><div class="bar-fill-actual" style="height: 45%; background: var(--blue-bright);"></div></div>
                 </div>
-
-                <!-- Bar 4: 17.4% Amber -->
                 <div class="bar-col">
-                  <span class="bar-pct-label">17.4%</span>
-                  <div class="bar-fill-track">
-                    <div class="bar-fill-actual amber" style="height: 46%;"></div>
-                  </div>
+                  <span class="bar-pct-label">Scan</span>
+                  <div class="bar-fill-track"><div class="bar-fill-actual" style="height: 60%; background: var(--cyan-neon);"></div></div>
                 </div>
               </div>
-
-              <!-- Legend List -->
               <div class="legend-list">
-                <div class="legend-row">
-                  <div class="legend-left">
-                    <span class="legend-dot" style="background: #2563eb;"></span>
-                    <span>On the way</span>
-                  </div>
-                  <span class="legend-time">3 hr 12 min</span>
-                </div>
-                <div class="legend-row">
-                  <div class="legend-left">
-                    <span class="legend-dot" style="background: #10b981;"></span>
-                    <span>Loading</span>
-                  </div>
-                  <span class="legend-time">1 hr 15 min</span>
-                </div>
-                <div class="legend-row">
-                  <div class="legend-left">
-                    <span class="legend-dot" style="background: #00f0ff;"></span>
-                    <span>Unloading</span>
-                  </div>
-                  <span class="legend-time">2 hr 21 min</span>
-                </div>
-                <div class="legend-row">
-                  <div class="legend-left">
-                    <span class="legend-dot" style="background: #f59e0b;"></span>
-                    <span>Waiting</span>
-                  </div>
-                  <span class="legend-time">1 hr 12 min</span>
-                </div>
+                <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:var(--crimson-alert);"></span><span>Volumetric DDoS</span></div><span class="legend-time" style="color:var(--crimson-alert);">HIGH</span></div>
+                <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:var(--amber-gold);"></span><span>Covert C2 Beacon</span></div><span class="legend-time" style="color:var(--amber-gold);">MED</span></div>
+                <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:var(--blue-bright);"></span><span>Data Exfiltration</span></div><span class="legend-time" style="color:var(--blue-bright);">PASS</span></div>
+                <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:var(--cyan-neon);"></span><span>Port Recon Sweep</span></div><span class="legend-time">PASS</span></div>
               </div>
+            </div>
+
           </div>
 
         </div>

@@ -180,8 +180,11 @@ class BackendBridge {
 
   _handleSnapshot(msg) {
     const incidents = (msg.incidents || []).map(i => this._normalize(i));
-    // Pre-populate feed with snapshot (latest first, up to 15)
-    incidents.slice(0, 15).forEach(inc => this._dispatch(inc));
+    // Pre-populate feed with snapshot (latest first, up to 15) without firing live attack alerts
+    incidents.slice(0, 15).forEach(inc => this._dispatch({ ...inc, isSnapshot: true, isLive: false }));
+
+    // Track seen IDs to prevent duplicate alerts on polling fallback
+    this._seenIncidentIds = new Set(incidents.map(i => i.id || i.uuid || i.name));
 
     // Update HUD counts from snapshot
     this._updateSeverityCounts(incidents);
@@ -194,7 +197,13 @@ class BackendBridge {
   _handleBatch(msg) {
     const incidents = (msg.incidents || []).map(i => this._normalize(i));
     incidents.forEach(inc => {
-      this._dispatch(inc);
+      if (!this._seenIncidentIds) this._seenIncidentIds = new Set();
+      const id = inc.id || inc.uuid || inc.name;
+      const isNew = !this._seenIncidentIds.has(id);
+      this._seenIncidentIds.add(id);
+
+      // Only live push if it's a newly detected incident
+      this._dispatch({ ...inc, isLive: isNew, isSnapshot: false });
     });
     // Update severity chips
     this._updateSeverityCounts(incidents);
@@ -214,7 +223,20 @@ class BackendBridge {
       const incidents = await this.fetchIncidents({ limit: 20 });
       if (incidents.length > 0) {
         this._setState('polling');
-        incidents.slice(0, 5).forEach(inc => this._dispatch(inc));
+        if (!this._seenIncidentIds) {
+          // First poll: initialize without firing popups
+          this._seenIncidentIds = new Set(incidents.map(i => i.id || i.uuid || i.name));
+          incidents.slice(0, 5).forEach(inc => this._dispatch({ ...inc, isSnapshot: true, isLive: false }));
+        } else {
+          // Subsequent polls: only new items are live attacks
+          incidents.forEach(inc => {
+            const id = inc.id || inc.uuid || inc.name;
+            if (!this._seenIncidentIds.has(id)) {
+              this._seenIncidentIds.add(id);
+              this._dispatch({ ...inc, isLive: true, isSnapshot: false });
+            }
+          });
+        }
         this._updateSeverityCounts(incidents);
       } else {
         this._setState('offline');

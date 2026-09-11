@@ -113,14 +113,12 @@ class PortalController {
         btn3D.classList.add('active');
         btn2D.classList.remove('active');
         this.globe.setMode('3D');
-        this.showToast("Switched to 3D Orbital Cyber Globe", "info");
       });
 
       btn2D.addEventListener('click', () => {
         btn2D.classList.add('active');
         btn3D.classList.remove('active');
         this.globe.setMode('2D');
-        this.showToast("Switched to 2D Planar Network Topology", "info");
       });
     }
 
@@ -136,7 +134,6 @@ class PortalController {
       btnDay.addEventListener('click', () => {
         btnDay.classList.add('active');
         btnNight.classList.remove('active');
-        this.showToast("Day mode simulation engaged", "info");
       });
     }
   }
@@ -151,7 +148,6 @@ class PortalController {
       this.totalPackets++;
       const elTot = document.getElementById('hudTotalPackets');
       if (elTot) elTot.textContent = `${(this.totalPackets / 1000).toFixed(1)}k+`;
-
       if (report.threatScore > 50) {
         // Attack packet intercepted!
         this.waitingCount++;
@@ -167,9 +163,10 @@ class PortalController {
         this.renderXAI(report);
         this.updateScoreGauge(report.threatScore, report.severity);
 
-        // Alert sound & Toast
+        // Alert popup banner & notification when attack is caught
         this.beep(880, 0.15, 'sawtooth');
-        this.showToast(`🚨 Intercepted: ${report.name} (Threat Score: ${report.threatScore})`, 'critical');
+        this.showToast(`🛡 Threat Caught: ${report.name} (Score: ${report.threatScore})`, 'critical');
+        this.triggerThreatAlert(report);
       } else {
         // Benign packet
         this.deliveredCount++;
@@ -183,7 +180,7 @@ class PortalController {
      Event Listeners for Controls & Attack Injector
      -------------------------------------------------------------------------- */
   initEventListeners() {
-    // Attack Launch button
+    // Attack Launch button — Show popup notification when attack is started
     const btnInject = document.getElementById('btnInjectAttack');
     const selectAttack = document.getElementById('attackSelect');
     if (btnInject && selectAttack) {
@@ -192,7 +189,7 @@ class PortalController {
         this.simulator.injectPacket(key, true);
         if (this.globe) this.globe.triggerAttackWave("#f43f5e");
         this.beep(380, 0.08, 'square');
-        this.showToast(`Simulating: ${THREAT_DATABASE[key].name}`, 'warning');
+        this.showToast(`🚨 Attack Started: ${THREAT_DATABASE[key].name} (Transmitting into Data Diode...)`, 'critical');
       });
     }
 
@@ -238,7 +235,6 @@ class PortalController {
           statusBadge.innerHTML = `<span class="dot-live" style="background: var(--crimson-alert); box-shadow: 0 0 8px var(--crimson-alert);"></span><span>SHUTTER CUTOFF</span>`;
         }
         this.beep(240, 0.25, 'sawtooth');
-        this.showToast("🛑 Mechanical Optical Shutter Closed. Unidirectional laser severed.", "critical");
       } else {
         if (btnShutter) {
           btnShutter.textContent = "Engage Optical Shutter (Sever Link)";
@@ -250,9 +246,8 @@ class PortalController {
           statusBadge.style.background = "rgba(16, 185, 129, 0.15)";
           statusBadge.style.borderColor = "rgba(16, 185, 129, 0.35)";
           statusBadge.style.color = "var(--green-light)";
-          statusBadge.innerHTML = `<span class="dot-live"></span><span>PREMIUM DIODE</span>`;
+          statusBadge.innerHTML = `<span class="dot-live"></span><span>1-WAY DIODE</span>`;
         }
-        this.showToast("✅ Optical Shutter opened. 1-Way transmission active.", "info");
       }
     };
 
@@ -264,7 +259,6 @@ class PortalController {
     if (pbBtnFlush) {
       pbBtnFlush.addEventListener('click', () => {
         this.beep(520, 0.08, 'sine');
-        this.showToast("⚡ RX Photodiode FIFO ring buffer flushed. 0 pending bytes dropped.", "info");
       });
     }
 
@@ -272,7 +266,6 @@ class PortalController {
     if (pbBtnIsolate) {
       pbBtnIsolate.addEventListener('click', () => {
         this.beep(350, 0.1, 'square');
-        this.showToast("🔒 Enclave IP 10.0.4.15 isolated in airgapped quarantine VLAN.", "warning");
       });
     }
 
@@ -280,7 +273,6 @@ class PortalController {
     if (pbBtnExportRules) {
       pbBtnExportRules.addEventListener('click', () => {
         this.beep(640, 0.08, 'sine');
-        this.showToast("📝 Generated eBPF XDP filter: `sec_filter_unidir.o` saved to SOC repository.", "info");
       });
     }
 
@@ -290,9 +282,6 @@ class PortalController {
       btnExportJSON.addEventListener('click', () => {
         if (window.BackendBridge) {
           window.BackendBridge.exportJSON();
-          this.showToast('⬇ Downloading signed hash-chain JSON from backend...', 'info');
-        } else {
-          this.showToast('⚠ Backend not available. Start the API server first.', 'warning');
         }
       });
     }
@@ -302,9 +291,6 @@ class PortalController {
       btnExportCSV.addEventListener('click', () => {
         if (window.BackendBridge) {
           window.BackendBridge.exportCSV();
-          this.showToast('⬇ Downloading incidents CSV from backend...', 'info');
-        } else {
-          this.showToast('⚠ Backend not available. Start the API server first.', 'warning');
         }
       });
     }
@@ -350,7 +336,8 @@ class PortalController {
     window.addEventListener('samarp:incident', (e) => {
       const incident = e.detail;
       if (!incident) return;
-      this.handleNewThreat(incident);
+      const isLive = Boolean(incident.isLive && !incident.isSnapshot);
+      this.handleNewThreat(incident, isLive);
     });
   }
 
@@ -374,7 +361,6 @@ class PortalController {
         playBtn.classList.add('active');
         if (pauseBtn) pauseBtn.classList.remove('active');
         this.beep(520, 0.05, 'sine');
-        this.showToast("▶ PCAP Replay Stream Active", "info");
       });
     }
 
@@ -384,7 +370,6 @@ class PortalController {
         pauseBtn.classList.add('active');
         if (playBtn) playBtn.classList.remove('active');
         this.beep(400, 0.05, 'sine');
-        this.showToast("⏸ PCAP Replay Paused", "warning");
       });
     }
 
@@ -394,7 +379,6 @@ class PortalController {
         if (playBtn) playBtn.classList.remove('active');
         if (pauseBtn) pauseBtn.classList.remove('active');
         this.beep(300, 0.08, 'sawtooth');
-        this.showToast("⏹ PCAP Replay Reset to Frame 0", "info");
       });
     }
 
@@ -404,7 +388,6 @@ class PortalController {
         replay.loadProfile(idx);
         const p = replay.profiles[idx];
         if (nameDisplay) nameDisplay.textContent = p.name;
-        this.showToast(`Loaded Capture: ${p.name}`, "info");
       });
     }
 
@@ -471,8 +454,9 @@ class PortalController {
       }
     };
 
+    // Passive replay doesn't trigger popup alerts
     replay.onThreatTriggered = (threat) => {
-      this.handleNewThreat(threat);
+      this.handleNewThreat(threat, false);
     };
 
     // Auto start replay playback
@@ -481,7 +465,7 @@ class PortalController {
     }, 500);
   }
 
-  handleNewThreat(threat) {
+  handleNewThreat(threat, triggerAlert = false) {
     if (!threat) return;
     const report = window.AIEngineInstance.analyzePacket(threat);
 
@@ -505,8 +489,8 @@ class PortalController {
       });
     }
 
-    // 3. Trigger globe wave if available
-    if (this.globe) {
+    // 3. Trigger globe wave if live threat
+    if (this.globe && triggerAlert) {
       this.globe.triggerAttackWave(report.threatScore > 80 ? "#f43f5e" : "#f59e0b");
     }
 
@@ -517,9 +501,10 @@ class PortalController {
     // 5. Update confidence meters
     this.updateConfidenceBars(report);
 
-    // 6. Show temporary alert banner if critical
-    if (report.severity === 'Critical') {
+    // 6. Show temporary alert banner ONLY when live threat intercepted
+    if (triggerAlert) {
       this.triggerThreatAlert(report);
+      this.showToast(`🚨 Threat Caught: ${report.name} (${report.severity})`, 'critical');
       this.beep(880, 0.12, 'sawtooth');
     }
   }
@@ -625,7 +610,6 @@ class PortalController {
         btnResolve.textContent = "Resolved ✓";
         btnResolve.style.background = "rgba(16, 185, 129, 0.2)";
         this.beep(720, 0.1, 'sine');
-        this.showToast("Case marked as Resolved in SOC Incident Log.", "info");
       });
     }
 
@@ -633,7 +617,6 @@ class PortalController {
       btnShutter.addEventListener('click', () => {
         const btnMainShutter = document.getElementById('btnToggleShutter');
         if (btnMainShutter) btnMainShutter.click();
-        this.showToast("Engaged Physical Optical Shutter from Investigation Panel.", "critical");
       });
     }
   }
