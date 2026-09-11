@@ -1,9 +1,9 @@
 # Task Today
 
-**Updated:** 2026-09-10
-**Timebox:** not yet set — build window has not opened
-**Current Phase:** Phase 0 — Foundation
-**Current Gate:** Phase 0 exit gate (H1)
+**Updated:** 2026-09-11
+**Timebox:** demo rehearsal
+**Current Phase:** Integration complete — demo readiness
+**Current Gate:** Final demo rehearsal
 **Overall Status:** GREEN
 
 > Keep this file small and short-lived. It holds only the current focused work period — roughly the next two hours. Project state is in `STATUS.md`; the roadmap is in `implementation_plan.md`.
@@ -12,113 +12,104 @@
 
 ## Current Objective
 
-**P1 — P1-1 Transport and Clock.** Build the sensor spine: one PCAP becomes contract-valid normalized events through a single clock.
+**Rehearse the demo. Change no code.** P1/P2/P3/P4 are frozen and accepted at commit `5f62f42`.
 
-### P1-1 progress
+### Delivered
 
-- [x] **Normalized-event foundation** — `ingest/identity.py`, `ingest/capability.py`, `ingest/address_plan.py`, `ingest/normalized_event.py`.
-- [x] `config/address_plan.yaml` loaded; `direction` populated for all four enum values.
-- [x] **PCAP reader** (`ingest/pcap.py`) — header-only, pure stdlib, all four magics, both endiannesses, PCAPNG rejected with an actionable message, malformed records counted and skipped.
-- [x] **Header-only decode** (`ingest/headers.py`) — Ethernet/VLAN/QinQ, IPv4 (options, fragments), IPv6 (bounded extension chain), TCP/UDP/ICMP. No payload-capable field.
-- [x] **Unified replay clock** (`ingest/clock.py`) — `t_replay_start` captured **exactly once**, written to the manifest; second start refused.
-- [x] **Deterministic replay driver** (`ingest/replay.py`) — speed control, counters, measured parse loss, capture-loss capability.
-- [x] **Header-only packet counter** (`ingest/counters.py`) — packets, bytes, protocol/direction/IP-version breakdowns on closed vocabularies, TCP flag counters, rates.
-- [x] **Bounded flow tracker** (`ingest/flow_tracker.py`) — LRU cap, idle timeout, absolute lifetime, bounded sweep budget; produces `flow_summary` per V6.3 §6.2.
-- [x] **Capture-loss accounting** — measured lower bound; `kernel_drops`/`ring_drops` null (NOT_OBSERVABLE, no sensor on this path); `capture_loss` capability `DEGRADED` on a snapped capture.
-- [x] **NetFlow v9 / IPFIX adapter** (`ingest/flow_record_adapter.py`) — one shared template decoder, bounded cache, template register/replace/expire, unknown-template deferral, same normalized contract. **P1-5 complete; H13 gate item satisfied.**
-- [x] 248 tests pass (72 foundation + 91 replay + 46 STEP 5 + 39 STEP 7).
-- [ ] Suricata EVE tail with partial-line handling *(STEP 6 — adapter only on this box, see blocker)*.
+- [x] **P1 — Sensor / Infrastructure, frozen at STEP 7.** Normalized-event foundation, PCAP reader, header-only decode, unified replay clock with `t_replay_start` captured exactly once, deterministic replay driver, header-only counters, bounded flow tracker, capture-loss accounting, and the shared NetFlow v9 / IPFIX template adapter.
+- [x] **P2 — Detection / ML, complete.** `features/rolling.py` and `features/entropy.py` against the frozen `FEATURE_ORDER`; seven detector modules — `ddos.py` (flood plus the distinct Slowloris low-rate path), `scan.py`, `c2.py`, `dga.py`, `dns.py`, `tls_quic.py`, `exfil.py` — wired by `detectors/pipeline.py`; `alerts/deduplicator.py` and `alerts/scorer.py`.
+- [x] **P4 — Backend / API / Integration, complete.** Read-only FastAPI Plane B with seven `GET` routes and the `/ws/incidents` WebSocket, 250 ms batched pushes, SQLite persistence with JSON and CSV export, `alerts/hash_chain.py`, `scenarios/canonical_campaign.py` and `scripts/run_demo.py`.
+- [x] **P3 — UI / UX, complete.** React/Vite operator dashboard — incident feed, incident row, evidence drawer, capability banner, header, demo tour modal, `useIncidents` hook, API and WebSocket services.
+- [x] **321 tests pass** (`python -m pytest tests/ -q`).
+- [x] **Frontend production build passes** (`cd dashboard && npm run build`) — 1 602 modules, 0 TypeScript errors.
+- [x] **Canonical campaign replay verified:** 12 137 events → 13 raw alerts → 10 distinct incidents, chain sequence 13, hash chain verified, exports byte-identical across independent runs.
+- [x] **Six PS 26145 threat classes verified** in a single replay: Botnet C2 beaconing, DGA / DNS tunnelling, Data exfiltration, Malware in encrypted sessions, Port scanning / reconnaissance, Volumetric DDoS / flooding.
+
+### Not delivered, and not required today
+
+- [ ] Suricata EVE tail with partial-line handling *(STEP 6 — Linux box required)*.
+- [ ] sFlow capability handling *(STEP 8 — deferred by decision, not by dependency)*.
+- [ ] Published throughput figure *(STEP 9 — needs the declared Linux box; WSL2 is not acceptable)*.
 - [ ] veth pair / one-way enclave *(STEP 10 — Linux box required)*.
+- [ ] `detectors/reflection.py` — **deferred. Not a Definition-of-Done item.** See the open finding in `STATUS.md`.
+
+---
+
+## Demo Commands
+
+```bash
+# Full suite
+python -m pytest tests/ -q
+
+# Canonical campaign replay, exports and chain verification in one run
+python scripts/run_demo.py --replay-only
+
+# Standalone hash-chain verification, clean process, no writer state
+python tests/hash_chain/verify_hash_chain.py export/canonical_campaign_export.json
+python scripts/run_demo.py --verify-only export/canonical_campaign_export.json
+
+# Live read-only Plane B API, then the dashboard in a second terminal
+python scripts/run_demo.py --serve
+cd dashboard && npm run dev            # http://localhost:5173
+
+# Read-only boundary proof
+curl -s -o /dev/null -w "POST=%{http_code}\n" -X POST http://127.0.0.1:8000/incidents   # 405
+```
+
+Serve the dashboard with `npm run dev`, not `npm run preview`: the API proxy lives under `server.proxy` in `dashboard/vite.config.ts` and `vite preview` does not apply it.
+
+**`/docs` and `/redoc` are not part of the offline demo path.** Those pages load Swagger UI and ReDoc from a CDN and will not render without internet access. Show the API through the `curl` commands above and through the dashboard.
 
 ---
 
 ## Priority Tasks
 
-### 1. Resolve the four open contract decisions — DONE
+### 1. Rehearse the run order
 
-Decided by the project owner and applied across the documentation layer and the frozen artifacts.
+- [ ] Replay, then chain verification, then the live API with the dashboard, then the 405 boundary proof.
+- [ ] Confirm the machine is offline for at least one full rehearsal.
+- [ ] Keep the frozen exports in `export/` untouched; the replay reproduces them byte for byte, which is itself a claim worth showing.
 
-- [x] Throughput target: at least **1 000 normalized flows/sec** sustained 60 s at below 1 % loss (primary); V6.3 pps and Mbps retained unchanged as secondary; the three are never conflated.
-- [x] Canonical identifier: `sha256(canonical_value).hexdigest()[:16]` — exactly 16 lowercase hex characters, 64-bit truncated SHA-256; one shared helper for writers and verifiers; chain hashes stay full length.
-- [x] Unavailable dedup-key components take the exact sentinel `NOT_OBSERVABLE`; dedup operates on the canonical serialized key containing it.
-- [x] `tests/detectors/` and `tests/throughput/` created; all other V6.3 test directories preserved.
+### 2. Fix the wording, not the code
 
-Rationale recorded in `memory.md`; `bugs.md` `DOC-004`, `DOC-006`, `DOC-007`, `DOC-009` closed.
+- [ ] Say **seven detector modules across six PS classes**. `PRD.md`, `design.md` and V6.3 describe eight internal modules; `reflection.py` is deferred.
+- [ ] Present `score`, `score_type` and `calibrated: false`. Never append a percent sign, and never call an uncalibrated score a probability.
+- [ ] State that the DGA path runs its documented rule fallback with `model_version: "rules-fallback"`. Publish no Brier score and no reliability diagram.
+- [ ] Quote no latency number. `latency_ms` is null on live alerts.
+- [ ] Quote no throughput number without the machine specification beside it.
 
-### 2. Freeze the shared contracts — DONE
-
-- [x] `schemas/normalized_event.schema.json`.
-- [x] `schemas/alert.schema.json` (v1.3) with the five PS-mandated fields, `flow_ref_type`, `score_type`, `calibrated`, capability state and chain fields.
-- [x] `features/feature_order.py` with the frozen `FEATURE_ORDER` tuple.
-- [x] `config/thresholds.yaml` (seeded, plus the decided `throughput:` block), `config/address_plan.yaml`, `config/dedup_keys.yaml`.
-- [ ] **Remaining:** contract tests in `tests/schema/` — enum values, non-null `flow_id`, identifier pattern `^[0-9a-f]{16}$`, dedup sentinel, six-classes-to-eight-modules mapping, `input_mode` enum, no non-`GET` route on Plane B (**P4**).
-
-**Done when:** contract tests exist and pass, and all four tracks can build against mocks.
-
-### 4. Ownership split applied — DONE
-
-- [x] Four-person split documented: **P1** Sensor/Infrastructure, **P2** Detection/ML, **P3** UI/UX, **P4** Backend/API/Integration.
-- [x] `agents.md` rewritten; `implementation_plan.md` phases renamed `P1-*`/`P2-*` and Track C split into `P3-*` and new `P4-*`.
-- [x] Legacy mapping recorded: `A → P1`, `B → P2`, `C → P3 + P4`. V6.3 itself is **not** edited.
-- [x] P3 mock-fixture independence made a hard rule; P4 owns the Hour-12 integration checkpoint.
-- [x] **Six supplementary responsibilities confirmed** — hash chain → P4; offline intel bundle and version manifest → P2; baseline snapshot generation → P2; model card and evaluation report → P2; cold boot and offline asset audit → P1; backup recording and screenshots → P3. Recorded in `agents.md` section 7 as confirmed assignments.
-- [x] **Coverage sweep passed** — all 15 V6.3 repository directories and all 46 Definition-of-Done items have a named owner (`agents.md` section 12). No unowned responsibility remains.
-
-### 3. Prove the environment
+### 3. Prove the environment — still outstanding, still Linux-gated
 
 - [ ] Confirm the OS/box decision is made and its specification recorded. **WSL2 is not acceptable** for the published throughput number.
 - [ ] Build and version-check Suricata (7.0.3 or later for JA4).
 - [ ] Run the capability probe against a known fixture PCAP; record every acceptance line, including the JA3/JA3S/JA4 verdict and `flow events == 0`.
 - [ ] Build the isolated veth lab; set egress DROP.
 
-**Done when:** the probe output is recorded in the capability state and the lab interface has no route and no egress.
-
 ---
 
 ## Current Blocker
 
-**P1 is temporarily FROZEN at STEP 7.** Checkpoint `4040ac6`, 248/248 pass. Do not start STEP 8, STEP 9 or further optional ingestion work. Preserve the current working state. Team priority moves to cross-team vertical integration: Normalized Events → Features → Detectors → Alerts → Backend/API → Dashboard.
+**None on the demo path.** Tests, build, replay, chain verification and the boundary proof are all green at `5f62f42` with a clean working tree.
 
 **Environment (unchanged).** The development box is Windows. Suricata, `veth`, `tcpreplay` and live tap are Linux-only, and V6.3 rules WSL2 unacceptable for the published throughput number.
-
-- **STEP 6 Suricata** — Linux-gated. Adapter writable here; probe and EVE tail must run on the lab machine.
-- **STEP 8 sFlow** — **not** Linux-gated. Pure Python, buildable here. Deferred by decision. `sflow` is already a valid frozen `input_mode` and its capability baseline already exists in `ingest/capability.py`.
-- **STEP 9 throughput** — partial. Capture-loss accounting landed in STEP 5. The published throughput figure needs the declared Linux box.
-- **STEP 10 veth / lab** — Linux-gated.
-
-Ingest pipeline delivered so far is complete and testable on this box: PCAP parse, normalize, flow track, NetFlow v9 / IPFIX.
 
 ---
 
 ## Do Not Work On
 
-- Any detector. The first development action is not a detector.
+- Any new detector, `reflection.py` included. New detector work is closed.
+- Any schema change, any frozen-contract change, any architecture change.
 - Threat map, PDF export, clock servo, Lomb-Scargle, fusion, SHAP — all Tier 2.
 - Unrelated refactors.
-- Documentation beyond what a decision requires (the documentation layer already exists).
-- Anything past the Phase 0 exit gate.
-
----
-
-## Next Task — four tracks in parallel
-
-| Track | Phase | Hours 1–6 |
-|---|---|---|
-| **P1 — Sensor / Infrastructure** | P1-1 Transport and Clock | tcpreplay driver, veth, the single rebased replay clock, header-only counter, Suricata EVE tail, normalizer, bounded flow tracker, capture-loss fields |
-| **P2 — Detection / ML** | P2-1 Ground Truth | Synthetic event generator, corpora, manifests, DGA corpus with hard negatives, holdouts, background PCAP generation (**stops at the Hour-6 gate**) |
-| **P3 — UI / UX** | P3-1 Mock-Driven Shell | Generate mock fixtures from the frozen alert schema, fixture validity check, React/Vite skeleton, incident feed, LIVE/REPLAY badge. **Does not wait for P4** |
-| **P4 — Backend / API / Integration** | P4-1 API and Transport | FastAPI `GET`+WebSocket only, route contract test asserting no non-`GET` route, 250 ms batched pushes, review P3's fixtures for contract fidelity |
-
-Ownership detail is in `agents.md`; phase detail in `implementation_plan.md`.
+- Documentation beyond what a decision requires.
 
 ---
 
 ## End-of-Session Update
 
-- **Completed:** documentation layer generated and cross-checked; four Phase 0 decisions applied; `schemas/`, `features/feature_order.py` and the three config files frozen; test subtree created.
-- **Blocked:** nothing.
-- **New bug:** `DOC-012` recorded — the V6.3 section 41 demo-beat overlap, documented rather than rewritten.
-- **New decision:** throughput target, canonical identifier form, dedup sentinel and test subtree frozen — rationale in `memory.md`. Where source documents conflicted, the higher authority was preferred and the resolution recorded rather than a new requirement invented.
+- **Completed:** read-only demo audit at `5f62f42` — 321 tests pass, frontend build passes, canonical replay is deterministic and byte-reproducible, hash chain verifies standalone, Plane B exposes only `GET` routes plus the WebSocket with mutating methods returning 405, no CDN runtime dependency in the dashboard, no secret or database tracked.
+- **Corrected:** `STATUS.md` and `task_today.md` had fallen four commits behind the repository and described P2, P3 and P4 as not started. Both now describe the shipped system.
+- **Recorded:** `reflection.py` is deferred, is not a Definition-of-Done item, and external material must say seven detector modules.
 
 ---
 
