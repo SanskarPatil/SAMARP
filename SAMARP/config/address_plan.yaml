@@ -1,0 +1,63 @@
+# Lab Address Plan - FROZEN at Phase 0
+# Source: FINAL_DEVELOPMENT_PLAN_V6.3.md section 2A
+#
+# Every module needing address semantics reads this file.
+# No hardcoded prefix checks inside detector code.
+
+version: 1
+frozen: true
+
+monitored_enclave:
+  # Internal enclave being observed
+  prefixes:
+    - 10.10.0.0/16
+  dns_resolver: 10.10.0.53
+
+monitoring_enclave:
+  # Plane B. No route to the monitored enclave, no external route.
+  prefixes:
+    - 10.20.0.0/16
+
+lab_transport:
+  # veth pairs
+  prefixes:
+    - 10.99.0.0/24
+
+external:
+  # Curated public ranges, GeoLite2-resolvable.
+  # Populated during Phase 0 asset preparation.
+  benign: []
+  synthetic_malicious: []
+  amplifier_hosts: []
+  amplifier_ports: [53, 123, 389, 1900, 11211]
+
+ipv6:
+  # Declared v6 prefixes for /48 entropy bucketing
+  entropy_bucket_prefix_len: 48
+  prefixes: []
+
+bogon:
+  # THE TRAP THIS FIXES (section 2A.3):
+  # The reflection reserved-source-share feature is computed against the
+  # EXTERNAL address space only. In a pure RFC 1918 lab the reserved share
+  # is 100% on benign traffic, so the detector fires continuously and the
+  # false-alerts-per-hour number is destroyed.
+  #
+  # Declared lab prefixes are excluded from the bogon set, and the
+  # exclusion is stated in the evidence drawer text.
+  compute_against: external_only
+  exclude_declared_lab_prefixes: true
+
+direction:
+  # Direction is derived from the enclave prefix list.
+  # exfil.py cannot exist without this.
+  inbound_when_dst_in: monitored_enclave
+  outbound_when_src_in: monitored_enclave
+
+anonymisation:
+  # Position: no runtime anonymisation in this build.
+  # All capture is lab-synthetic; there is no subscriber data to protect.
+  # Forward path for real enclave traffic: CryptoPAn AFTER geolocation and
+  # BEFORE persistence - applying it first destroys the geo lookup.
+  # Stated in LIMITATIONS.md.
+  runtime_enabled: false

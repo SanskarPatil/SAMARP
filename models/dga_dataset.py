@@ -52,7 +52,9 @@ def build_dga_corpus(seed: int = 26145, per_family: int = 24) -> tuple[DomainExa
     origin = datetime(2026, 9, 10, tzinfo=UTC)
     examples: list[DomainExample] = []
     for index in range(per_family):
-        examples.append(DomainExample(BENIGN_DOMAINS[index % len(BENIGN_DOMAINS)], 0, "benign", f"benign-host-{index % 8}", origin + timedelta(minutes=index)))
+        base = BENIGN_DOMAINS[index % len(BENIGN_DOMAINS)]
+        qname = base if index < len(BENIGN_DOMAINS) else f"node-{index}.{base}"
+        examples.append(DomainExample(qname, 0, "benign", f"benign-host-{index % 8}", origin + timedelta(minutes=index * 8)))
     for family_number, family in enumerate(("numeric_seed", "hexflux", "wordmix")):
         for index in range(per_family):
             examples.append(DomainExample(_malicious_domain(rng, family, index), 1, family, f"infected-host-{family_number}-{index % 6}", origin + timedelta(hours=1 + family_number, minutes=index)))

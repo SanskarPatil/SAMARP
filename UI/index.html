@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Cyber Threat Detection in Unidirectional IP Traffic | SIH SOC Portal</title>
+  <meta name="description" content="AI-Based Detection of Cyber Threats in Unidirectional IP Traffic (Physical Data Diodes). Features 3D Cyber Globe, Real-time Monitoring, Threat Scorer, Deep Packet Header Inspection, Explainable AI (XAI), and Source-to-Destination Attack Simulator.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Left Icon Rail Navigation -->
+  <aside class="sidebar">
+    <div class="brand-logo" id="logoBtn" title="Unidirectional AI Security Gateway">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1 14h2v2h-2v-2zm0-8h2v6h-2V8z"/>
+      </svg>
+    </div>
+
+    <nav class="nav-rail">
+      <!-- 1. Dashboard / Globe (active) -->
+      <button class="nav-item active" data-tab="tab-dashboard" data-tooltip="Overview & Cyber Globe" id="navDashboard">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+      </button>
+
+      <!-- 2. Attack Simulator -->
+      <button class="nav-item" data-tab="tab-simulator" data-tooltip="Attack Simulator (Src &rarr; Dst)" id="navSimulator">
+        <svg viewBox="0 0 24 24">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </button>
+
+      <!-- 3. Packet & Headers Inspector -->
+      <button class="nav-item" data-tab="tab-inspector" data-tooltip="IP Data & Headers Inspector" id="navInspector">
+        <svg viewBox="0 0 24 24">
+          <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+          <line x1="6" y1="12" x2="10" y2="12"></line>
+          <line x1="14" y1="12" x2="18" y2="12"></line>
+        </svg>
+      </button>
+
+      <!-- 4. Threat Scorer & XAI -->
+      <button class="nav-item" data-tab="tab-xai" data-tooltip="Threat Scorer & XAI Explainer" id="navXAI">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M12 2a10 10 0 0 0-7.07 17.07l1.42-1.42A8 8 0 1 1 12 4V2z"></path>
+          <circle cx="19" cy="5" r="2"></circle>
+          <circle cx="5" cy="19" r="2"></circle>
+        </svg>
+      </button>
+
+      <!-- 5. Threat Classifier -->
+      <button class="nav-item" data-tab="tab-classifier" data-tooltip="Threat Classification Matrix" id="navClassifier">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+          <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+          <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+        </svg>
+      </button>
+
+      <!-- 6. Playbooks -->
+      <button class="nav-item" data-tab="tab-playbook" data-tooltip="Remediation Playbooks" id="navPlaybook">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+      </button>
+
+      <!-- 7. Cyber Sentinel SOC Operations (Latest added features LASTLY) -->
+      <button class="nav-item" data-tab="tab-soc" data-tooltip="Cyber Sentinel SOC Operations" id="navSOC">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+      </button>
+    </nav>
+
+    <div class="nav-bottom">
+      <button class="nav-item" data-tooltip="System Settings" id="navSettings">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Application Wrapper -->
+  <div class="app-wrapper">
+
+    <!-- Top Navigation Bar (Matching Reference Image) -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="back-btn" id="topbarBackBtn" title="Back">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <span class="topbar-title">Departments</span>
+        <div class="topbar-breadcrumbs">
+          <span>Map</span> / <span>Departments</span> / <span class="active">Status</span>
+        </div>
+      </div>
+
+      <div class="topbar-center">
+        <!-- Search Input -->
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" placeholder="Search" id="globalSearchInput">
+        </div>
+
+        <!-- Metric Chip: Income -->
+        <div class="chip-metric">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          <span style="color: var(--text-muted);">Income</span>
+          <span class="chip-val" id="topbarIncome">$862,415</span>
+        </div>
+
+        <!-- Metric Chip: Expences -->
+        <div class="chip-metric">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+          <span style="color: var(--text-muted);">Expences</span>
+          <span class="chip-val" id="topbarExpences">$726,389</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Shield Badge: PREMIUM -->
+        <div class="diode-shield-badge" id="diodeStatusBadge" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4); color: var(--green-light);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>PREMIUM</span>
+        </div>
+
+        <!-- Night/Day Toggle -->
+        <div class="toggle-pill-group">
+          <button class="toggle-pill-btn active" id="btnNightMode" title="Night Cyber Mode">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </button>
+          <button class="toggle-pill-btn" id="btnDayMode" title="Day Mode">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          </button>
+        </div>
+
+        <!-- 3D / 2D Toggle Pill -->
+        <div class="toggle-pill-group">
+          <button class="toggle-pill-btn active" id="btn3DMode">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            3D
+          </button>
+          <button class="toggle-pill-btn" id="btn2DMode">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            2D
+          </button>
+        </div>
+
+        <!-- User Profile Pill: Timur K. -->
+        <div class="user-profile-badge" id="userProfileBtn">
+          <div class="user-avatar" style="background: linear-gradient(135deg, #f59e0b, #ec4899);">TK</div>
+          <span class="user-name">Timur K.</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sub-Navigation Switcher Bar -->
+    <nav class="sub-nav-bar">
+      <button class="sub-nav-btn active" data-tab="tab-dashboard">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        Overview & Cyber Globe
+      </button>
+      <button class="sub-nav-btn" data-tab="tab-simulator">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        Attack Simulator (Src &rarr; Dst)
+      </button>
+      <button class="sub-nav-btn" data-tab="tab-inspector">
+        <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M4 17v3h16v-3M9 12h6"></path></svg>
+        IP Data, Headers & Metadata
+      </button>
+      <button class="sub-nav-btn" data-tab="tab-xai">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M12 2a10 10 0 0 0-7.07 17.07l1.42-1.42A8 8 0 1 1 12 4V2z"></path></svg>
+        AI Threat Scorer & XAI Explainer
+      </button>
+      <button class="sub-nav-btn" data-tab="tab-classifier">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+        Threat Classification Matrix
+      </button>
+      <button class="sub-nav-btn" data-tab="tab-playbook">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        Remediation Playbooks
+      </button>
+      <!-- Latest added features placed LASTLY -->
+      <button class="sub-nav-btn" data-tab="tab-soc">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        Cyber Sentinel SOC Operations
+      </button>
+    </nav>
+
+    <!-- Main Content Body -->
+    <main class="content-body">
+
+      <!-- ================================================================
+           TAB 1: GLOBE OVERVIEW (Exact Reference Screenshot Layout)
+           ================================================================ -->
+      <section class="view-section active" id="tab-dashboard">
+        <div class="globe-dashboard-stage">
+
+          <!-- Central Canvas for 3D Cyber Globe & Topology -->
+          <canvas class="globe-canvas" id="cyberGlobeCanvas"></canvas>
+
+          <!-- Left Column: Total, Status Categories, Parcels -->
+          <div class="hud-left-column">
+            <!-- Card 1: Top-Left "Total 2.4k+" with Sparkline -->
+            <div class="hud-card hud-top-left">
+              <div class="hud-stat-header">
+                <span class="hud-label">Total</span>
+                <span class="hud-select-pill">This week &or;</span>
+              </div>
+              <div class="hud-stat-main">
+                <span class="hud-number-lg" id="hudTotalPackets">2.4k+</span>
+                <svg class="sparkline-svg" viewBox="0 0 72 28">
+                  <path d="M 2,20 Q 18,26 30,12 T 54,16 T 70,4" fill="none" stroke="#4ade80" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Card 2: Mid-Left Category List with Icons -->
+            <div class="hud-card hud-mid-left">
+              <!-- Row 1: On the way -->
+              <div class="category-row">
+                <div class="cat-icon-box blue">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 19 21 12 17 5 21 12 2"></polygon></svg>
+                </div>
+                <div class="cat-info">
+                  <span class="cat-title">On the way</span>
+                  <span class="cat-value" id="hudOnTheWay">15.7k+</span>
+                </div>
+              </div>
+
+              <!-- Row 2: Delivered -->
+              <div class="category-row">
+                <div class="cat-icon-box green">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="cat-info">
+                  <span class="cat-title">Delivered</span>
+                  <span class="cat-value" id="hudDelivered">56.4k+</span>
+                </div>
+              </div>
+
+              <!-- Row 3: Waiting -->
+              <div class="category-row">
+                <div class="cat-icon-box amber">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                </div>
+                <div class="cat-info">
+                  <span class="cat-title">Waiting</span>
+                  <span class="cat-value" id="hudWaiting">8.2k+</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Bottom-Left Parcels / Packets Volume -->
+            <div class="hud-card hud-bottom-left">
+              <span class="hud-section-title">PARCELS</span>
+              
+              <div class="metric-row">
+                <span class="metric-sublabel">Monthly</span>
+                <div class="metric-val-row">
+                  <span class="metric-num">32,540</span>
+                  <span class="badge-delta">&Delta; +10%</span>
+                </div>
+                <span style="font-size: 9px; color: var(--text-muted);">Compared to 21,495 last month</span>
+              </div>
+
+              <div class="metric-row">
+                <span class="metric-sublabel">Yearly</span>
+                <div class="metric-val-row">
+                  <span class="metric-num">1,387,456</span>
+                  <span class="badge-delta">&Delta; +12%</span>
+                </div>
+                <span style="font-size: 9px; color: var(--text-muted);">Compared to 1,221,495 last year</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Center-Bottom Floating Pill -->
+          <div class="hud-card hud-center-bottom">
+            <div class="floating-stream-row">
+              <div class="stream-title-dot">
+                <span class="stream-dot"></span>
+                <span>Parcels in the way</span>
+              </div>
+              <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            </div>
+            <div class="stream-fraction" id="hudActiveStreamFraction">24 / 75</div>
+            <div class="stream-subtext">
+              <span>&Delta; +15% vs. last month</span>
+            </div>
+          </div>
+
+          <!-- Card 5: Bottom-Right Dual Progress Gauges (Delivered & In the way) -->
+          <div class="hud-card hud-bottom-right-gauges">
+            <!-- Ring 1: 75% Delivered -->
+            <div class="ring-gauge-item">
+              <svg class="gauge-svg" viewBox="0 0 58 58">
+                <circle class="gauge-bg" cx="29" cy="29" r="25"></circle>
+                <circle class="gauge-fill-amber" cx="29" cy="29" r="25"></circle>
+              </svg>
+              <span class="gauge-center-text" id="gaugePctDelivered">75%</span>
+              <span class="gauge-label">Delivered</span>
+            </div>
+
+            <!-- Ring 2: 25% In the way -->
+            <div class="ring-gauge-item">
+              <svg class="gauge-svg" viewBox="0 0 58 58">
+                <circle class="gauge-bg" cx="29" cy="29" r="25"></circle>
+                <circle class="gauge-fill-teal" cx="29" cy="29" r="25"></circle>
+              </svg>
+              <span class="gauge-center-text" id="gaugePctInTransit">25%</span>
+              <span class="gauge-label">In the way</span>
+            </div>
+          </div>
+
+          <!-- Right Column: Total Orders & Quantity Bars -->
+          <div class="hud-right-column">
+            <!-- Card 6: Top-Right "Total Orders 2.4k+" with Wavy Area Chart -->
+            <div class="hud-card hud-top-right">
+              <div class="hud-stat-header">
+                <span class="hud-label">Total orders</span>
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              </div>
+              <div class="hud-stat-main">
+                <span class="hud-number-lg">2.4k+</span>
+                <span class="badge-delta" style="background: rgba(16,185,129,0.15); padding: 3px 8px; border-radius: 6px;">&uarr; 12%</span>
+              </div>
+              <svg class="hud-wave-chart" viewBox="0 0 200 48" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="waveGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#4ade80" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#4ade80" stop-opacity="0.0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M 0,38 Q 40,42 70,22 T 140,26 T 200,8 L 200,48 L 0,48 Z" fill="url(#waveGrad)"/>
+                <path d="M 0,38 Q 40,42 70,22 T 140,26 T 200,8" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="180" cy="12" r="4" fill="#4ade80"/>
+              </svg>
+            </div>
+
+            <!-- Card 7: Middle-Right "Quantity - Average by category" Bar Chart -->
+            <div class="hud-card hud-mid-right">
+              <div class="hud-stat-header">
+                <div>
+                  <div style="font-size: 13px; font-weight: 700; color: #fff;">Quantity</div>
+                  <div style="font-size: 10px; color: var(--text-muted);">Average by category</div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+              </div>
+
+              <!-- Vertical Neon Bars -->
+              <div class="bars-chart-container">
+                <!-- Bar 1: 28.3% Blue -->
+                <div class="bar-col">
+                  <span class="bar-pct-label">28.3%</span>
+                  <div class="bar-fill-track">
+                    <div class="bar-fill-actual blue" style="height: 60%;"></div>
+                  </div>
+                </div>
+
+                <!-- Bar 2: 39.7% Green -->
+                <div class="bar-col">
+                  <span class="bar-pct-label">39.7%</span>
+                  <div class="bar-fill-track">
+                    <div class="bar-fill-actual green" style="height: 90%;"></div>
+                  </div>
+                </div>
+
+                <!-- Bar 3: 14.6% Teal -->
+                <div class="bar-col">
+                  <span class="bar-pct-label">14.6%</span>
+                  <div class="bar-fill-track">
+                    <div class="bar-fill-actual teal" style="height: 38%;"></div>
+                  </div>
+                </div>
+
+                <!-- Bar 4: 17.4% Amber -->
+                <div class="bar-col">
+                  <span class="bar-pct-label">17.4%</span>
+                  <div class="bar-fill-track">
+                    <div class="bar-fill-actual amber" style="height: 46%;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Legend List -->
+              <div class="legend-list">
+                <div class="legend-row">
+                  <div class="legend-left">
+                    <span class="legend-dot" style="background: #2563eb;"></span>
+                    <span>On the way</span>
+                  </div>
+                  <span class="legend-time">3 hr 12 min</span>
+                </div>
+                <div class="legend-row">
+                  <div class="legend-left">
+                    <span class="legend-dot" style="background: #10b981;"></span>
+                    <span>Loading</span>
+                  </div>
+                  <span class="legend-time">1 hr 15 min</span>
+                </div>
+                <div class="legend-row">
+                  <div class="legend-left">
+                    <span class="legend-dot" style="background: #00f0ff;"></span>
+                    <span>Unloading</span>
+                  </div>
+                  <span class="legend-time">2 hr 21 min</span>
+                </div>
+                <div class="legend-row">
+                  <div class="legend-left">
+                    <span class="legend-dot" style="background: #f59e0b;"></span>
+                    <span>Waiting</span>
+                  </div>
+                  <span class="legend-time">1 hr 12 min</span>
+                </div>
+              </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 2: ATTACK SIMULATOR (Source to Destination Across Data Diode)
+           ================================================================ -->
+      <section class="view-section" id="tab-simulator">
+        <div class="sim-container">
+          <!-- Hardware Simulation Canvas -->
+          <div class="sim-canvas-box">
+            <canvas class="sim-canvas" id="simCanvas"></canvas>
+          </div>
+
+          <!-- Control Panels -->
+          <div class="sim-control-panel">
+            <!-- Attack Injector Box -->
+            <div class="control-card">
+              <h3>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--crimson-alert)" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                Threat Attack Injector
+              </h3>
+              <div class="control-row">
+                <select class="select-cyber" id="attackSelect">
+                  <option value="SCADA_INJECTION">Blind SCADA Modbus Command Injection (0x10 Override)</option>
+                  <option value="COVERT_TIMING">Covert Timing Channel Exfiltration (Bimodal Jitter)</option>
+                  <option value="HIGH_ENTROPY_EXFIL">High-Entropy Encrypted Data Smuggling (7.94 bits/B)</option>
+                  <option value="VOLUMETRIC_FLOOD">UDP Volumetric Photodiode Flood (24k pkts/sec)</option>
+                  <option value="MALFORMED_HEADER">Malformed IPv4 Header & Protocol Smuggling</option>
+                </select>
+                <button class="btn-cyber-primary" id="btnInjectAttack">
+                  Launch Attack &rarr;
+                </button>
+              </div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;" id="attackPreviewDesc">
+                Injects blind write registers over physical 1-way link. Zero backchannel ACK return path prevents sender confirmation, creating kinetic sabotage hazards.
+              </div>
+            </div>
+
+            <!-- Link Controls -->
+            <div class="control-card">
+              <h3>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-neon)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                Diode Flow Rate
+              </h3>
+              <div class="control-row">
+                <span style="font-size: 11px; color: var(--text-muted); width: 70px;">Rate (pps):</span>
+                <input type="range" class="range-slider" id="rateSlider" min="1" max="40" value="6">
+                <span style="font-family: var(--font-mono); font-weight: 700; color: #fff; width: 30px;" id="rateVal">6</span>
+              </div>
+              <div class="control-row" style="margin-top: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer;">
+                  <input type="checkbox" id="continuousStreamToggle" checked>
+                  <span>Continuous Benign Telemetry</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Mechanical Shutter Emergency Cutoff -->
+            <div class="control-card">
+              <h3>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--crimson-alert)" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+                Physical Optical Shutter
+              </h3>
+              <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
+                Mechanically drop opaque shutter to physically block 850nm laser beam.
+              </p>
+              <button class="btn-cyber-danger" id="btnToggleShutter" style="width: 100%;">
+                Engage Optical Shutter (Sever Link)
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 3: IP DATA, HEADERS & PACKET INSPECTOR
+           ================================================================ -->
+      <section class="view-section" id="tab-inspector">
+        <div class="inspector-grid">
+          <!-- Left: Layer-by-Layer Breakdown -->
+          <div class="layer-tree-container">
+            <!-- L2: Ethernet II -->
+            <div class="layer-card">
+              <div class="layer-header">
+                <span>Layer 2: Ethernet II Frame</span>
+                <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">14 Bytes</span>
+              </div>
+              <div class="layer-body">
+                <div class="field-item"><span class="field-name">Source MAC</span><span class="field-value" id="fSrcMac">00:1A:2B:3C:4D:5E</span></div>
+                <div class="field-item"><span class="field-name">Destination MAC</span><span class="field-value" id="fDstMac">00:50:56:C0:00:08</span></div>
+                <div class="field-item"><span class="field-name">EtherType</span><span class="field-value" id="fEtherType">0x0800 (IPv4)</span></div>
+                <div class="field-item"><span class="field-name">VLAN Tag</span><span class="field-value">None (Physical Trunk)</span></div>
+              </div>
+            </div>
+
+            <!-- L3: IPv4 Header -->
+            <div class="layer-card">
+              <div class="layer-header">
+                <span>Layer 3: Internet Protocol v4</span>
+                <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">20 Bytes</span>
+              </div>
+              <div class="layer-body">
+                <div class="field-item"><span class="field-name">Source IP</span><span class="field-value" id="fSrcIp">192.168.10.198</span></div>
+                <div class="field-item"><span class="field-name">Destination IP</span><span class="field-value" id="fDstIp">10.0.4.15</span></div>
+                <div class="field-item"><span class="field-name">Protocol</span><span class="field-value" id="fProto">17 (UDP)</span></div>
+                <div class="field-item"><span class="field-name">TTL / Flags</span><span class="field-value" id="fTtlFlags">58 &bull; DF</span></div>
+                <div class="field-item"><span class="field-name">Header Length</span><span class="field-value">20 Bytes (IHL 5)</span></div>
+                <div class="field-item"><span class="field-name">Header Checksum</span><span class="field-value" id="fChecksum">0xB39E [Valid]</span></div>
+              </div>
+            </div>
+
+            <!-- L4: UDP / Transport -->
+            <div class="layer-card">
+              <div class="layer-header">
+                <span>Layer 4: User Datagram Protocol (UDP)</span>
+                <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">8 Bytes</span>
+              </div>
+              <div class="layer-body">
+                <div class="field-item"><span class="field-name">Source Port</span><span class="field-value" id="fSrcPort">49152</span></div>
+                <div class="field-item"><span class="field-name">Destination Port</span><span class="field-value" id="fDstPort">502 (Modbus)</span></div>
+                <div class="field-item"><span class="field-name">Length</span><span class="field-value" id="fUdpLen">84 Bytes</span></div>
+                <div class="field-item"><span class="field-name">Unidirectional Return</span><span class="field-value" style="color: var(--amber-gold);">Disabled (0 Backchannel)</span></div>
+              </div>
+            </div>
+
+            <!-- Metadata: Entropy & Jitter -->
+            <div class="layer-card">
+              <div class="layer-header">
+                <span>Statistical Metadata & Entropy</span>
+                <span style="font-family: var(--font-mono); font-size: 10px; color: var(--cyan-neon);">AI Metrics</span>
+              </div>
+              <div class="layer-body">
+                <div class="field-item"><span class="field-name">Shannon Entropy</span><span class="field-value" id="fEntropy" style="color: var(--crimson-alert);">4.88 bits/B</span></div>
+                <div class="field-item"><span class="field-name">Timing Jitter (IAT)</span><span class="field-value" id="fJitter">0.12s variance</span></div>
+                <div class="field-item"><span class="field-name">Modbus Function</span><span class="field-value" id="fModbusCode" style="color: var(--crimson-alert);">0x10 (Write Multiple)</span></div>
+                <div class="field-item"><span class="field-name">Payload Size</span><span class="field-value" id="fPayloadSize">84 Bytes</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Hex Dump & ASCII Inspector -->
+          <div class="layer-card" style="display: flex; flex-direction: column;">
+            <div class="layer-header">
+              <span>Deep Packet Payload & Hex Dump</span>
+              <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">Interactive Byte Offsets</span>
+            </div>
+            <div class="hex-dump-box" style="flex: 1;" id="hexDumpContainer">
+              <div class="hex-header-row">OFFSET   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F  ASCII</div>
+              <div>00000000 <span class="hex-bytes">00 4b 00 00 00 11 01 10 00 01 00 04 08 00 00 00</span> <span class="hex-ascii">.K..............</span></div>
+              <div>00000010 <span class="hex-bytes danger">00 00 00 7f ff 21 44 49 4f 44 45 5f 4f 56 52 44</span> <span class="hex-ascii">.....!..DIODE_OVRD</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 4: AI THREAT SCORER & XAI EXPLAINER
+           ================================================================ -->
+      <section class="view-section" id="tab-xai">
+        <div class="xai-stage-grid">
+          <!-- Left: Cyber Threat Meter -->
+          <div class="score-meter-card">
+            <h3 style="font-size: 15px; font-weight: 700; color: #fff;">Cyber Threat Score</h3>
+            <span style="font-size: 11px; color: var(--text-muted);">Zero-Backchannel Risk Engine</span>
+
+            <div class="score-circle-outer">
+              <svg class="score-circle-svg" viewBox="0 0 180 180">
+                <circle class="score-bg-ring" cx="90" cy="90" r="75"></circle>
+                <circle class="score-fill-ring" id="xaiScoreCircle" cx="90" cy="90" r="75"></circle>
+              </svg>
+              <div class="score-center-display">
+                <span class="score-large-num" id="xaiScoreNum">96</span>
+                <span class="score-severity-tag" id="xaiSeverityTag" style="background: rgba(244,63,94,0.15); color: var(--crimson-alert);">CRITICAL</span>
+              </div>
+            </div>
+
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
+              Model Confidence: <span style="color: #fff; font-weight: 700;" id="xaiConfidence">98.2%</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="xaiThreatName">
+              Blind SCADA Modbus Injection
+            </div>
+          </div>
+
+          <!-- Right: Explainable AI (XAI) Attribution Waterfall -->
+          <div class="xai-waterfall-card">
+            <h3>Explainable AI (XAI) Feature Attribution</h3>
+            <span style="font-size: 11px; color: var(--text-muted);">Attribution weights driving unidirectional classification decision</span>
+
+            <!-- Plain English Explanation Box -->
+            <div class="xai-explainer-text" id="xaiExplanationText" style="margin-top: 14px;">
+              AI Neural Gateway intercepted an unauthorized Modbus Write Multiple Registers command (0x10) targeting critical safety PLC registers. In a physical diode setup, blind writes risk immediate kinetic harm.
+            </div>
+
+            <!-- Feature Weight Attribution Bars -->
+            <div class="xai-feature-bars" id="xaiFeatureBarsList">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 5: THREAT CLASSIFICATION MATRIX
+           ================================================================ -->
+      <section class="view-section" id="tab-classifier">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 6px;">
+              Unidirectional AI Multi-Class Detection Matrix
+            </h3>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">
+              Supervised ensemble trained on optical data diode captures with asymmetric one-way telemetry.
+            </p>
+
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th>Threat Category</th>
+                  <th>Precision</th>
+                  <th>Recall</th>
+                  <th>F1-Score</th>
+                  <th>ROC-AUC</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 700; color: #fff;">SCADA / ICS Command Injection</td>
+                  <td>98.4%</td>
+                  <td>97.8%</td>
+                  <td>98.1%</td>
+                  <td>0.994</td>
+                  <td><span style="color: var(--green-light);">&bull; ACTIVE RULE</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700; color: #fff;">Covert Timing Channel (IPAT Jitter)</td>
+                  <td>95.2%</td>
+                  <td>94.1%</td>
+                  <td>94.6%</td>
+                  <td>0.982</td>
+                  <td><span style="color: var(--green-light);">&bull; ACTIVE RULE</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700; color: #fff;">High-Entropy Encrypted Exfiltration</td>
+                  <td>97.6%</td>
+                  <td>96.5%</td>
+                  <td>97.0%</td>
+                  <td>0.991</td>
+                  <td><span style="color: var(--green-light);">&bull; ACTIVE RULE</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700; color: #fff;">UDP Volumetric Photodiode Flood</td>
+                  <td>99.5%</td>
+                  <td>99.1%</td>
+                  <td>99.3%</td>
+                  <td>0.998</td>
+                  <td><span style="color: var(--green-light);">&bull; ACTIVE RULE</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 700; color: #fff;">Malformed IPv4 Header / Tunneling</td>
+                  <td>93.8%</td>
+                  <td>91.7%</td>
+                  <td>92.7%</td>
+                  <td>0.965</td>
+                  <td><span style="color: var(--green-light);">&bull; ACTIVE RULE</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 6: REMEDIATION PLAYBOOKS
+           ================================================================ -->
+      <section class="view-section" id="tab-playbook">
+        <div style="margin-bottom: 20px;">
+          <h3 style="font-size: 16px; font-weight: 700; color: #fff;">Unidirectional Defense & Mitigation Controls</h3>
+          <p style="font-size: 12px; color: var(--text-secondary);">
+            Execute hardware-level and kernel-level mitigations for high-security enclave protection.
+          </p>
+        </div>
+
+        <div class="playbook-cards-grid">
+          <!-- Card 1 -->
+          <div class="action-card">
+            <div>
+              <h4 style="color: var(--crimson-alert);">Engage Physical Optical Shutter</h4>
+              <p>Mechanically drop the physical solenoid shutter in front of the 850nm laser beam. Sever the physical light link to completely block untrusted ingress.</p>
+            </div>
+            <button class="btn-cyber-danger" id="pbBtnShutter">Trigger Shutter Drop</button>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="action-card">
+            <div>
+              <h4 style="color: var(--amber-gold);">Emergency Flush RX Photodiode Queue</h4>
+              <p>Instantly purge the receiving hardware FIFO ring buffer to discard pending malformed packets before they are parsed by internal SCADA hosts.</p>
+            </div>
+            <button class="btn-cyber-primary" id="pbBtnFlush">Purge RX Buffer (0 B)</button>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="action-card">
+            <div>
+              <h4 style="color: var(--cyan-neon);">Enclave Destination Host Isolation</h4>
+              <p>Place destination enclave node 10.0.4.15 into airgap quarantine. Sever internal downstream forwarding to safeguard the industrial historian.</p>
+            </div>
+            <button class="btn-cyber-primary" id="pbBtnIsolate">Isolate Enclave IP</button>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="action-card">
+            <div>
+              <h4 style="color: var(--green-light);">Export eBPF / IPTables Drop Rules</h4>
+              <p>Generate kernel XDP/eBPF bytecode filters at the ingress aggregation switch to drop attacker traffic prior to optical laser conversion.</p>
+            </div>
+            <button class="btn-cyber-primary" id="pbBtnExportRules">Generate eBPF Filter</button>
+          </div>
+        </div>
+      </section>
+
+    
+<section class="view-section" id="tab-soc">
+        <div class="soc-stage">
+
+          <!-- 1. PCAP Replay Header Controller Bar -->
+          <div class="pcap-control-bar">
+            <div class="pcap-left">
+              <div class="pcap-title-badge">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <span>PCAP Replay</span>
+              </div>
+              <div class="pcap-btn-group">
+                <button class="pcap-ctrl-btn active" id="pcapPlayBtn" title="Play Replay">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  <span>PLAY</span>
+                </button>
+                <button class="pcap-ctrl-btn" id="pcapPauseBtn" title="Pause Replay">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                  <span>PAUSE</span>
+                </button>
+                <button class="pcap-ctrl-btn" id="pcapStopBtn" title="Stop & Reset">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16"></rect></svg>
+                  <span>RESET</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="pcap-center">
+              <div class="pcap-progress-row">
+                <span id="pcapNameDisplay">scada_modbus_unidirectional_attack.pcap</span>
+                <span id="pcapProgressText">412,000 / 1,284,392 pkts (32.1%)</span>
+              </div>
+              <div class="pcap-scrubber-track" id="pcapScrubberTrack">
+                <div class="pcap-scrubber-fill" id="pcapScrubberFill"></div>
+              </div>
+            </div>
+
+            <div class="pcap-right">
+              <select class="pcap-select" id="pcapSelectProfile">
+                <option value="0">SCADA Modbus Injection (.pcap)</option>
+                <option value="1">DDoS Amplification Flood (.pcap)</option>
+                <option value="2">C2 Timing Exfiltration (.pcap)</option>
+                <option value="3">Enterprise Mixed Capture (.pcap)</option>
+              </select>
+
+              <div class="speed-pills">
+                <button class="speed-pill-btn" data-speed="0.5">0.5x</button>
+                <button class="speed-pill-btn active" data-speed="1">1x</button>
+                <button class="speed-pill-btn" data-speed="2">2x</button>
+                <button class="speed-pill-btn" data-speed="5">5x</button>
+                <button class="speed-pill-btn" data-speed="10">10x</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Network Overview Cards Grid -->
+          <div class="overview-grid">
+            <div class="overview-card">
+              <span class="overview-label">Flows / sec</span>
+              <span class="overview-value" id="ovFlowsSec">1,520</span>
+              <span class="overview-trend">&uarr; +4.2% active</span>
+            </div>
+            <div class="overview-card">
+              <span class="overview-label">Packets / sec</span>
+              <span class="overview-value" id="ovPacketsSec">29,432</span>
+              <span class="overview-trend">&uarr; Line rate nominal</span>
+            </div>
+            <div class="overview-card">
+              <span class="overview-label">Throughput</span>
+              <span class="overview-value" id="ovThroughput">364 Mbps</span>
+              <span class="overview-trend">Saturating diode</span>
+            </div>
+            <div class="overview-card">
+              <span class="overview-label">Unidirectional %</span>
+              <span class="overview-value" style="color: var(--green-light);" id="ovUnidirectional">98.7%</span>
+              <span class="overview-trend" style="color: var(--cyan-neon);">0 Return Backchannel</span>
+            </div>
+            <div class="overview-card">
+              <span class="overview-label">Suspicious Flows</span>
+              <span class="overview-value" style="color: var(--crimson-alert);" id="ovSuspicious">143</span>
+              <span class="overview-trend" style="color: var(--crimson-alert);">&uarr; Intercepted</span>
+            </div>
+            <div class="overview-card">
+              <span class="overview-label">Detection Rate</span>
+              <span class="overview-value" style="color: var(--green-light);" id="ovDetectionRate">96.8%</span>
+              <span class="overview-trend">AI Ensemble Model</span>
+            </div>
+            <div class="overview-card">
+              <span class="overview-label">Unique Sources</span>
+              <span class="overview-value" id="ovUniqueSrc">48</span>
+              <span class="overview-trend">External Ingress</span>
+            </div>
+            <div class="overview-card">
+              <span class="overview-label">Unique Destinations</span>
+              <span class="overview-value" id="ovUniqueDst">12</span>
+              <span class="overview-trend">Protected Enclave</span>
+            </div>
+            <div class="overview-card">
+              <span class="overview-label">Packets Dropped</span>
+              <span class="overview-value" style="color: var(--amber-gold);" id="ovDropped">171 /s</span>
+              <span class="overview-trend" style="color: var(--amber-gold);">Loss: 0.58%</span>
+            </div>
+          </div>
+
+          <!-- 3. Main SOC Split Layout -->
+          <div class="soc-layout-grid">
+
+            <!-- Left Column: Live Traffic Flows, Pipeline Architecture, Suspicious Sources & Protocols -->
+            <div class="soc-col">
+
+              <!-- Live Unidirectional Traffic Flow Canvas Card -->
+              <div class="flow-canvas-card">
+                <div class="flow-card-header">
+                  <div class="flow-card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-neon)" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    <span>Live Unidirectional Traffic Flow (1-Way Physical Optical Diode)</span>
+                  </div>
+                  <span style="font-size: 11px; font-family: var(--font-mono); color: var(--green-light);">● 6 ACTIVE CHANNELS</span>
+                </div>
+                <div class="flow-canvas-wrap">
+                  <canvas class="flow-canvas" id="liveFlowCanvas"></canvas>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted);">
+                  <span>🟢 Normal Telemetry: Smooth Low-Velocity</span>
+                  <span>🟠 Suspicious: Accelerated Pulse</span>
+                  <span>🔴 Critical Sabotage: Red Glow Burst</span>
+                </div>
+              </div>
+
+              <!-- AI Detection Pipeline Architecture Card -->
+              <div class="pipeline-card">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <span style="font-size: 12px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-neon)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                    AI Detection Pipeline Architecture
+                  </span>
+                  <span style="font-size: 10px; font-family: var(--font-mono); color: var(--cyan-neon);">Real-time Packet Flow Tracking</span>
+                </div>
+                <canvas class="pipeline-canvas" id="pipelineCanvas"></canvas>
+              </div>
+
+              <!-- Top Suspicious Source IPs Table Card -->
+              <div class="sources-table-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span style="font-size: 13px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--crimson-alert)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    Attacker / Source Analysis (Top Suspicious Origins)
+                  </span>
+                  <span style="font-size: 10px; color: var(--text-muted);">Click any row to open Deep Investigation</span>
+                </div>
+                <div style="overflow-x: auto;">
+                  <table class="sources-table">
+                    <thead>
+                      <tr>
+                        <th>Source IP</th>
+                        <th>Threat Category</th>
+                        <th>Risk Score</th>
+                        <th>Flows</th>
+                        <th>Packets</th>
+                        <th>Volume</th>
+                        <th>First Seen</th>
+                        <th>Last Seen</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="suspiciousSourcesTableBody">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Protocol Intelligence Grid: DNS & TLS 1.3 / QUIC -->
+              <div class="protocol-grid">
+                <!-- DNS Intelligence Card -->
+                <div class="proto-card">
+                  <div class="proto-header">
+                    <span class="proto-title">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue-bright)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                      DNS Intelligence
+                    </span>
+                    <span style="font-size: 9px; font-weight: 700; color: var(--amber-gold);">DGA SCORE 0.94</span>
+                  </div>
+                  <div class="proto-row"><span class="proto-lbl">Domain</span><span class="proto-val" style="color: var(--amber-gold);">xj94f20baq98zq.exfil.net</span></div>
+                  <div class="proto-row"><span class="proto-lbl">Query Type</span><span class="proto-val">TXT (Data Smuggle)</span></div>
+                  <div class="proto-row"><span class="proto-lbl">Response IP</span><span class="proto-val">185.220.101.5</span></div>
+                  <div class="proto-row"><span class="proto-lbl">Query Frequency</span><span class="proto-val">294 Queries/min</span></div>
+                  <div class="proto-row"><span class="proto-lbl">Classification</span><span class="proto-val" style="color: var(--crimson-alert);">Algorithmic DGA Tunnel</span></div>
+                </div>
+
+                <!-- TLS 1.3 / Encrypted Metadata Card -->
+                <div class="proto-card">
+                  <div class="proto-header">
+                    <span class="proto-title">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-neon)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                      TLS / Encrypted Traffic Metadata
+                    </span>
+                    <span style="font-size: 9px; font-weight: 700; color: var(--green-light);">ZERO DECRYPTION</span>
+                  </div>
+                  <div class="proto-row"><span class="proto-lbl">TLS Version</span><span class="proto-val">TLS 1.3 / QUIC v1</span></div>
+                  <div class="proto-row"><span class="proto-lbl">SNI</span><span class="proto-val">update.microsoft-service.cc</span></div>
+                  <div class="proto-row"><span class="proto-lbl">JA3 Hash</span><span class="proto-val" style="color: var(--crimson-alert);">72c039320224b77e8...</span></div>
+                  <div class="proto-row"><span class="proto-lbl">JA4 Hash</span><span class="proto-val">t13d1516h2_8daaf6...</span></div>
+                  <div class="proto-row"><span class="proto-lbl">Payload Status</span><span class="proto-val" style="color: var(--green-light);">🔒 ENCRYPTED (Metadata Profiling)</span></div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Right Column: AI Engine, Threat Severity, Distribution, Timeline, Incidents & Capture Health -->
+            <div class="soc-col">
+
+              <!-- AI Detection Engine Panel -->
+              <div class="ai-engine-panel">
+                <div class="ai-engine-status-row">
+                  <span style="font-size: 13px; font-weight: 700; color: #fff;">AI Detection Engine</span>
+                  <span class="ai-status-tag">
+                    <span class="ai-pulse-dot"></span>
+                    <span>ACTIVE INFERENCE</span>
+                  </span>
+                </div>
+
+                <div class="ai-stat-row">
+                  <div class="ai-stat-item">
+                    <span class="ai-stat-lbl">Flows Analyzed</span>
+                    <span class="ai-stat-val" id="socFlowsAnalyzed">1,284,392</span>
+                  </div>
+                  <div class="ai-stat-item">
+                    <span class="ai-stat-lbl">Normal</span>
+                    <span class="ai-stat-val" style="color: var(--green-light);">87.4%</span>
+                  </div>
+                  <div class="ai-stat-item">
+                    <span class="ai-stat-lbl">Malicious</span>
+                    <span class="ai-stat-val" style="color: var(--crimson-alert);">4.4%</span>
+                  </div>
+                </div>
+
+                <div style="background: rgba(15, 23, 42, 0.5); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                    <span style="color: var(--text-muted);">Current Classification:</span>
+                    <span style="font-weight: 700; color: var(--crimson-alert);" id="socCurrentPred">DDoS Amplification Flood</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span style="color: var(--text-muted);">Inference Latency:</span>
+                    <span style="font-family: var(--font-mono); font-weight: 700; color: var(--cyan-neon);" id="socInferenceLatency">0.7 ms</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 4px;">
+                    <span style="color: var(--text-muted);">Anomaly vs Baseline:</span>
+                    <span style="font-family: var(--font-mono); font-weight: 700; color: var(--amber-gold);" id="socAnomalyScore">87.4 / 100 (HIGH)</span>
+                  </div>
+                </div>
+
+                <!-- Animated AI Confidence Bars -->
+                <div class="confidence-meter-list">
+                  <div class="conf-meter-item">
+                    <div class="conf-meter-header">
+                      <span>DDoS Amplification</span>
+                      <span id="confValDDoS">97.3%</span>
+                    </div>
+                    <div class="conf-meter-track">
+                      <div class="conf-meter-fill" style="width: 97.3%; background: var(--crimson-alert);" id="confBarDDoS"></div>
+                    </div>
+                  </div>
+                  <div class="conf-meter-item">
+                    <div class="conf-meter-header">
+                      <span>SCADA / ICS Command Injection</span>
+                      <span id="confValSCADA">98.2%</span>
+                    </div>
+                    <div class="conf-meter-track">
+                      <div class="conf-meter-fill" style="width: 98.2%; background: var(--crimson-alert);" id="confBarSCADA"></div>
+                    </div>
+                  </div>
+                  <div class="conf-meter-item">
+                    <div class="conf-meter-header">
+                      <span>Covert C2 Heartbeat Beacon</span>
+                      <span id="confValC2">91.5%</span>
+                    </div>
+                    <div class="conf-meter-track">
+                      <div class="conf-meter-fill" style="width: 91.5%; background: var(--amber-gold);" id="confBarC2"></div>
+                    </div>
+                  </div>
+                  <div class="conf-meter-item">
+                    <div class="conf-meter-header">
+                      <span>High-Entropy Data Exfiltration</span>
+                      <span id="confValExfil">88.9%</span>
+                    </div>
+                    <div class="conf-meter-track">
+                      <div class="conf-meter-fill" style="width: 88.9%; background: var(--amber-gold);" id="confBarExfil"></div>
+                    </div>
+                  </div>
+                  <div class="conf-meter-item">
+                    <div class="conf-meter-header">
+                      <span>Asymmetric Port Recon Sweep</span>
+                      <span id="confValScan">94.2%</span>
+                    </div>
+                    <div class="conf-meter-track">
+                      <div class="conf-meter-fill" style="width: 94.2%; background: var(--blue-bright);" id="confBarScan"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Threat Severity & Rolling Timeline Card -->
+              <div class="severity-timeline-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 13px; font-weight: 700; color: #fff;">Threat Severity Breakdown</span>
+                  <span style="font-size: 10px; color: var(--text-muted);">Active Triage</span>
+                </div>
+
+                <div class="severity-bars-grid">
+                  <div class="sev-chip critical">
+                    <span class="sev-lbl">CRITICAL</span>
+                    <span class="sev-cnt" id="sevCntCritical">32</span>
+                  </div>
+                  <div class="sev-chip high">
+                    <span class="sev-lbl">HIGH</span>
+                    <span class="sev-cnt" id="sevCntHigh">48</span>
+                  </div>
+                  <div class="sev-chip medium">
+                    <span class="sev-lbl">MEDIUM</span>
+                    <span class="sev-cnt" id="sevCntMedium">27</span>
+                  </div>
+                  <div class="sev-chip low">
+                    <span class="sev-lbl">LOW</span>
+                    <span class="sev-cnt" id="sevCntLow">12</span>
+                  </div>
+                </div>
+
+                <!-- Threat Timeline (5-minute rolling window) -->
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;">
+                    <span style="font-weight: 700; color: #fff;">Threat Timeline (Last 5 min)</span>
+                    <span style="font-size: 10px; color: var(--text-secondary);">Events moving right &rarr; left</span>
+                  </div>
+                  <div class="timeline-track-wrap">
+                    <div class="timeline-axis">
+                      <span>21:23</span>
+                      <span>21:24</span>
+                      <span>21:25</span>
+                      <span>21:26</span>
+                      <span>21:27</span>
+                    </div>
+                    <div class="timeline-events" id="socTimelineEvents">
+                      <span class="timeline-dot critical" title="21:23 - DDoS Amplification"></span>
+                      <span class="timeline-dot high" title="21:24 - Port Scan"></span>
+                      <span class="timeline-dot high" title="21:24 - C2 Beacon"></span>
+                      <span class="timeline-dot medium" title="21:25 - DGA Query"></span>
+                      <span class="timeline-dot critical" title="21:26 - SCADA Injection"></span>
+                      <span class="timeline-dot critical" title="21:27 - Exfiltration"></span>
+                      <span class="timeline-dot high" title="21:27 - Encrypted Malware"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Real-Time Interactive Incident Feed -->
+              <div class="incident-feed-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 13px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--crimson-alert)" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    Real-Time Incident Feed
+                  </span>
+                  <span style="font-size: 10px; font-family: var(--font-mono); color: var(--text-muted);" id="incidentCountBadge">142 INCIDENTS</span>
+                </div>
+                <div class="incident-feed-list" id="socIncidentFeedList">
+                  <!-- Dynamically populated with slide-in items -->
+                </div>
+              </div>
+
+              <!-- Capture Health & System Performance Card -->
+              <div class="health-perf-grid">
+                <!-- Capture Health -->
+                <div class="proto-card">
+                  <div class="proto-header">
+                    <span class="proto-title">Capture Health</span>
+                    <span style="font-size: 9px; color: var(--green-light);">● HEALTHY</span>
+                  </div>
+                  <canvas class="waveform-canvas" id="waveformCanvas"></canvas>
+                  <div class="proto-row"><span class="proto-lbl">Packets Recv</span><span class="proto-val">29,432 /s</span></div>
+                  <div class="proto-row"><span class="proto-lbl">Processed</span><span class="proto-val">29,261 /s</span></div>
+                  <div class="proto-row"><span class="proto-lbl">Capture Loss</span><span class="proto-val" style="color: var(--amber-gold);">0.58% (171 pkts)</span></div>
+                </div>
+
+                <!-- System Performance -->
+                <div class="proto-card">
+                  <div class="proto-header">
+                    <span class="proto-title">Host Performance</span>
+                    <span style="font-size: 9px; color: var(--cyan-neon);">FPGA + GPU</span>
+                  </div>
+                  <div class="proto-row"><span class="proto-lbl">CPU Usage</span><span class="proto-val">34%</span></div>
+                  <div class="proto-row"><span class="proto-lbl">RAM Usage</span><span class="proto-val">42% (3.4 GB)</span></div>
+                  <div class="proto-row"><span class="proto-lbl">Inference Latency</span><span class="proto-val">0.7 ms</span></div>
+                  <div class="proto-row"><span class="proto-lbl">RX FIFO Buffer</span><span class="proto-val">143 / 4,096 B</span></div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+</main>
+  </div>
+
+  <!-- Temporary Threat Alert Notification Banner -->
+  <div class="threat-alert-banner" id="threatAlertBanner" style="display: none;">
+    <div style="font-size: 24px;">🚨</div>
+    <div style="display: flex; flex-direction: column; gap: 2px;">
+      <div style="font-size: 11px; font-weight: 800; color: var(--crimson-alert); letter-spacing: 0.5px;">CRITICAL THREAT DETECTED</div>
+      <div style="font-size: 13px; font-weight: 700; color: #fff;" id="alertThreatName">DDoS Amplification Flood</div>
+      <div style="font-size: 10px; font-family: var(--font-mono); color: var(--text-secondary);" id="alertThreatSource">Src: 10.20.14.8 &bull; Conf: 97.3%</div>
+    </div>
+    <button class="btn-investigate" id="alertInvestigateBtn" style="padding: 6px 14px; font-size: 11px;">
+      INVESTIGATE &rarr;
+    </button>
+  </div>
+
+  <!-- Threat Investigation Forensic Modal -->
+  <div class="modal-backdrop" id="investigationModalBackdrop">
+    <div class="investigation-modal">
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-neon)" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span style="font-size: 15px; font-weight: 800; color: #fff;">THREAT FORENSIC INVESTIGATION</span>
+          <span class="modal-case-tag" id="invModalCaseTag">CASE-DDOS-01</span>
+        </div>
+        <button class="modal-close-btn" id="invModalCloseBtn">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Row 1: Threat Summary & AI Verdict -->
+        <div class="modal-grid-2col">
+          <div class="invest-card">
+            <div class="invest-card-title">
+              <span>Threat Verdict</span>
+              <span class="evidence-tag" style="background: rgba(244,63,94,0.2); color: var(--crimson-alert);">AI PREDICTION</span>
+            </div>
+            <div class="invest-field-row"><span class="invest-lbl">Threat Category</span><span class="invest-val" style="color: var(--crimson-alert); font-weight: 700;" id="invThreatCategory">DDoS Amplification</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Severity Level</span><span class="invest-val" style="color: var(--crimson-alert); font-weight: 700;" id="invSeverity">CRITICAL</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Model Confidence</span><span class="invest-val" style="color: var(--green-light); font-weight: 700;" id="invConfidence">97.3%</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Status</span><span class="invest-val" id="invStatus">ACTIVE THREAT</span></div>
+          </div>
+
+          <div class="invest-card">
+            <div class="invest-card-title">
+              <span>Traffic & Volume Profile</span>
+              <span class="evidence-tag">OBSERVED</span>
+            </div>
+            <div class="invest-field-row"><span class="invest-lbl">Total Packets</span><span class="invest-val" id="invPackets">18,294</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Total Bytes</span><span class="invest-val" id="invBytes">14.2 MB</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Flow Duration</span><span class="invest-val" id="invDuration">71.4 sec</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Direction</span><span class="invest-val" style="color: var(--cyan-neon);">100% Ingress (0 Return ACK)</span></div>
+          </div>
+        </div>
+
+        <!-- Row 2: Source & Destination Analysis -->
+        <div class="modal-grid-2col">
+          <div class="invest-card">
+            <div class="invest-card-title">
+              <span>Attacker / Source Profile</span>
+              <span class="evidence-tag">OBSERVED</span>
+            </div>
+            <div class="invest-field-row"><span class="invest-lbl">Source IP</span><span class="invest-val" style="color: var(--cyan-neon); font-weight: 700;" id="invSrcIp">10.20.14.8</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Source Port</span><span class="invest-val" id="invSrcPort">45231</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">First Seen</span><span class="invest-val" id="invFirstSeen">21:26:42</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Last Seen</span><span class="invest-val" id="invLastSeen">21:27:53</span></div>
+          </div>
+
+          <div class="invest-card">
+            <div class="invest-card-title">
+              <span>Protected Destination</span>
+              <span class="evidence-tag">OBSERVED</span>
+            </div>
+            <div class="invest-field-row"><span class="invest-lbl">Target IP</span><span class="invest-val" style="color: #fff; font-weight: 700;" id="invDstIp">10.0.4.15</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Target Port</span><span class="invest-val" id="invDstPort">443 (Modbus Gateway)</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Protocol</span><span class="invest-val" id="invProto">17 (UDP)</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Enclave Node</span><span class="invest-val">Isolated SCADA Core</span></div>
+          </div>
+        </div>
+
+        <!-- Row 3: Explainable AI / Why Was It Flagged? -->
+        <div class="invest-card">
+          <div class="invest-card-title">
+            <span>Explainable AI (XAI) &mdash; Why Was This Flow Flagged?</span>
+            <span class="evidence-tag" style="background: rgba(16,185,129,0.15); color: var(--green-light);">EVALUATED EVIDENCE</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 6px;" id="invDescription">
+            DDoS amplification flood targeting destination 10.0.4.15 across unidirectional photodiode. Because unidirectional gateways provide no backchannel TCP feedback, volumetric flood causes hardware buffer loss.
+          </p>
+          <div class="xai-factor-checklist" id="invWhyFlaggedList">
+            <!-- Populated dynamically with checked factors -->
+          </div>
+        </div>
+
+        <!-- Row 4: Protocols, TLS / JA3 / JA4 & Geolocation -->
+        <div class="modal-grid-2col">
+          <div class="invest-card">
+            <div class="invest-card-title">
+              <span>DNS / TLS / JA3 Fingerprints</span>
+              <span class="evidence-tag">NO-DECRYPTION METADATA</span>
+            </div>
+            <div class="invest-field-row"><span class="invest-lbl">Associated Domain</span><span class="invest-val" style="color: var(--amber-gold);" id="invDomain">amp-reflector.ntp-pool.net</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">TLS Version</span><span class="invest-val" id="invTlsVer">TLS 1.3 / Encrypted</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">JA3 Hash</span><span class="invest-val" id="invJa3">72c039320224b77e8...</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">JA4 Hash</span><span class="invest-val" id="invJa4">t13d1516h2_8daaf6...</span></div>
+          </div>
+
+          <div class="invest-card">
+            <div class="invest-card-title">
+              <span>Approximate IP Geolocation</span>
+              <span class="evidence-tag estimate">ESTIMATE</span>
+            </div>
+            <div class="invest-field-row"><span class="invest-lbl">Country / Region</span><span class="invest-val" id="invGeoLocation">India &bull; Gujarat, Ahmedabad</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Transit ISP / ASN</span><span class="invest-val" id="invGeoIsp">AS133612 Enterprise Gateway</span></div>
+            <div class="invest-field-row"><span class="invest-lbl">Geo Confidence</span><span class="invest-val" style="color: var(--amber-gold);">LOW / ESTIMATE</span></div>
+            <div style="font-size: 9px; color: var(--text-muted); margin-top: 4px;" id="invGeoDisclaimer">
+              * Notice: IP geolocation is an approximate network estimate and may reflect VPN, proxy, or ISP transit rather than physical hacker location.
+            </div>
+          </div>
+        </div>
+
+        <!-- Evidence Confidence Hierarchy Matrix -->
+        <div class="invest-card">
+          <div class="invest-card-title">
+            <span>Evidence Hierarchy & Confidence Classification</span>
+            <span class="evidence-tag">AUDIT TRAIL</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; font-size: 10px; font-family: var(--font-mono);">
+            <div style="background: rgba(15,23,42,0.6); padding: 6px; border-radius: 4px;">
+              <span style="color: var(--text-muted);">IP & Ports:</span><br><strong style="color: var(--blue-bright);">[OBSERVED]</strong>
+            </div>
+            <div style="background: rgba(15,23,42,0.6); padding: 6px; border-radius: 4px;">
+              <span style="color: var(--text-muted);">Packet Counts:</span><br><strong style="color: var(--blue-bright);">[OBSERVED]</strong>
+            </div>
+            <div style="background: rgba(15,23,42,0.6); padding: 6px; border-radius: 4px;">
+              <span style="color: var(--text-muted);">Threat Type:</span><br><strong style="color: var(--crimson-alert);">[AI PREDICTION]</strong>
+            </div>
+            <div style="background: rgba(15,23,42,0.6); padding: 6px; border-radius: 4px;">
+              <span style="color: var(--text-muted);">Geolocation:</span><br><strong style="color: var(--amber-gold);">[ESTIMATE]</strong>
+            </div>
+            <div style="background: rgba(15,23,42,0.6); padding: 6px; border-radius: 4px;">
+              <span style="color: var(--text-muted);">DGA Scoring:</span><br><strong style="color: var(--purple-accent);">[MODEL SCORE]</strong>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-cyber-primary" id="invBtnResolve">Mark Threat Resolved</button>
+          <button class="btn-cyber-danger" id="invBtnShutter">Engage Optical Shutter</button>
+        </div>
+        <button class="btn-cyber-primary" style="background: transparent; border-color: var(--border-subtle);" id="invBtnClose">Close Panel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="attack-dataset.js"></script>
+  <script src="ai-engine.js"></script>
+  <script src="pcap-replay.js"></script>
+  <script src="flow-visualizer.js"></script>
+  <script src="globe.js"></script>
+  <script src="simulator.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
