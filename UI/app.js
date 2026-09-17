@@ -147,7 +147,7 @@ class PortalController {
       const elTot = document.getElementById('hudTotalPackets');
       if (elTot) elTot.textContent = `${(this.totalPackets / 1000).toFixed(1)}k+`;
 
-      if (report.threatScore > 50) {
+      if (pkt && pkt.isAttack) {
         // Attack packet intercepted!
         this.waitingCount++;
         const elWait = document.getElementById('hudWaiting');
@@ -162,9 +162,9 @@ class PortalController {
         this.renderXAI(report);
         this.updateScoreGauge(report.threatScore, report.severity);
 
-        // Alert sound & Toast
+        // Alert sound & Threat Alert Popup ONLY when simulated attack detection event occurs
         this.beep(880, 0.15, 'sawtooth');
-        this.showToast(`🚨 Intercepted: ${report.name} (Threat Score: ${report.threatScore})`, 'critical');
+        this.triggerThreatAlert(report);
       } else {
         // Benign packet
         this.deliveredCount++;
@@ -187,7 +187,6 @@ class PortalController {
         this.simulator.injectPacket(key, true);
         if (this.globe) this.globe.triggerAttackWave("#f43f5e");
         this.beep(380, 0.08, 'square');
-        this.showToast(`Simulating: ${THREAT_DATABASE[key].name}`, 'warning');
       });
     }
 
@@ -479,12 +478,6 @@ class PortalController {
 
     // 5. Update confidence meters
     this.updateConfidenceBars(report);
-
-    // 6. Show temporary alert banner if critical
-    if (report.severity === 'Critical') {
-      this.triggerThreatAlert(report);
-      this.beep(880, 0.12, 'sawtooth');
-    }
   }
 
   updateConfidenceBars(report) {

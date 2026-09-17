@@ -148,7 +148,7 @@ class PortalController {
       this.totalPackets++;
       const elTot = document.getElementById('hudTotalPackets');
       if (elTot) elTot.textContent = `${(this.totalPackets / 1000).toFixed(1)}k+`;
-      if (report.threatScore > 50) {
+      if (pkt && pkt.isAttack) {
         // Attack packet intercepted!
         this.waitingCount++;
         const elWait = document.getElementById('hudWaiting');
@@ -163,9 +163,8 @@ class PortalController {
         this.renderXAI(report);
         this.updateScoreGauge(report.threatScore, report.severity);
 
-        // Alert popup banner & notification when attack is caught
+        // Alert popup banner ONLY when simulated attack detection event occurs
         this.beep(880, 0.15, 'sawtooth');
-        this.showToast(`🛡 Threat Caught: ${report.name} (Score: ${report.threatScore})`, 'critical');
         this.triggerThreatAlert(report);
       } else {
         // Benign packet
@@ -180,7 +179,7 @@ class PortalController {
      Event Listeners for Controls & Attack Injector
      -------------------------------------------------------------------------- */
   initEventListeners() {
-    // Attack Launch button — Show popup notification when attack is started
+    // Attack Launch button — injects attack packet into simulation across physical diode
     const btnInject = document.getElementById('btnInjectAttack');
     const selectAttack = document.getElementById('attackSelect');
     if (btnInject && selectAttack) {
@@ -189,7 +188,6 @@ class PortalController {
         this.simulator.injectPacket(key, true);
         if (this.globe) this.globe.triggerAttackWave("#f43f5e");
         this.beep(380, 0.08, 'square');
-        this.showToast(`🚨 Attack Started: ${THREAT_DATABASE[key].name} (Transmitting into Data Diode...)`, 'critical');
       });
     }
 
@@ -500,13 +498,6 @@ class PortalController {
 
     // 5. Update confidence meters
     this.updateConfidenceBars(report);
-
-    // 6. Show temporary alert banner ONLY when live threat intercepted
-    if (triggerAlert) {
-      this.triggerThreatAlert(report);
-      this.showToast(`🚨 Threat Caught: ${report.name} (${report.severity})`, 'critical');
-      this.beep(880, 0.12, 'sawtooth');
-    }
   }
 
   updateConfidenceBars(report) {

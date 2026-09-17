@@ -53,7 +53,7 @@ class UnidirectionalSimulator {
       data: { ...template },
       x: 75,
       y: laneY + (Math.random() * 12 - 6),
-      vx: 3.8 + Math.random() * 0.8,
+      vx: isAttack ? 8.5 : (3.8 + Math.random() * 0.8),
       size: isAttack ? 8 : 5,
       color: isAttack ? "#f43f5e" : "#10b981",
       trailColor: isAttack ? "rgba(244, 63, 94, 0.4)" : "rgba(16, 185, 129, 0.35)",
