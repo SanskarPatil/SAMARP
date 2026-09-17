@@ -1,10 +1,49 @@
-# Cyber Sentinel
+<div align="center">
 
-**AI-Based Detection of Cyber Threats in Unidirectional IP Traffic — SIH 2026, Problem Statement PS26145.**
+<img src="assets/banner.svg" alt="SAMARP — AI-Based Detection of Cyber Threats in Unidirectional IP Traffic" width="100%">
 
-Cyber Sentinel is a passive, streaming cyber-intelligence layer for a monitored enclave sitting behind a one-way boundary. It observes copied traffic, sensor metadata and exported flow records, and turns those observations into evidence-rich, deduplicated incidents — including an explicit statement of what it could **not** see.
+# 🛡️ SAMARP
+
+**AI-Based Detection of Cyber Threats in Unidirectional IP Traffic**
+
+*Smart India Hackathon 2026 — Problem Statement PS26145 (NTRO)*
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/)
+[![Node 18+](https://img.shields.io/badge/node-18%2B-brightgreen.svg)](https://nodejs.org/)
+[![Dashboard: React + TypeScript + Vite](https://img.shields.io/badge/dashboard-React%20%2B%20TS%20%2B%20Vite-61dafb.svg)](dashboard)
+[![Status: Green](https://img.shields.io/badge/status-green-success.svg)](STATUS.md)
+
+</div>
+
+---
+
+> **Problem Statement PS26145 (NTRO):** Build an AI-based system that detects cyber threats using only **passively observed, non-decrypted IP traffic metadata**, across a **one-way (unidirectional) network boundary**, in near-real-time — with evidence an analyst can actually act on.
+
+SAMARP is a passive, streaming cyber-intelligence layer for a monitored enclave sitting behind a one-way boundary or data diode. It observes copied traffic, sensor metadata and exported flow records, and turns those observations into evidence-rich, deduplicated incidents — including an explicit statement of what it could **not** see.
 
 It never sends anything back across the boundary, never decrypts payload, and never depends on the internet at run time.
+
+---
+
+## Table of Contents
+
+- [Design Constraints](#design-constraints)
+- [Pipeline](#pipeline)
+- [Boundary Architecture](#boundary-architecture)
+- [Threat Coverage](#threat-coverage)
+- [Frozen Contracts](#frozen-contracts)
+- [Quick Start](#quick-start)
+- [Read-Only API Surface](#read-only-api-surface)
+- [Tests](#tests)
+- [Evidence Integrity](#evidence-integrity)
+- [Incident Lifecycle](#incident-lifecycle)
+- [Machine Learning](#machine-learning)
+- [Performance Budget](#performance-budget)
+- [Repository Layout](#repository-layout)
+- [Security and Lab Policy](#security-and-lab-policy)
+- [Documentation Map](#documentation-map)
+- [License](#license)
 
 ---
 
@@ -26,35 +65,53 @@ These are architectural invariants, not preferences. Every one of them is enforc
 
 ## Pipeline
 
-```text
-Passive input                 PCAP replay | live tap | IPFIX | NetFlow v9 | sFlow
-      |
-      v
-ingest/       normalization, single-clock replay, bounded flow tracking,
-              capability declaration, deterministic flow identity
-      |
-      v
-features/     entropy, robust statistics (median/MAD, robust z), inter-arrival
-              shape, DNS qtype distribution, lexical/DGA features, TLS/QUIC shape
-              — emitted in a single frozen FEATURE_ORDER
-      |
-      v
-detectors/    seven active modules covering the six PS threat classes
-      |
-      v
-alerts/       deduplication (frozen keys), scoring, SHA-256 hash chain
-      |
-      v
-persistence   SQLite
-      |
-      v
-api/          FastAPI read-only routes + /ws/incidents WebSocket
-      |
-      v
-dashboard/    React + TypeScript + Vite monitoring dashboard
+```mermaid
+flowchart TD
+    A["Passive input\nPCAP replay · live tap · IPFIX · NetFlow v9 · sFlow"] --> B
+    B["ingest/\nnormalization · single-clock replay · bounded flow tracking\ncapability declaration · deterministic flow identity"] --> C
+    C["features/\nentropy · robust stats (median/MAD, robust z) · inter-arrival shape\nDNS qtype distribution · lexical/DGA features · TLS/QUIC shape\n(single frozen FEATURE_ORDER)"] --> D
+    D["detectors/\nseven active modules covering the six PS threat classes"] --> E
+    E["alerts/\ndeduplication (frozen keys) · scoring · SHA-256 hash chain"] --> F
+    F["persistence\nSQLite"] --> G
+    G["api/\nFastAPI read-only routes + /ws/incidents WebSocket"] --> H
+    H["dashboard/\nReact + TypeScript + Vite monitoring dashboard"]
 ```
 
 JSON appears at exactly three boundaries — the Suricata EVE input, the storage boundary and the WebSocket output. Everything between normalization and persistence is in-process.
+
+---
+
+## Boundary Architecture
+
+The Scenario Console (attacker side) and the Monitoring Dashboard (defender side) are two separate applications on opposite sides of the one-way boundary. The console never informs the dashboard that an attack occurred — the dashboard learns only from the observed packet stream, and nothing crosses back.
+
+```mermaid
+flowchart LR
+    subgraph Attacker["Attacker side (lab-only)"]
+        SC["Scenario Console\nreplay · seed logging · manifests"]
+    end
+
+    subgraph Boundary["One-way boundary / data diode"]
+        direction TB
+        DIODE["Copied traffic only\n— no return path —"]
+    end
+
+    subgraph Enclave["Monitoring side"]
+        SENSOR["Passive sensors\nPCAP / tap / IPFIX / NetFlow / sFlow"]
+        PIPE["Ingest → Features → Detectors → Alerts"]
+        API["FastAPI — GET + WebSocket only"]
+        DASH["Operator Dashboard"]
+    end
+
+    SC -. "packets copied out, never in" .-> DIODE
+    DIODE --> SENSOR --> PIPE --> API --> DASH
+
+    style DIODE fill:#111a2e,stroke:#38bdf8,color:#f8fafc
+    style SC fill:#1e293b,stroke:#f87171,color:#f8fafc
+    style DASH fill:#1e293b,stroke:#22c55e,color:#f8fafc
+```
+
+`GET`/`WS` only, `405` on every mutating method — that is the live, testable proof of the diagram above, not just a claim in this file.
 
 ---
 
@@ -111,10 +168,12 @@ Two deduplication keys are deliberately counter-intuitive: `ddos` **never** keys
 
 ## Quick Start
 
-Requirements: Python 3.13, Node.js 18+.
+**Requirements:** Python 3.13, Node.js 18+.
 
 ```bash
-pip install fastapi uvicorn jsonschema pyyaml lightgbm scikit-learn scipy
+git clone https://github.com/SanskarPatil/SAMARP.git
+cd SAMARP
+pip install -r requirements.txt
 ```
 
 ### Run the canonical campaign replay and the read-only API
@@ -141,7 +200,9 @@ npm run dev     # http://127.0.0.1:5173, proxied to the API on 127.0.0.1:8000
 npm run build   # type-check and production build
 ```
 
-### Read-only API surface
+---
+
+## Read-Only API Surface
 
 | Method | Path | Purpose |
 |---|---|---|
@@ -176,6 +237,23 @@ Incidents are appended to a SHA-256 hash chain. Each entry binds the canonicalis
 
 ---
 
+## Incident Lifecycle
+
+Detections deduplicate into a small number of evolving incidents rather than an alert storm — a 50,000 pps flood produces **one** incident, not one alert per packet or per window.
+
+```mermaid
+stateDiagram-v2
+    [*] --> NEW: first matching alert
+    NEW --> ACTIVE: dedup key reused, still observed
+    ACTIVE --> UPDATED: new evidence appended
+    UPDATED --> ACTIVE: continues to recur
+    ACTIVE --> RESOLVED: no longer observed
+    UPDATED --> RESOLVED: no longer observed
+    RESOLVED --> [*]
+```
+
+---
+
 ## Machine Learning
 
 - **One trained model: the DGA LightGBM classifier.** Training and inference import the same `FEATURE_ORDER` object; no component builds its own ordering.
@@ -184,7 +262,7 @@ Incidents are appended to a SHA-256 hash chain. Each entry binds the canonicalis
 - `score_type` and `calibrated` govern presentation. A robust z-score or a rule score is **never** shown as a probability, and the UI appends a percent sign only when `calibrated: true`.
 - If the DGA artifact is unusable, the documented rule fallback ships with `calibrated: false` and `model_version: "rules-fallback"` — and no Brier score or reliability diagram is published for it.
 
-The accepted wording for novel activity is "previously unseen patterns". Cyber Sentinel does not claim zero-day detection, malware-family attribution or generic "AI accuracy".
+The accepted wording for novel activity is "previously unseen patterns". SAMARP does not claim zero-day detection, malware-family attribution or generic "AI accuracy".
 
 ---
 
@@ -192,9 +270,23 @@ The accepted wording for novel activity is "previously unseen patterns". Cyber S
 
 The latency budget in `config/thresholds.yaml` is frozen: 300 ms watermark, ~1.0 s window, ~100 ms scoring and deduplication, 250 ms batch push, giving a structural floor of roughly 1.6 s against an SLO of **p95 < 2.0 s**. `latency_ms` is measured, never estimated.
 
+```mermaid
+gantt
+    title Latency budget vs. p95 SLO (2.0 s)
+    dateFormat X
+    axisFormat %Lms
+    section Structural floor (~1.6 s)
+    Watermark (300 ms)            :done, w1, 0, 300
+    Window (~1000 ms)             :done, w2, 300, 1300
+    Scoring + dedup (~100 ms)     :done, w3, 1300, 1400
+    Batch push (250 ms)           :done, w4, 1400, 1650
+    section Remaining headroom
+    Headroom to 2.0 s SLO         :active, w5, 1650, 2000
+```
+
 If p95 exceeds the SLO, the fix order is batch push interval, then window size, then detector cost. **The watermark is never shrunk** — that trades a visible latency number for invisible missed detections.
 
-Throughput acceptance targets are at least 1 000 normalized flows/sec sustained for 60 s below 1 % loss (the primary PS KPI), with at least 50 000 pps and 400 Mbps as independent secondary system metrics. Flows/sec, pps and Mbps are three separate measurements; deriving one from another is not a measurement. No throughput figure is published without the machine specification beside it, and none is extrapolated beyond the measured hardware.
+Throughput acceptance targets are at least 1,000 normalized flows/sec sustained for 60 s below 1% loss (the primary PS KPI), with at least 50,000 pps and 400 Mbps as independent secondary system metrics. Flows/sec, pps and Mbps are three separate measurements; deriving one from another is not a measurement. No throughput figure is published without the machine specification beside it, and none is extrapolated beyond the measured hardware.
 
 ---
 
@@ -217,7 +309,7 @@ export/        frozen canonical campaign artifacts
 tests/         contract, boundary, replay, latency, throughput and detector tests
 ```
 
-`SAMARP/` is a parallel snapshot of the project carrying its own copy of the detector modules and their tests, and `UI/` holds an earlier standalone HTML/JS interface. Neither is part of the live pipeline; the shipped dashboard is `dashboard/`.
+> `SAMARP/` is a parallel snapshot of the project carrying its own copy of the detector modules and their tests, and `UI/` holds an earlier standalone HTML/JS interface. Neither is part of the live pipeline; the shipped dashboard is `dashboard/`. Both are candidates for removal once no longer needed for reference, to keep the repository focused on the live pipeline.
 
 ---
 
