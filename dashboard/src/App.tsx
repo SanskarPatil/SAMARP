@@ -80,7 +80,7 @@ export const App: React.FC = () => {
   return (
     <div className="app-container">
       <aside className="rail" aria-label="Console sections">
-        <div className="rail-mark" title="Cyber Sentinel">
+        <div className="rail-mark" title="SAMARP">
           <ShieldCheck size={20} />
         </div>
         <nav className="rail-nav">

@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="topbar">
       <div className="topbar-identity">
-        <span className="wordmark">CYBER SENTINEL</span>
+        <span className="wordmark">SAMARP</span>
         <span className="wordmark-rule" aria-hidden="true" />
         <span className="wordmark-sub">Unidirectional Threat Monitor</span>
         <span className="spec-badge">PS26145</span>

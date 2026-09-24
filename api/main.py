@@ -38,7 +38,7 @@ def create_app(
 ) -> FastAPI:
     """Factory creating the Plane B FastAPI monitoring application."""
     app = FastAPI(
-        title="Cyber Sentinel Plane B Monitoring API",
+        title="SAMARP Plane B Monitoring API",
         version="1.3",
         description="Passive, read-only monitoring and export interface for PS26145.",
         lifespan=lifespan,
