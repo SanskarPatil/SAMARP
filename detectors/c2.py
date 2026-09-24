@@ -32,6 +32,19 @@ DEFAULT_MIN_EVENTS = 8
 DEFAULT_WINDOW_S = 300.0
 DEFAULT_MAX_TRACKED = 1024
 DEFAULT_MAX_HISTORY_PER_FLOW = 64
+# Protocols that are periodic by design and owned by other detectors or are
+# infrastructure: NTP (UDP/123) and DNS (53, covered by the dns/dga detectors).
+DEFAULT_EXEMPT_PORTS: frozenset[tuple[str, int]] = frozenset({("UDP", 123), ("UDP", 53), ("TCP", 53)})
+# Fleet prevalence: a destination:port contacted by at least this many distinct
+# internal hosts is treated as a shared service (telemetry, updates, backup),
+# not a single implant's C2. Known limitation: a botnet with this many infected
+# hosts beaconing to one server is suppressed; set 0 to disable.
+DEFAULT_FLEET_MIN_HOSTS = 3
+DEFAULT_MAX_PREVALENCE_DSTS = 4096
+# Flow exporters cut long connections into records at a fixed active timeout
+# (5-60 s), which looks periodic. Beacons are small; a record at or above this
+# size is a slice of a bulk transfer and is not a beacon.
+DEFAULT_MAX_BEACON_BYTES = 1_000_000
 
 
 def _iso_utc(ts: float | datetime | None = None) -> str:
@@ -76,7 +89,13 @@ class C2Detector:
         min_events: int = DEFAULT_MIN_EVENTS,
         window_s: float = DEFAULT_WINDOW_S,
         max_tracked: int = DEFAULT_MAX_TRACKED,
+        exempt_ports: frozenset[tuple[str, int]] = DEFAULT_EXEMPT_PORTS,
+        fleet_min_hosts: int = DEFAULT_FLEET_MIN_HOSTS,
     ) -> None:
+        self.exempt_ports = exempt_ports
+        self.fleet_min_hosts = fleet_min_hosts
+        # (dst_ip, dst_port) -> distinct source hosts seen (bounded, insertion-ordered LRU)
+        self._prevalence: dict[tuple[str, int], set[str]] = {}
         self.cv_max = cv_max
         self.min_events = min_events
         self.window_s = window_s
@@ -105,8 +124,16 @@ class C2Detector:
         if not ev.src_ip or not ev.dst_ip or ev.dst_port is None:
             return None
 
+        if (str(ev.protocol).upper(), int(ev.dst_port)) in self.exempt_ports:
+            return None
+        if ev.bytes is not None and ev.bytes >= DEFAULT_MAX_BEACON_BYTES:
+            return None
+        if ev.direction == "inbound":
+            return None  # beaconing is an internal host calling out
+
         now = float(ev.observed_time.timestamp()) if isinstance(ev.observed_time, datetime) else float(ev.observed_time)
         self._prune(now)
+        hosts = self._note_prevalence(ev.dst_ip, int(ev.dst_port), ev.src_ip)
 
         key = (ev.src_ip, ev.dst_ip, ev.dst_port)
         state = self._conversations.get(key)
@@ -116,7 +143,21 @@ class C2Detector:
         else:
             state.add(now, ev.flow_id, DEFAULT_MAX_HISTORY_PER_FLOW)
 
+        if self.fleet_min_hosts and hosts >= self.fleet_min_hosts:
+            return None  # shared service contacted by many internal hosts
         return self._check_conversation(state, now, ev)
+
+    def _note_prevalence(self, dst_ip: str, dst_port: int, src_ip: str) -> int:
+        k = (dst_ip, dst_port)
+        srcs = self._prevalence.pop(k, None)
+        if srcs is None:
+            srcs = set()
+            if len(self._prevalence) >= DEFAULT_MAX_PREVALENCE_DSTS:
+                self._prevalence.pop(next(iter(self._prevalence)))
+        if len(srcs) < 64:
+            srcs.add(src_ip)
+        self._prevalence[k] = srcs
+        return len(srcs)
 
     def evaluate_window(self, window: WindowSummary) -> list[dict[str, Any]]:
         """Evaluate a closed window by processing sampled events."""
