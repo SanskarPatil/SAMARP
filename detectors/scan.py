@@ -52,6 +52,17 @@ def _declared_amplifier_ports() -> frozenset[int]:
 
 _SERVICE_REPLY_PORTS = _declared_amplifier_ports()
 
+
+def _declared_resolvers() -> frozenset[str]:
+    try:
+        from ingest.address_plan import AddressPlan
+        return frozenset(AddressPlan.load().dns_resolvers)
+    except Exception:  # pragma: no cover - plan file missing
+        return frozenset()
+
+
+_DECLARED_RESOLVERS = _declared_resolvers()
+
 class _SourceScanState:
     """Bounded state tracking destinations and ports probed by a single source IP."""
 
@@ -123,6 +134,10 @@ class ScanDetector:
         # source port below 1024 AND probes only ports >= 1024 is not counted.
         if ev.src_port is not None and ev.dst_port is not None and (ev.src_port < 1024 or ev.src_port in _SERVICE_REPLY_PORTS) \
                 and ev.dst_port >= 1024 and ev.src_port != ev.dst_port:
+            return None
+
+        # A declared internal resolver querying many DNS servers is doing its job.
+        if ev.dst_port == 53 and ev.src_ip in _DECLARED_RESOLVERS:
             return None
 
         now = float(ev.observed_time.timestamp()) if isinstance(ev.observed_time, datetime) else float(ev.observed_time)

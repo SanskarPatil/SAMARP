@@ -12,6 +12,12 @@ monitored_enclave:
   prefixes:
     - 10.10.0.0/16
   dns_resolver: 10.10.0.53
+  # Further internal recursive resolvers. A declared resolver's own DNS
+  # queries are not a horizontal scan, and a window made of its balanced
+  # query/answer traffic is not a UDP flood. Undeclared resolvers still alert.
+  # 10.0.1.2 = the internal resolver in the synthetic benign replay
+  # (scenarios/benign_background.py); replace with the site's resolvers.
+  additional_dns_resolvers: [10.0.1.2]
 
 monitoring_enclave:
   # Plane B. No route to the monitored enclave, no external route.

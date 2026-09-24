@@ -24,6 +24,14 @@ from features.rolling import TumblingWindowAggregator
 from ingest.normalized_event import NormalizedEvent
 
 
+def _declared_resolvers() -> tuple[str, ...]:
+    try:
+        from ingest.address_plan import AddressPlan
+        return AddressPlan.load().dns_resolvers
+    except Exception:  # pragma: no cover - plan file missing
+        return ()
+
+
 class DetectionPipeline:
     """Unified detector coordinator evaluating normalized network events."""
 
@@ -43,6 +51,7 @@ class DetectionPipeline:
         self.rolling_aggregator = TumblingWindowAggregator(
             window_duration_s=window_duration_s,
             watermark_delay_s=watermark_delay_s,
+            resolvers=_declared_resolvers(),
         )
 
         # Instantiate detectors

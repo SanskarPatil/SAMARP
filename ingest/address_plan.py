@@ -67,6 +67,7 @@ class AddressPlan:
         "monitoring",
         "lab_transport",
         "dns_resolver",
+        "dns_resolvers",
         "external_benign",
         "external_malicious",
         "amplifier_hosts",
@@ -105,6 +106,9 @@ class AddressPlan:
 
         resolver = monitored.get("dns_resolver")
         self.dns_resolver = ipaddress.ip_address(str(resolver)) if resolver else None
+        extra = [ipaddress.ip_address(str(r)) for r in (monitored.get("additional_dns_resolvers") or [])]
+        #: Every declared internal resolver, as strings (dns_resolver first).
+        self.dns_resolvers: tuple[str, ...] = tuple(str(a) for a in ([self.dns_resolver] if self.dns_resolver else []) + extra)
 
         self.external_benign = _parse_networks(
             external.get("benign"), label="external.benign"

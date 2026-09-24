@@ -72,6 +72,9 @@ class WindowSummary:
     #: Share of the window's packets carried by its single largest 5-tuple
     #: (0.0 when unknown). A bulk transfer is one flow; a flood is many.
     top_flow_packet_share: float = 0.0
+    #: Packets of balanced DNS exchanges of declared internal resolvers:
+    #: 2 x min(queries sent, answers received). Unbalanced floods do not count.
+    resolver_dns_balanced_packets: int = 0
 
     # Latest capability context seen in this window
     latest_capability: Any = None
@@ -123,6 +126,9 @@ class _OpenWindow:
         "_dst_entropy",
         "_dst_ports",
         "_flow_pkts",
+        "_resolvers",
+        "_resolver_q",
+        "_resolver_a",
         "contributing_flow_ids",
         "sample_events",
         "dns_queries",
@@ -140,7 +146,11 @@ class _OpenWindow:
         duration_s: float,
         max_events: int = DEFAULT_MAX_EVENTS_PER_WINDOW,
         max_entities: int = DEFAULT_MAX_TRACKED_ENTITIES,
+        resolvers: frozenset[str] = frozenset(),
     ) -> None:
+        self._resolvers = resolvers
+        self._resolver_q = 0
+        self._resolver_a = 0
         self.start_time = start_time
         self.end_time = start_time + duration_s
         self.duration_s = duration_s
@@ -195,6 +205,11 @@ class _OpenWindow:
         if ev.dst_port is not None:
             if len(self._dst_ports) < self._max_entities or ev.dst_port in self._dst_ports:
                 self._dst_ports[ev.dst_port] += pkts
+        if self._resolvers:
+            if ev.src_ip in self._resolvers and ev.dst_port == 53:
+                self._resolver_q += pkts
+            elif ev.dst_ip in self._resolvers and ev.src_port == 53:
+                self._resolver_a += pkts
         five_tuple = (ev.src_ip, ev.dst_ip, ev.src_port, ev.dst_port, str(ev.protocol))
         if len(self._flow_pkts) < self._max_entities or five_tuple in self._flow_pkts:
             self._flow_pkts[five_tuple] += pkts
@@ -245,6 +260,7 @@ class _OpenWindow:
             src_ip_counts=src_counts,
             dst_ip_counts=dst_counts,
             dst_port_counts=dict(self._dst_ports),
+            resolver_dns_balanced_packets=2 * min(self._resolver_q, self._resolver_a),
             top_flow_packet_share=(max(self._flow_pkts.values()) / self.packet_count) if self._flow_pkts and self.packet_count else 0.0,
             latest_capability=self.latest_capability,
             latest_input_mode=self.latest_input_mode,
@@ -265,7 +281,9 @@ class TumblingWindowAggregator:
         watermark_delay_s: float = DEFAULT_WATERMARK_DELAY_S,
         max_open_windows: int = DEFAULT_MAX_OPEN_WINDOWS,
         max_events_per_window: int = DEFAULT_MAX_EVENTS_PER_WINDOW,
+        resolvers: frozenset[str] | tuple[str, ...] = (),
     ) -> None:
+        self.resolvers = frozenset(resolvers)
         if window_duration_s <= 0:
             raise ValueError("window_duration_s must be > 0")
         if watermark_delay_s < 0:
@@ -329,6 +347,7 @@ class TumblingWindowAggregator:
                 start_time=w_start,
                 duration_s=self.window_duration_s,
                 max_events=self.max_events_per_window,
+                resolvers=self.resolvers,
             )
         else:
             closed_windows = []

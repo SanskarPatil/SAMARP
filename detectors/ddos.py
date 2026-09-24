@@ -35,6 +35,11 @@ DEFAULT_WARMUP_WINDOWS = 30
 # bulk transfer (download, backup), not a flood. SYN and UDP flood signatures
 # are not gated by this.
 DEFAULT_MAX_SINGLE_FLOW_SHARE = 0.5
+# A window where at least this share of packets is balanced query/answer DNS
+# of a DECLARED internal resolver (config/address_plan.yaml) is a cache
+# refresh, not a flood. Floods at or reflection onto the resolver are not
+# balanced and still alert.
+DEFAULT_MAX_RESOLVER_SHARE = 0.8
 
 # Slowloris thresholds (low-rate, long-duration, high concurrency)
 DEFAULT_SLOWLORIS_MIN_CONCURRENCY = 5
@@ -138,6 +143,10 @@ class DDoSDetector:
             baseline_dict is not None and z_score >= self.robust_z_threshold and current_pps > 100.0
         )
 
+        resolver_share = window.resolver_dns_balanced_packets / window.packet_count if window.packet_count else 0.0
+        if exceeds_threshold and resolver_share >= DEFAULT_MAX_RESOLVER_SHARE:
+            self._consecutive_flood_windows = 0
+            return None
         if exceeds_threshold:
             self._consecutive_flood_windows += 1
         else:
