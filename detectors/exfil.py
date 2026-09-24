@@ -82,6 +82,25 @@ class _ExfilConversationState:
             self.flow_ids.append(flow_id)
 
 
+def _directional_bytes(ev: NormalizedEvent, inbound_event: bool) -> tuple[int, int, int, int]:
+    """(outbound_bytes, inbound_bytes, outbound_pkts, inbound_pkts) relative to the internal host.
+
+    A bidirectional flow record (EVE-style ``bytes_toserver``/``bytes_toclient``)
+    is split by side. Anything else is one direction: the event's own bytes. The
+    PCAP flow tracker's cumulative ``fwd_bytes``/``rev_bytes`` are deliberately
+    not used, because every packet event carries the running total.
+    """
+    fs = ev.flow_summary or {}
+    if "bytes_toserver" in fs or "bytes_toclient" in fs:
+        to_server, to_client = int(fs.get("bytes_toserver") or 0), int(fs.get("bytes_toclient") or 0)
+        p_server, p_client = int(fs.get("pkts_toserver") or 0), int(fs.get("pkts_toclient") or 0)
+        # Record src is the client. If the client is external, the internal host is the server.
+        return (to_client, to_server, p_client, p_server) if inbound_event else (to_server, to_client, p_server, p_client)
+    b = int(ev.bytes or 0)
+    p = int(ev.packets if ev.packets is not None else 1)
+    return (0, b, 0, p) if inbound_event else (b, 0, p, 0)
+
+
 class ExfilDetector:
     """Data exfiltration detector identifying asymmetric outbound transfer volumes."""
 
@@ -122,23 +141,30 @@ class ExfilDetector:
         if not ev.src_ip or not ev.dst_ip:
             return None
 
-        # Exfiltration is specifically evaluated on outbound traffic
-        if ev.direction and ev.direction not in ("outbound", "external"):
+        # Conversations are keyed (internal host, external peer). Outbound events
+        # add to the outbound side; inbound events add to the inbound side of the
+        # reversed pair, so replies are counted instead of dropped.
+        if ev.direction and ev.direction not in ("outbound", "external", "inbound"):
             return None
+        inbound_event = ev.direction == "inbound"
+        internal, external = (ev.dst_ip, ev.src_ip) if inbound_event else (ev.src_ip, ev.dst_ip)
 
         now = float(ev.observed_time.timestamp()) if isinstance(ev.observed_time, datetime) else float(ev.observed_time)
         self._prune(now)
 
-        key = (ev.src_ip, ev.dst_ip)
+        key = (internal, external)
         state = self._conversations.get(key)
         if state is None:
-            state = _ExfilConversationState(ev.src_ip, ev.dst_ip, now)
+            state = _ExfilConversationState(internal, external, now)
             self._conversations[key] = state
 
-        bytes_ = ev.bytes if ev.bytes is not None else 0
-        pkts = ev.packets if ev.packets is not None else 1
-        state.add(bytes_, pkts, ev.direction, ev.flow_id, now)
-
+        out_b, in_b, out_p, in_p = _directional_bytes(ev, inbound_event)
+        if out_b or out_p:
+            state.add(out_b, out_p, "outbound", ev.flow_id, now)
+        if in_b or in_p:
+            state.add(in_b, in_p, "inbound", ev.flow_id, now)
+        if not (out_b or out_p):
+            return None  # nothing left the network in this event
         return self._check_state(state, now, ev)
 
     def evaluate_window(self, window: WindowSummary) -> list[dict[str, Any]]:
