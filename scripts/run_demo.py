@@ -41,7 +41,13 @@ def reset_demo_db(db_path: str | Path) -> list[str]:
     removed = []
     for candidate in (base, Path(f"{base}-wal"), Path(f"{base}-shm"), Path(f"{base}-journal")):
         if candidate.is_file():
-            candidate.unlink()
+            try:
+                candidate.unlink()
+            except PermissionError as exc:   # Windows: the file is open in another process
+                raise RuntimeError(
+                    f"cannot reset {candidate}: it is open in another process "
+                    "(is 'run_demo.py --serve' still running?). Stop it, or pass --keep-db to append."
+                ) from exc
             removed.append(str(candidate))
     return removed
 
