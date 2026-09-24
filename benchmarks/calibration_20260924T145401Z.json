@@ -1,0 +1,65 @@
+{
+  "machine": {
+    "captured_at_utc": "2026-09-24T14:54:02+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "power": {
+      "power_source": "ac",
+      "battery_percent": 57,
+      "battery_saver_on": false,
+      "power_plan": "Ultimate Performance"
+    },
+    "git_commit": "b292797",
+    "command": "python.exe scripts\\calibrate_confidence.py"
+  },
+  "calibration": {
+    "source": "synthetic_replay",
+    "note": "fitted on synthetic benign replay + synthetic attack suite; re-fit after any detector change",
+    "seed": 101,
+    "background_seconds": 8400.0,
+    "fitted_at_utc": "2026-09-24T14:54:01+00:00",
+    "detectors": {}
+  },
+  "per_detector": {
+    "c2": {
+      "status": "uncalibrated",
+      "reason": "needs >= 5 true and >= 5 false alerts; has 5 / 1",
+      "n": 6
+    },
+    "ddos": {
+      "status": "uncalibrated",
+      "reason": "needs >= 5 true and >= 5 false alerts; has 10 / 3",
+      "n": 13
+    },
+    "dga": {
+      "status": "uncalibrated",
+      "reason": "needs >= 5 true and >= 5 false alerts; has 2 / 0",
+      "n": 2
+    },
+    "dns": {
+      "status": "uncalibrated",
+      "reason": "needs >= 5 true and >= 5 false alerts; has 2 / 0",
+      "n": 2
+    },
+    "exfil": {
+      "status": "uncalibrated",
+      "reason": "needs >= 5 true and >= 5 false alerts; has 5 / 3",
+      "n": 8
+    },
+    "scan": {
+      "status": "uncalibrated",
+      "reason": "needs >= 5 true and >= 5 false alerts; has 3 / 0",
+      "n": 3
+    },
+    "tls_quic": {
+      "status": "uncalibrated",
+      "reason": "needs >= 5 true and >= 5 false alerts; has 3 / 0",
+      "n": 3
+    }
+  },
+  "written": true
+}

@@ -111,7 +111,8 @@ def test_data_exfiltration_robust_z_with_baseline(alert_validator: jsonschema.Dr
     assert alert is not None
     alert_validator.validate(alert)
     assert alert["score_type"] == "robust_z"
-    assert alert["calibrated"] is False
+    # calibration depends on config/confidence_calibration.json; the flag must match its source
+    assert alert["calibrated"] is (alert["calibrated_on"] != "uncalibrated")
     assert alert["evidence"]["robust_z"] >= 5.0
     assert alert["baseline"] == baseline
 

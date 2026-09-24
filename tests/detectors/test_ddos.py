@@ -107,7 +107,8 @@ def test_volumetric_flood_detection(alert_validator: jsonschema.Draft202012Valid
     assert alert["flow_ref_type"] == "aggregate"
     assert len(alert["flow_id"]) == 16
     assert len(alert["incident_id"]) == 16
-    assert alert["calibrated"] is False
+    # calibration depends on config/confidence_calibration.json; the flag must match its source
+    assert alert["calibrated"] is (alert["calibrated_on"] != "uncalibrated")
     assert alert["score_type"] in ("robust_z", "anomaly_score")
     assert alert["evidence"]["packet_rate_pps"] == 6500.0
     assert alert["evidence"]["source_entropy"] == 4.8

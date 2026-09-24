@@ -113,7 +113,8 @@ def test_dga_burst_detection(alert_validator: jsonschema.Draft202012Validator) -
     assert alert["flow_ref_type"] == "entity"
     assert alert["flow_id"] == identifier(src)
     assert alert["incident_id"] == identifier(["DGA / DNS tunnelling", src])
-    assert alert["calibrated"] is False
+    # calibration depends on config/confidence_calibration.json; the flag must match its source
+    assert alert["calibrated"] is (alert["calibrated_on"] != "uncalibrated")
     assert alert["model_version"] == "rules-fallback"
     assert alert["score_type"] == "rule_score"
     assert alert["evidence"]["query_count"] >= 5
