@@ -1,0 +1,120 @@
+===== full pytest suite =====
+$ python.exe -m pytest -q -p no:cacheprovider
+exit 0  (28.4 s)
+........................................................................ [ 17%]
+........................................................................ [ 34%]
+........................................................................ [ 52%]
+........................................................................ [ 69%]
+........................................................................ [ 87%]
+....................................................                     [100%]
+============================== warnings summary ===============================
+tests\api\test_api_and_persistence.py:18
+  D:\SIH-26\project\tests\api\test_api_and_persistence.py:18: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+412 passed, 1 warning in 27.72s
+
+===== API + integration tests =====
+$ python.exe -m pytest -q -p no:cacheprovider tests/api tests/integration
+exit 0  (3.1 s)
+..........                                                               [100%]
+============================== warnings summary ===============================
+tests\api\test_api_and_persistence.py:18
+  D:\SIH-26\project\tests\api\test_api_and_persistence.py:18: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+10 passed, 1 warning in 2.42s
+
+===== read-only proof (405 on writes) =====
+$ python.exe -m pytest -q -p no:cacheprovider tests/api -k read_only
+exit 0  (0.9 s)
+.                                                                        [100%]
+============================== warnings summary ===============================
+tests\api\test_api_and_persistence.py:18
+  D:\SIH-26\project\tests\api\test_api_and_persistence.py:18: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 8 deselected, 1 warning in 0.39s
+
+===== static scan: no write routes =====
+$ (built-in scan of api/*.py)
+exit 0  (0.0 s)
+no POST/PUT/PATCH/DELETE route decorators in api/*.py
+
+===== canonical replay from empty DB =====
+$ python.exe scripts/run_demo.py --replay-only --db-path C:\Users\Sanskar\AppData\Local\Temp\samarp_verify__bdxv01s\verify.db
+exit 0  (2.2 s)
+========================================================================
+  SAMARP - PS26145 CANONICAL CAMPAIGN REPLAY
+========================================================================
+[*] Target SQLite Database: C:\Users\Sanskar\AppData\Local\Temp\samarp_verify__bdxv01s\verify.db (fresh)
+[*] Generating canonical campaign normalized events...
+[*] Generated 12137 events across 7 campaign beats.
+[*] Replaying events through detection pipeline and alert deduplicator...
+
+------------------------------------------------------------------------
+  REPLAY EXECUTION SUMMARY
+------------------------------------------------------------------------
+  Events Processed:    12,137
+  Raw Alerts Emitted:  8
+  Incidents Persisted: 8
+  Chain Entries:       8
+  Elapsed Time:        0.56s
+  Hash Chain Status:   [PASS] VERIFIED
+------------------------------------------------------------------------
+  DEMONSTRATED PS26145 THREAT CLASSES:
+    - Botnet C2 beaconing                  : 1 incident(s)
+    - DGA / DNS tunnelling                 : 2 incident(s)
+    - Data exfiltration                    : 1 incident(s)
+    - Malware in encrypted sessions        : 2 incident(s)
+    - Port scanning / reconnaissance       : 1 incident(s)
+    - Volumetric DDoS / flooding           : 1 incident(s)
+------------------------------------------------------------------------
+  Lossless JSON Export : D:\SIH-26\project\export\canonical_campaign_export.json
+  Flattened CSV Export : D:\SIH-26\project\export\canonical_campaign_export.csv
+========================================================================
+
+[*] Replay verification complete. To serve live API, pass --serve.
+
+===== hash-chain verification of export =====
+$ python.exe scripts/run_demo.py --verify-only export/canonical_campaign_export.json
+exit 0  (0.6 s)
+[PASS] Hash chain intact for export/canonical_campaign_export.json
+
+===== dashboard unit tests (vitest) =====
+$ npm.CMD test   (cwd: dashboard)
+exit 0  (1.4 s)
+
+> samarp-dashboard@1.3.0 test
+> vitest run
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/SIH-26/project/dashboard[39m
+
+ [32m✓[39m src/services/scoreFormat.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m src/services/incidentStore.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 01:00:32
+[2m   Duration [22m 406ms[2m (transform 73ms, setup 0ms, collect 99ms, tests 9ms, environment 0ms, prepare 173ms)[22m
+
+===== dashboard production build =====
+$ npm.CMD run build   (cwd: dashboard)
+exit 0  (3.9 s)
+
+> samarp-dashboard@1.3.0 build
+> tsc && vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 1605 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                 [39m[1m[2m  0.65 kB[22m[1m[22m[2m │ gzip:  0.45 kB[22m
+[2mdist/[22m[35massets/index-Cn820EV-.css  [39m[1m[2m 26.00 kB[22m[1m[22m[2m │ gzip:  5.59 kB[22m
+[2mdist/[22m[36massets/index-DOZz_R6u.js   [39m[1m[2m208.68 kB[22m[1m[22m[2m │ gzip: 65.18 kB[22m
+[32m✓ built in 1.50s[39m

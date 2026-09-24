@@ -1,0 +1,94 @@
+{
+  "machine": {
+    "captured_at_utc": "2026-09-24T19:30:37+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "power": {
+      "power_source": "ac",
+      "battery_percent": 100,
+      "battery_saver_on": false,
+      "power_plan": "Normal mode"
+    },
+    "git_commit": "af003e1",
+    "command": "python.exe scripts\\verify_all.py"
+  },
+  "all_passed": true,
+  "steps": [
+    {
+      "step": "full pytest suite",
+      "command": "python.exe -m pytest -q -p no:cacheprovider",
+      "exit_code": 0,
+      "passed": true,
+      "seconds": 28.4,
+      "counts": {
+        "passed": 412
+      }
+    },
+    {
+      "step": "API + integration tests",
+      "command": "python.exe -m pytest -q -p no:cacheprovider tests/api tests/integration",
+      "exit_code": 0,
+      "passed": true,
+      "seconds": 3.1,
+      "counts": {
+        "passed": 10
+      }
+    },
+    {
+      "step": "read-only proof (405 on writes)",
+      "command": "python.exe -m pytest -q -p no:cacheprovider tests/api -k read_only",
+      "exit_code": 0,
+      "passed": true,
+      "seconds": 0.9,
+      "counts": {
+        "passed": 1,
+        "deselected": 8
+      }
+    },
+    {
+      "step": "static scan: no write routes",
+      "command": "(built-in scan of api/*.py)",
+      "exit_code": 0,
+      "passed": true,
+      "seconds": 0.0
+    },
+    {
+      "step": "canonical replay from empty DB",
+      "command": "python.exe scripts/run_demo.py --replay-only --db-path C:\\Users\\Sanskar\\AppData\\Local\\Temp\\samarp_verify__bdxv01s\\verify.db",
+      "exit_code": 0,
+      "passed": true,
+      "seconds": 2.2,
+      "replay": {
+        "events": "12,137",
+        "raw_alerts": "8",
+        "incidents": "8",
+        "chain": "[PASS] VERIFIED"
+      }
+    },
+    {
+      "step": "hash-chain verification of export",
+      "command": "python.exe scripts/run_demo.py --verify-only export/canonical_campaign_export.json",
+      "exit_code": 0,
+      "passed": true,
+      "seconds": 0.6
+    },
+    {
+      "step": "dashboard unit tests (vitest)",
+      "command": "npm.CMD test   (cwd: dashboard)",
+      "exit_code": 0,
+      "passed": true,
+      "seconds": 1.4
+    },
+    {
+      "step": "dashboard production build",
+      "command": "npm.CMD run build   (cwd: dashboard)",
+      "exit_code": 0,
+      "passed": true,
+      "seconds": 3.9
+    }
+  ]
+}

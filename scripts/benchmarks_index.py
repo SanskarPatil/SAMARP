@@ -31,6 +31,7 @@ STATUS = {
     "sample_alert_20260924T151143Z": "task 6: TLS novelty alert (canonical beat 10.0.0.75)",
     "sample_alert_20260924T184623Z": "task 8: DGA alert with shadow model evidence (synthetic-only model)",
     "sample_alert_20260924T191325Z": "CURRENT task 8: DGA alert with shadow evidence (real-trained model)",
+    "verify_20260924T193037Z": "CURRENT: all 8 checks pass - 412 tests (10 API/integration), read-only 405, no write routes, replay 8 incidents + chain verified, dashboard 7/7 + build",
 }
 LABELS = {
     "throughput": "Throughput / latency / CPU / RSS ladder (synthetic canonical events, file SQLite)",
