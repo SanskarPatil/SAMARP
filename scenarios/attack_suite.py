@@ -72,6 +72,17 @@ def _ddos(b: _Builder, t, victim, pps, sources, seconds, proto="TCP", port=80):
     return t + seconds
 
 
+def _reflection(b: _Builder, t, victim, port, amplifiers, pps, seconds, size):
+    """Amplified UDP responses FROM many amplifiers (source port = service) TO a victim that never asked."""
+    rng = b.rng
+    amps = [f"{rng.randint(11, 223)}.{rng.randint(0, 255)}.{rng.randint(0, 255)}.{rng.randint(1, 254)}" for _ in range(amplifiers)]
+    n = int(pps * seconds)
+    for i in range(n):
+        b.flow(t + i / pps, amps[i % amplifiers], victim, port, rng.randint(1024, 65535), "UDP",
+               packets=1, bytes=int(size * rng.uniform(0.9, 1.1)), direction="inbound")
+    return t + seconds
+
+
 def _beacon(b: _Builder, t, src, dst, period, jitter, count, port=443):
     for _ in range(count):
         b.flow(t, src, dst, 49152, port, "TCP", tcp_flags="PA", packets=2, bytes=b.rng.randint(180, 260), direction="outbound")
@@ -130,7 +141,7 @@ def _exfil(b: _Builder, t, src, dst, total_bytes, records, spacing):
 
 
 def generate_attack_suite(seed: int = 11, start_time: float = 1773280000.0, first_offset: float = 300.0, gap: float = 210.0) -> tuple[list[NormalizedEvent], list[AttackLabel]]:
-    """30 labelled attack instances, spaced ``gap`` seconds apart (stream time)."""
+    """33 labelled attack instances (8 class a incl. 3 UDP reflection, 5 each b-f), spaced ``gap`` seconds apart (stream time)."""
     rng = Random(seed)
     b = _Builder(rng)
     labels: list[AttackLabel] = []
@@ -151,6 +162,9 @@ def generate_attack_suite(seed: int = 11, start_time: float = 1773280000.0, firs
         ("a", "UDP flood 8k pps to :53, 3 s", lambda s, t: ({"10.0.1.252"}, _ddos(b, t, "10.0.1.252", 8000, 300, 3, "UDP", 53)), False),
         ("a", "SYN flood 3k pps, 50 src, 4 s (below min_pps)", lambda s, t: ({"10.0.1.253"}, _ddos(b, t, "10.0.1.253", 3000, 50, 4)), True),
         ("a", "low-rate SYN 800 pps, 20 src, 5 s", lambda s, t: ({"10.0.1.254"}, _ddos(b, t, "10.0.1.254", 800, 20, 5)), True),
+        ("a", "DNS reflection 6k pps x 1.2 KB from 80 open resolvers, 3 s", lambda s, t: ({"10.0.1.245"}, _reflection(b, t, "10.0.1.245", 53, 80, 6000, 3, 1200)), False),
+        ("a", "NTP monlist reflection 2.5k pps x 468 B from 30 amplifiers, 4 s", lambda s, t: ({"10.0.1.246"}, _reflection(b, t, "10.0.1.246", 123, 30, 2500, 4, 468)), False),
+        ("a", "memcached reflection 600 pps x 1.4 KB from 6 amplifiers, 5 s (below fan-in)", lambda s, t: ({"10.0.1.247"}, _reflection(b, t, "10.0.1.247", 11211, 6, 600, 5, 1400)), True),
         ("b", "beacon 5 s, 1 % jitter", lambda s, t: ({s, "203.0.113.10"}, _beacon(b, t, s, "203.0.113.10", 5, 0.01, 12)), False),
         ("b", "beacon 20 s, 5 % jitter", lambda s, t: ({s, "203.0.113.11"}, _beacon(b, t, s, "203.0.113.11", 20, 0.05, 12)), False),
         ("b", "beacon 30 s, 10 % jitter", lambda s, t: ({s, "203.0.113.12"}, _beacon(b, t, s, "203.0.113.12", 30, 0.10, 12)), False),

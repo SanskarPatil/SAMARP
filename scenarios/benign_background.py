@@ -12,6 +12,8 @@ deliberate hard negatives for our own detectors:
 * CDN hash / UUID sub-domains          -> random-looking names like DGA
 * _dmarc / SPF TXT lookups             -> TXT records like DNS tunnelling
 * large downloads                      -> packet bursts like volumetric floods
+* internal resolver cache refresh      -> many port-53 servers answering one host fast,
+                                          like DNS reflection (but every answer was asked for)
 
 ``load_background(source)`` accepts ``"synthetic"`` or a path to a classic
 pcap file; a pcap is replayed through the existing header-only
@@ -52,6 +54,7 @@ class BackgroundConfig:
     telemetry_hosts: int = 5          # hosts with a 30 s heart-beat
     backup_hosts: int = 3             # hosts running a cloud backup upload
     download_hosts: int = 4           # hosts pulling a large file
+    resolver_refresh: bool = True     # internal recursive resolver with bursty cache refresh
     start_time: float = 1773280000.0
 
 
@@ -144,8 +147,44 @@ def generate_benign_background(cfg: BackgroundConfig = BackgroundConfig()) -> li
                                tls={"ja3": BENIGN_JA3[2], "ja3s": BENIGN_JA3S[1], "ja4": BENIGN_JA4[2], "sni": "mirror.downloads.example"}))
             t += 5.0
 
+    # --- internal recursive resolver (hard negative for UDP reflection) ---
+    # Separate RNG so the events above stay identical to earlier runs.
+    if cfg.resolver_refresh:
+        events.extend(_resolver_traffic(cfg, cap))
+
     events.sort(key=lambda e: float(e.observed_time))
     return events
+
+
+INTERNAL_RESOLVER = "10.0.1.2"
+
+
+def _resolver_traffic(cfg: BackgroundConfig, cap: CapabilityState) -> list[NormalizedEvent]:
+    """Per-packet query/response pairs: a slow trickle plus a 3,000-query burst every 30 min."""
+    rng = Random(cfg.seed + 5000)
+    authorities = [f"198.19.{rng.randint(0, 255)}.{rng.randint(1, 254)}" for _ in range(150)]
+    out: list[NormalizedEvent] = []
+
+    def pair(t, auth):
+        sport = rng.randint(1024, 65535)
+        out.append(NormalizedEvent.from_flow(observed_time=t, input_mode=InputMode.PCAP_REPLAY, capability=cap, src_ip=INTERNAL_RESOLVER,
+                                             dst_ip=auth, src_port=sport, dst_port=53, protocol="UDP", packets=1,
+                                             bytes=rng.randint(70, 110), direction="outbound"))
+        out.append(NormalizedEvent.from_flow(observed_time=t + rng.uniform(0.004, 0.04), input_mode=InputMode.PCAP_REPLAY, capability=cap,
+                                             src_ip=auth, dst_ip=INTERNAL_RESOLVER, src_port=53, dst_port=sport, protocol="UDP", packets=1,
+                                             bytes=rng.randint(200, 1400), direction="inbound"))
+
+    t0, t_end = cfg.start_time, cfg.start_time + cfg.duration_s
+    t = t0 + rng.uniform(0, 2)
+    while t < t_end:                               # ~0.5 queries/s steady
+        pair(t, rng.choice(authorities))
+        t += rng.expovariate(0.5)
+    t = t0 + rng.uniform(60, 600)
+    while t < t_end:                               # cache refresh: 3,000 queries in 1 s (above the 2,000 pps gate)
+        for i in range(3000):
+            pair(t + i / 3000, authorities[i % len(authorities)])
+        t += 1800.0
+    return out
 
 
 def load_background(source: str | Path = "synthetic", cfg: BackgroundConfig = BackgroundConfig()) -> tuple[list[NormalizedEvent], str]:

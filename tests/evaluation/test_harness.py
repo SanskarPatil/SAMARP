@@ -21,11 +21,12 @@ def test_load_background_labels_provenance():
     assert events and provenance == "synthetic benign replay"
 
 
-def test_attack_suite_covers_every_ps_class_five_times():
+def test_attack_suite_covers_every_ps_class():
     events, labels = generate_attack_suite(seed=11, start_time=1773280000)
-    assert events and len(labels) == 30
+    assert events and len(labels) == 33
     for letter in PS_CLASSES:
-        assert sum(1 for l in labels if l.ps_letter == letter) == 5
+        expected = 8 if letter == "a" else 5          # class a adds 3 UDP reflection attacks
+        assert sum(1 for l in labels if l.ps_letter == letter) == expected
     attacker_ips = {ip for l in labels for ip in l.key_ips}
     assert not attacker_ips & {f"10.0.1.{i}" for i in range(10, 60)}, "attack IPs must not collide with benign hosts"
 
