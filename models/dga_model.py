@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import pickle
+import json
 from dataclasses import dataclass
 from math import exp
 from pathlib import Path
@@ -15,7 +15,7 @@ from features.feature_order import FEATURE_ORDER
 from .dga_dataset import DomainExample
 
 
-MODEL_VERSION = "dga-lightgbm-0.2.0"
+MODEL_VERSION = "dga-lightgbm-0.3.0"
 
 # Per-domain lexical model inputs, taken IN FROZEN ORDER from FEATURE_ORDER.
 # ``nxdomain_rate`` is deliberately excluded: it is a response-level, per-source
@@ -66,22 +66,61 @@ class CalibratedDGAModel:
     feature_names: tuple[str, ...] = DGA_MODEL_FEATURES
 
     def predict_probability(self, qname: str) -> float:
-        raw_probability = float(self.classifier.predict_proba([model_vector(qname, self.language_model)])[0][1])
+        raw_probability = _raw_probability(self.classifier, [model_vector(qname, self.language_model)])[0]
         logit = __import__("math").log(max(raw_probability, 1e-9) / max(1.0 - raw_probability, 1e-9))
         return _sigmoid(self.platt_slope * logit + self.platt_intercept)
 
-    def save(self, path: Path) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("wb") as handle:
-            pickle.dump(self, handle)
+    # -- artifact: LightGBM text booster + JSON metadata (no pickle) ----------
+    def save_artifact(self, directory: Path, extra_meta: Mapping[str, Any] | None = None) -> dict[str, str]:
+        """Write <dir>/dga_lightgbm.txt (booster) and <dir>/dga_model_meta.json.
+
+        Plain text and JSON only: loading never executes code from the
+        artifact (a pickle would).  Requires a fitted LGBMClassifier.
+        """
+        directory = Path(directory)
+        directory.mkdir(parents=True, exist_ok=True)
+        booster = getattr(self.classifier, "booster_", None)
+        if booster is None:
+            raise TypeError("save_artifact needs a fitted LightGBM classifier (booster_)")
+        booster_path = directory / BOOSTER_FILE
+        booster.save_model(str(booster_path))
+        meta = {"model_version": self.version, "feature_names": list(self.feature_names),
+                "platt_slope": self.platt_slope, "platt_intercept": self.platt_intercept,
+                "language_model": self.language_model, **dict(extra_meta or {})}
+        meta_path = directory / META_FILE
+        meta_path.write_text(json.dumps(meta, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+        return {"booster": str(booster_path), "meta": str(meta_path)}
 
     @classmethod
-    def load(cls, path: Path) -> "CalibratedDGAModel":
-        with path.open("rb") as handle:
-            model = pickle.load(handle)
-        if not isinstance(model, cls):
-            raise TypeError("artifact is not a CalibratedDGAModel")
-        return model
+    def load_artifact(cls, directory: Path) -> "CalibratedDGAModel":
+        import lightgbm
+
+        directory = Path(directory)
+        meta = json.loads((directory / META_FILE).read_text(encoding="utf-8"))
+        if tuple(meta["feature_names"]) != DGA_MODEL_FEATURES:
+            raise ValueError(f"artifact features {meta['feature_names']} != code features {list(DGA_MODEL_FEATURES)}")
+        booster = lightgbm.Booster(model_file=str(directory / BOOSTER_FILE))
+        return cls(booster, dict(meta["language_model"]), float(meta["platt_slope"]), float(meta["platt_intercept"]),
+                   version=str(meta["model_version"]))
+
+
+ARTIFACT_DIR = Path(__file__).resolve().parent / "artifact"
+BOOSTER_FILE = "dga_lightgbm.txt"
+META_FILE = "dga_model_meta.json"
+
+
+def _raw_probability(classifier: Any, rows: list[tuple[float, ...]]) -> list[float]:
+    """P(DGA) from a fitted sklearn-style classifier or a raw lightgbm.Booster.
+
+    Rows go in as a plain float array WITHOUT column names, matching how the
+    model is fitted - so LightGBM never warns about feature names.
+    """
+    import numpy as np
+
+    matrix = np.asarray(rows, dtype=float)
+    if hasattr(classifier, "predict_proba"):
+        return [float(p) for p in classifier.predict_proba(matrix)[:, 1]]
+    return [float(p) for p in classifier.predict(matrix)]      # Booster, binary objective -> probability
 
 
 def _default_classifier() -> Any:
@@ -113,9 +152,14 @@ def train_lightgbm(examples: Iterable[DomainExample], classifier_factory: Callab
     fold_models = {fold: build_language_model(e.qname for e in fitting_benign if fold_of[e.qname] != fold) for fold in range(5)}
     fitting_rows = [_record(example, fold_models[fold_of[example.qname]] if example.label == 0 else language_model) for example in fitting]
     classifier = (classifier_factory or _default_classifier)()
-    fit_kwargs = {"feature_name": list(DGA_MODEL_FEATURES)} if type(classifier).__name__ == "LGBMClassifier" else {}
-    classifier.fit(fitting_rows, [example.label for example in fitting], **fit_kwargs)
-    raw = [float(classifier.predict_proba([_record(example, language_model)])[0][1]) for example in calibration]
+    # Fitted on an unnamed float array and always queried the same way (see
+    # _raw_probability): mixing named fit / unnamed predict is what produced
+    # LightGBM's "X does not have valid feature names" warning. Names are kept
+    # in CalibratedDGAModel.feature_names and in the artifact metadata.
+    import numpy as np
+
+    classifier.fit(np.asarray(fitting_rows, dtype=float), [example.label for example in fitting])
+    raw = _raw_probability(classifier, [_record(example, language_model) for example in calibration])
     targets = [example.label for example in calibration]
     logits = [__import__("math").log(max(probability, 1e-9) / max(1.0 - probability, 1e-9)) for probability in raw]
     result = minimize(lambda params: sum(-(target * __import__("math").log(max(_sigmoid(params[0] * value + params[1]), 1e-12)) + (1 - target) * __import__("math").log(max(1 - _sigmoid(params[0] * value + params[1]), 1e-12))) for value, target in zip(logits, targets)), x0=(1.0, 0.0), method="BFGS")
@@ -143,7 +187,7 @@ def evaluate_model(model: CalibratedDGAModel, examples: Iterable[DomainExample],
 
     examples = tuple(examples)
     labels = [example.label for example in examples]
-    probabilities = [model.predict_probability(example.qname) for example in examples]
+    probabilities = predict_many(model, [example.qname for example in examples])
     predictions = [int(probability >= threshold) for probability in probabilities]
     report: dict[str, object] = {"count": len(examples), "threshold": threshold, "per_class": per_class_report(labels, predictions), "brier_score": round(float(brier_score_loss(labels, probabilities)), 4) if len(set(labels)) == 2 else None, "roc_auc": round(float(roc_auc_score(labels, probabilities)), 4) if len(set(labels)) == 2 else None}
     bins = [{"lower": lower / 5, "upper": (lower + 1) / 5, "count": 0, "mean_probability": 0.0, "observed_rate": 0.0} for lower in range(5)]
@@ -158,3 +202,25 @@ def evaluate_model(model: CalibratedDGAModel, examples: Iterable[DomainExample],
             bin_item["observed_rate"] /= bin_item["count"]
     report["reliability"] = bins
     return report
+
+
+def predict_many(model: CalibratedDGAModel, qnames: list[str]) -> list[float]:
+    """Vectorised predict_probability (same numbers, one model call)."""
+    if not qnames:
+        return []
+    if not isinstance(model, CalibratedDGAModel):          # any other scorer: one name per call, name only
+        return [float(model.predict_probability(q)) for q in qnames]
+    import math
+
+    raw = _raw_probability(model.classifier, [model_vector(q, model.language_model) for q in qnames])
+    return [_sigmoid(model.platt_slope * math.log(max(p, 1e-9) / max(1.0 - p, 1e-9)) + model.platt_intercept) for p in raw]
+
+
+def load_default_model() -> CalibratedDGAModel | None:
+    """The saved artifact, or None when it is absent or lightgbm is not installed (rule fallback)."""
+    if not (ARTIFACT_DIR / BOOSTER_FILE).is_file() or not (ARTIFACT_DIR / META_FILE).is_file():
+        return None
+    try:
+        return CalibratedDGAModel.load_artifact(ARTIFACT_DIR)
+    except ImportError:
+        return None

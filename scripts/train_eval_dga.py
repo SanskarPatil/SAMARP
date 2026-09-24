@@ -1,24 +1,30 @@
-"""Leakage-free training + evaluation of the DGA LightGBM model (PS task 1).
+"""Leakage-free training + evaluation of the DGA LightGBM model (PS tasks 1 and 8).
 
-Usage (from the project root):
-    python scripts/train_eval_dga.py                  # evaluate only, LightGBM
-    python scripts/train_eval_dga.py --save-model     # also train on the full corpus and save artifact (task 8)
+Usage (from the project root, venv active):
+    python scripts/train_eval_dga.py                                   # evaluate, LightGBM
+    python scripts/train_eval_dga.py --save-model                      # + save models/artifact/
+    python scripts/train_eval_dga.py --real-benign intel\\tranco\\top-1m.csv   # + REAL benign test set
 
-Writes benchmarks/dga_eval_<UTC timestamp>.json and .md, containing the
-machine spec and the exact command.  Every metric comes from this run.
+Writes benchmarks/dga_eval_<UTC>.json and .md with machine spec and command.
 
-Evaluation protocol
-  1. grouped validation: ~30 % of registered domains held out (no domain on both sides)
-  2. leave-one-family-out: for each of 5 DGA families, train WITHOUT it and test on it
-     (plus a disjoint benign bucket) - the honest "unseen family" number
-  3. the running rules-fallback detector is scored on the same test sets as a baseline
-Features come from the query name only; labels are used only as ground truth.
+Evaluation protocol (features come from the query name only; labels are ground truth only)
+  1. Word-level hold-out: ~30 % of benign vocabulary words never appear in training.
+     Benign names built only from those words form the OUT-OF-VOCABULARY (OOV) set.
+  2. Grouped validation on in-vocabulary data: no registered domain on both sides.
+  3. OOV benign false-positive rate, and OOV benign + validation DGA mixed set.
+  4. Leave-one-family-out: each of 5 DGA families unseen in training.
+  5. Optional REAL benign list (Tranco CSV "rank,domain" or one domain per line):
+     false-positive rate only, labelled "real". Absent -> reported as not available.
+  6. The running rules-fallback detector is scored on the same sets.
+With --save-model the deployed artifact is refit on ALL synthetic data; the
+hold-out numbers above estimate how it generalises. Text booster + JSON, no pickle.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import statistics
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -28,100 +34,168 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from machine_spec import machine_spec, spec_markdown  # noqa: E402
-from models.dga_dataset import build_extended_dga_corpus, family_holdout_splits, grouped_train_validation_split  # noqa: E402
-from models.dga_model import DGA_MODEL_FEATURES, MODEL_VERSION, evaluate_model, per_class_report, train_lightgbm  # noqa: E402
+from models.dga_dataset import (build_vocab_holdout_corpus, family_holdout_splits, grouped_train_validation_split,  # noqa: E402
+                                load_real_benign, vocabulary_split)
+from models.dga_model import (ARTIFACT_DIR, DGA_MODEL_FEATURES, MODEL_VERSION, evaluate_model, per_class_report,  # noqa: E402
+                              predict_many, train_lightgbm)
 
 
 def _classifier_factory(name: str):
     if name == "lightgbm":
         return None  # default in train_lightgbm
-    if name == "sklearn-hgb":  # development fallback when lightgbm is not installed; never reported as LightGBM
+    if name == "sklearn-hgb":  # development stand-in when lightgbm is not installed; never reported as LightGBM
         from sklearn.ensemble import HistGradientBoostingClassifier
 
         return lambda: HistGradientBoostingClassifier(max_iter=120, learning_rate=0.08, random_state=26145)
     raise SystemExit(f"unknown classifier {name}")
 
 
-def _rule_baseline(examples, threshold: float) -> dict:
+def _rule_preds(examples, threshold: float) -> list[int]:
     from detectors.dga import DGADetector
 
     detector = DGADetector()
-    labels = [e.label for e in examples]
-    preds = [int(detector.score_domain(e.qname)[0] >= threshold and not detector.is_allowlisted(e.qname)) for e in examples]
-    return {"threshold": threshold, "per_class": per_class_report(labels, preds)}
+    return [int(detector.score_domain(e.qname)[0] >= threshold and not detector.is_allowlisted(e.qname)) for e in examples]
+
+
+def _rule_baseline(examples, threshold: float) -> dict:
+    return {"threshold": threshold, "per_class": per_class_report([e.label for e in examples], _rule_preds(examples, threshold))}
+
+
+def _benign_only(model, examples, threshold: float) -> dict:
+    """False-positive view of a benign-only set (no DGA in it, so precision is undefined)."""
+    probs = predict_many(model, [e.qname for e in examples])
+    fp = [e.qname for e, p in zip(examples, probs) if p >= threshold]
+    rules = {thr: sum(_rule_preds(examples, thr)) for thr in (0.85, 0.70)}
+    n = len(examples)
+    return {"n": n, "model_threshold": threshold, "model_false_positives": len(fp), "model_fpr": round(len(fp) / n, 4) if n else None,
+            "model_mean_probability": round(statistics.fmean(probs), 4) if probs else None,
+            "model_p95_probability": round(sorted(probs)[int(0.95 * (n - 1))], 4) if probs else None,
+            "rules_fpr_0.85": round(rules[0.85] / n, 4) if n else None, "rules_fpr_0.70": round(rules[0.70] / n, 4) if n else None,
+            "example_false_positives": fp[:10]}
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--classifier", default="lightgbm", choices=("lightgbm", "sklearn-hgb"))
     parser.add_argument("--out-dir", default=str(ROOT / "benchmarks"))
-    parser.add_argument("--save-model", action="store_true", help="train on the full corpus and write models/artifact/")
+    parser.add_argument("--save-model", action="store_true", help="refit on all synthetic data and write models/artifact/")
+    parser.add_argument("--real-benign", default=None, help="Tranco CSV (rank,domain) or one domain per line; evaluated as REAL benign")
+    parser.add_argument("--real-top", type=int, default=10_000)
+    parser.add_argument("--threshold", type=float, default=0.5)
     args = parser.parse_args()
     factory = _classifier_factory(args.classifier)
+    thr = args.threshold
 
-    corpus = build_extended_dga_corpus()
+    corpus = build_vocab_holdout_corpus()
+    in_vocab = tuple(e for e in corpus if e.family != "benign_oov")
+    oov = tuple(e for e in corpus if e.family == "benign_oov")
+    train_words, heldout_words = vocabulary_split()
     result: dict = {
-        "machine": machine_spec(),
-        "model_version": MODEL_VERSION,
-        "classifier": args.classifier,
-        "features": list(DGA_MODEL_FEATURES),
-        "leakage_note": "nxdomain_rate removed from the per-domain model; features computed from qname only",
-        "data": {"source": "synthetic: models/dga_dataset.build_extended_dga_corpus (seed 26145)",
-                 "total": len(corpus), "benign": sum(1 for e in corpus if e.label == 0), "dga": sum(1 for e in corpus if e.label == 1),
-                 "families": sorted({e.family for e in corpus if e.label})},
+        "machine": machine_spec(), "model_version": MODEL_VERSION, "classifier": args.classifier, "features": list(DGA_MODEL_FEATURES),
+        "leakage_note": "nxdomain_rate removed; features from qname only; held-out benign WORDS never appear in training",
+        "data": {"source": "synthetic: models/dga_dataset.build_vocab_holdout_corpus (seed 26145)",
+                 "benign_in_vocab": sum(1 for e in in_vocab if e.label == 0), "benign_oov": len(oov),
+                 "dga": sum(1 for e in corpus if e.label == 1), "families": sorted({e.family for e in corpus if e.label}),
+                 "train_words": len(train_words), "heldout_words": list(heldout_words)},
     }
 
-    split = grouped_train_validation_split(corpus)
+    split = grouped_train_validation_split(in_vocab)
     model = train_lightgbm(split["train"], factory)
-    result["grouped_validation"] = {
+    val_dga = [e for e in split["validation"] if e.label == 1]
+    result["grouped_validation_in_vocab"] = {
         "train_size": len(split["train"]), "validation_size": len(split["validation"]),
-        "model": evaluate_model(model, split["validation"]),
-        "rules_fallback_0.85": _rule_baseline(split["validation"], 0.85),
-        "rules_fallback_0.70": _rule_baseline(split["validation"], 0.70),
+        "model": evaluate_model(model, split["validation"], thr),
+        "rules_fallback_0.85": _rule_baseline(split["validation"], 0.85), "rules_fallback_0.70": _rule_baseline(split["validation"], 0.70),
     }
     importances = getattr(model.classifier, "feature_importances_", None)
     if importances is not None:
-        result["grouped_validation"]["feature_importance"] = {name: int(value) for name, value in zip(DGA_MODEL_FEATURES, importances)}
+        result["grouped_validation_in_vocab"]["feature_importance"] = {n: int(v) for n, v in zip(DGA_MODEL_FEATURES, importances)}
+    result["benign_only"] = {"in_vocab_validation": _benign_only(model, [e for e in split["validation"] if e.label == 0], thr),
+                             "oov_heldout_words": _benign_only(model, oov, thr)}
+    mixed = list(oov) + val_dga
+    result["oov_mixed"] = {"description": "OOV benign + grouped-validation DGA", "model": evaluate_model(model, mixed, thr),
+                           "rules_fallback_0.85": _rule_baseline(mixed, 0.85), "rules_fallback_0.70": _rule_baseline(mixed, 0.70)}
+
+    if args.real_benign:
+        real, provenance = load_real_benign(args.real_benign, args.real_top)
+        result["real_benign"] = {"available": True, "provenance": provenance, **_benign_only(model, real, thr),
+                                 "note": "rules fallback allowlists ~30 top domains, which favours it on the head of a popularity list"}
+    else:
+        result["real_benign"] = {"available": False, "reason": "no real benign list supplied (--real-benign); intel/tranco_sample.txt has 5 domains, too few to report"}
 
     folds = []
-    for family, train, test in family_holdout_splits(corpus):
+    for family, train, test in family_holdout_splits(in_vocab):
         fold_model = train_lightgbm(train, factory)
-        folds.append({"held_out_family": family, "train_size": len(train), "test_size": len(test),
-                      "test_dga": sum(e.label for e in test), "model": evaluate_model(fold_model, test),
-                      "rules_fallback_0.70": _rule_baseline(test, 0.70)})
+        folds.append({"held_out_family": family, "train_size": len(train), "test_size": len(test), "test_dga": sum(e.label for e in test),
+                      "model": evaluate_model(fold_model, test, thr), "rules_fallback_0.70": _rule_baseline(test, 0.70),
+                      "oov_benign": _benign_only(fold_model, oov, thr)})
     result["leave_one_family_out"] = folds
-
-    if args.save_model:
-        full = train_lightgbm(corpus, factory)
-        artifact = ROOT / "models" / "artifact" / "dga_lightgbm.pkl"
-        full.save(artifact)
-        result["saved_artifact"] = str(artifact.relative_to(ROOT))
 
     out = Path(args.out_dir); out.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     json_path = out / f"dga_eval_{stamp}.json"
+
+    if args.save_model:
+        if args.classifier != "lightgbm":
+            raise SystemExit("--save-model writes a LightGBM artifact; run with --classifier lightgbm")
+        full = train_lightgbm(corpus, factory)
+        paths = full.save_artifact(ARTIFACT_DIR, {"trained_on": result["data"], "trained_at_utc": result["machine"]["captured_at_utc"],
+                                                  "metrics_file": f"benchmarks/{json_path.name}", "threshold": thr,
+                                                  "note": "refit on ALL synthetic data after evaluation; see metrics_file for hold-out estimates"})
+        import hashlib
+
+        result["saved_artifact"] = {k: {"path": str(Path(v).relative_to(ROOT)).replace("\\", "/"),
+                                        "sha256": hashlib.sha256(Path(v).read_bytes()).hexdigest(), "bytes": Path(v).stat().st_size}
+                                    for k, v in paths.items()}
+        result["saved_artifact"]["git"] = "models/artifact/ is .gitignored by project policy (vendored into the offline bundle); hashes above identify it"
+
     json_path.write_text(json.dumps(result, indent=2), encoding="utf-8")
+    if args.save_model:
+        (ARTIFACT_DIR / "dga_metrics.json").write_text(json.dumps({k: result[k] for k in result if k != "machine"} | {"machine": result["machine"]}, indent=2), encoding="utf-8")
 
     def row(name, rep):
         b, d = rep["per_class"]["benign"], rep["per_class"]["dga"]
         return f"| {name} | {b['precision']:.3f} | {b['recall']:.3f} | {b['f1']:.3f} | {d['precision']:.3f} | {d['recall']:.3f} | {d['f1']:.3f} |"
 
-    gv = result["grouped_validation"]
-    lines = [f"# DGA model evaluation ({stamp})", "", f"Classifier: **{args.classifier}**, model `{MODEL_VERSION}`. Data: {result['data']['source']} "
-             f"({result['data']['benign']} benign, {result['data']['dga']} DGA). **Synthetic corpus - not real traffic.**", "",
+    def fp_row(name, r):
+        if not r.get("n"):
+            return f"| {name} | - | - | - | - | - |"
+        return f"| {name} | {r['n']} | {r['model_fpr']:.4f} ({r['model_false_positives']}) | {r['rules_fpr_0.85']:.4f} | {r['rules_fpr_0.70']:.4f} | {r['model_mean_probability']:.3f} |"
+
+    label = "LightGBM (calibrated, thr %.2f)" % thr if args.classifier == "lightgbm" else f"{args.classifier} STAND-IN (thr {thr:.2f})"
+    gv, om, rb = result["grouped_validation_in_vocab"], result["oov_mixed"], result["real_benign"]
+    lines = [f"# DGA model evaluation ({stamp})", "",
+             f"Classifier: **{args.classifier}**, model `{MODEL_VERSION}`. Data: {result['data']['source']} "
+             f"({result['data']['benign_in_vocab']} in-vocabulary benign, {len(oov)} out-of-vocabulary benign, {result['data']['dga']} DGA). "
+             f"**Synthetic corpus - not real traffic**, except the row labelled *real*.", "",
+             f"Held-out benign words ({len(heldout_words)} of {len(train_words) + len(heldout_words)}, never in training): {', '.join(heldout_words)}.", "",
              "## Machine", "| key | value |", "|---|---|", spec_markdown(result["machine"]), "",
-             f"## Grouped validation (train {gv['train_size']}, validation {gv['validation_size']})", "",
+             f"## 1. Grouped validation, in-vocabulary (train {gv['train_size']}, validation {gv['validation_size']})", "",
              "| Detector | Benign P | Benign R | Benign F1 | DGA P | DGA R | DGA F1 |", "|---|---|---|---|---|---|---|",
-             row("LightGBM (calibrated, thr 0.5)" if args.classifier == "lightgbm" else f"{args.classifier} (thr 0.5)", gv["model"]),
-             row("rules-fallback thr 0.85", gv["rules_fallback_0.85"]), row("rules-fallback thr 0.70", gv["rules_fallback_0.70"]),
+             row(label, gv["model"]), row("rules-fallback thr 0.85", gv["rules_fallback_0.85"]), row("rules-fallback thr 0.70", gv["rules_fallback_0.70"]),
              f"\nModel ROC-AUC {gv['model']['roc_auc']}, Brier {gv['model']['brier_score']}. Feature importance: {gv.get('feature_importance', 'n/a')}.", "",
-             "> Caveat: validation benign names come from the same synthetic generator vocabulary as training, so grouped-validation "
-             "scores measure fit to our generator, not real-world accuracy. The leave-one-family-out rows are the meaningful generalisation test.", "",
-             "## Leave-one-family-out (family never seen in training)", "",
+             "## 2. Benign false-positive rate: in-vocabulary vs out-of-vocabulary vs real", "",
+             "| Benign set | n | Model FPR (count) | Rules FPR 0.85 | Rules FPR 0.70 | Model mean P(DGA) |", "|---|---|---|---|---|---|",
+             fp_row("in-vocabulary (validation, synthetic)", result["benign_only"]["in_vocab_validation"]),
+             fp_row("out-of-vocabulary (held-out words, synthetic)", result["benign_only"]["oov_heldout_words"]),
+             fp_row(f"**real** ({rb['provenance']['file']}, top {rb['provenance']['domains_used']})", rb) if rb["available"] else f"| **real** | not available: {rb['reason']} | | | | |",
+             "", f"OOV false positives (up to 10): {', '.join(result['benign_only']['oov_heldout_words']['example_false_positives']) or 'none'}.", "",
+             "## 3. Out-of-vocabulary mixed set (OOV benign + validation DGA)", "",
+             "| Detector | Benign P | Benign R | Benign F1 | DGA P | DGA R | DGA F1 |", "|---|---|---|---|---|---|---|",
+             row(label, om["model"]), row("rules-fallback thr 0.85", om["rules_fallback_0.85"]), row("rules-fallback thr 0.70", om["rules_fallback_0.70"]),
+             f"\nModel ROC-AUC {om['model']['roc_auc']}, Brier {om['model']['brier_score']}.", "",
+             "## 4. Leave-one-family-out (family never seen in training)", "",
              "| Held-out family | n DGA | Model DGA P | Model DGA R | Model DGA F1 | Model benign F1 | Rules(0.70) DGA R |", "|---|---|---|---|---|---|---|"]
     for f in folds:
         d, b, r = f["model"]["per_class"]["dga"], f["model"]["per_class"]["benign"], f["rules_fallback_0.70"]["per_class"]["dga"]
         lines.append(f"| {f['held_out_family']} | {f['test_dga']} | {d['precision']:.3f} | {d['recall']:.3f} | {d['f1']:.3f} | {b['f1']:.3f} | {r['recall']:.3f} |")
+    lines += ["", "Same folds, out-of-vocabulary benign false-positive rate of each fold model:", "",
+              "| Held-out family | OOV benign n | Model FPR (count) |", "|---|---|---|"]
+    lines += [f"| {f['held_out_family']} | {f['oov_benign']['n']} | {f['oov_benign']['model_fpr']:.4f} ({f['oov_benign']['model_false_positives']}) |" for f in folds]
+    lines += ["", "> Caveats: all rows except *real* use our synthetic generators. The attack suite in scripts/evaluate.py draws DGA names from the same",
+              "> five families, so the live-pipeline DGA recall with the model is an in-family number; section 4 is the unseen-family estimate."]
+    if args.save_model:
+        lines += ["", f"Saved artifact (refit on all synthetic data): {result['saved_artifact']}"]
     (out / f"dga_eval_{stamp}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
     print(f"\nwrote {json_path}")

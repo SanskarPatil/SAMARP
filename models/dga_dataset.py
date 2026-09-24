@@ -138,14 +138,14 @@ EXTENDED_DGA_FAMILIES = ("numeric_seed", "hexflux", "wordmix", "dictcat", "base3
 DGA_TLDS = ("com", "net", "info", "biz", "xyz", "top", "org", "ru")
 
 
-def _benign_hostname(rng: Random) -> str:
+def _benign_hostname(rng: Random, words: tuple[str, ...] = BENIGN_WORDS) -> str:
     sld_style = rng.random()
     if sld_style < 0.55:
-        sld = rng.choice(BENIGN_WORDS)
+        sld = rng.choice(words)
     elif sld_style < 0.85:
-        sld = rng.choice(BENIGN_WORDS) + rng.choice(BENIGN_WORDS)
+        sld = rng.choice(words) + rng.choice(words)
     else:
-        sld = rng.choice(BENIGN_WORDS) + str(rng.randint(1, 99))
+        sld = rng.choice(words) + str(rng.randint(1, 99))
     domain = f"{sld}.{rng.choice(BENIGN_TLDS)}"
     shape = rng.random()
     if shape < 0.30:
@@ -247,3 +247,91 @@ def family_holdout_splits(examples: Iterable[DomainExample], families: Iterable[
                 (test if _bucket(registered_domain(example.qname), len(families)) == index else train).append(example)
         folds.append((family, tuple(train), tuple(test)))
     return folds
+
+
+# ---------------------------------------------------------------------------
+# Vocabulary hold-out (PS-compliance task 8).
+#
+# Benign second-level names are built from BENIGN_WORDS.  A grouped split by
+# registered domain still lets the model see every WORD in training, so it can
+# score well by memorising the generator's vocabulary.  Here ~30 % of the
+# words are held out ENTIRELY: in-vocabulary benign names use only the other
+# 70 %, out-of-vocabulary (OOV) benign names use only held-out words.  The
+# model never sees a held-out word, in any position, during training.
+# ---------------------------------------------------------------------------
+
+def vocabulary_split(heldout_fraction: float = 0.3, words: tuple[str, ...] = BENIGN_WORDS) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Deterministic (train_words, heldout_words) partition by hash of the word."""
+    buckets = 1000
+    cut = int(round(heldout_fraction * buckets))
+    heldout = tuple(w for w in words if _bucket(f"vocab:{w}", buckets) < cut)
+    train = tuple(w for w in words if w not in heldout)
+    return train, heldout
+
+
+def build_vocab_holdout_corpus(seed: int = 26145, benign_in_vocab: int = 1500, benign_oov: int = 600,
+                               per_family: int = 300, heldout_fraction: float = 0.3) -> tuple[DomainExample, ...]:
+    """Synthetic corpus with a word-level hold-out.
+
+    family == "benign"      : label 0, second-level name built only from TRAIN words
+    family == "benign_oov"  : label 0, second-level name built only from HELD-OUT words
+    family in EXTENDED_DGA_FAMILIES : label 1
+    Service labels (www, api, cdn ...), regions and hex/UUID node ids are shared
+    by both benign sets - they are infrastructure tokens, not vocabulary.
+    """
+    rng = Random(seed)
+    train_words, heldout_words = vocabulary_split(heldout_fraction)
+    origin = datetime(2026, 9, 10, tzinfo=UTC)
+    examples: list[DomainExample] = []
+    seen: set[str] = set()
+
+    def add_benign(count: int, words: tuple[str, ...], family: str) -> None:
+        made = 0
+        while made < count:
+            qname = _benign_hostname(rng, words)
+            if qname in seen:
+                continue
+            seen.add(qname)
+            examples.append(DomainExample(qname, 0, family, f"benign-host-{len(examples) % 40}", origin + timedelta(seconds=len(examples))))
+            made += 1
+
+    add_benign(benign_in_vocab, train_words, "benign")
+    add_benign(benign_oov, heldout_words, "benign_oov")
+    for family_number, family in enumerate(EXTENDED_DGA_FAMILIES):
+        produced = 0
+        while produced < per_family:
+            qname = f"{_extended_dga_label(rng, family, produced)}.{rng.choice(DGA_TLDS)}"
+            if qname in seen:
+                continue
+            seen.add(qname)
+            examples.append(DomainExample(qname, 1, family, f"infected-host-{family_number}-{produced % 6}", origin + timedelta(hours=1 + family_number, seconds=produced)))
+            produced += 1
+    return deduplicate_examples(examples)
+
+
+def load_real_benign(path, top: int = 10_000) -> tuple[list[DomainExample], dict[str, object]]:
+    """Load a REAL benign domain list: Tranco CSV ("rank,domain") or one domain per line.
+
+    Returns (examples labelled 0 with family "benign_real", provenance dict).
+    """
+    import hashlib
+    from pathlib import Path
+
+    p = Path(path)
+    raw = p.read_bytes()
+    domains: list[str] = []
+    for line in raw.decode("utf-8", errors="replace").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        domain = line.split(",")[-1].strip().lower().rstrip(".")
+        if "." in domain and domain not in domains:
+            domains.append(domain)
+        if len(domains) >= top:
+            break
+    origin = datetime(2026, 9, 10, tzinfo=UTC)
+    examples = [DomainExample(d, 0, "benign_real", "", origin) for d in domains]
+    provenance = {"label": "real", "file": p.name, "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw),
+                  "file_mtime_utc": datetime.fromtimestamp(p.stat().st_mtime, tz=UTC).isoformat(timespec="seconds"),
+                  "domains_used": len(examples), "top": top}
+    return examples, provenance

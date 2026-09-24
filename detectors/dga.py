@@ -35,6 +35,23 @@ DEFAULT_SCORE_THRESHOLD = 0.85
 DEFAULT_MIN_QUERIES = 5
 DEFAULT_NXDOMAIN_RATE_MIN = 0.4
 DEFAULT_MAX_SOURCES = 1024
+# LightGBM model use (config/thresholds.yaml dga.model_mode):
+#   off    - rules only (model not loaded)
+#   shadow - rules decide; the model scores every query and its probabilities
+#            are recorded in the evidence (default: measure before trusting)
+#   on     - the model decides (mean calibrated P(DGA) over the burst >= model_threshold)
+# With no artifact in models/artifact/ or no lightgbm installed, every mode is rules only.
+DEFAULT_MODEL_MODE = "shadow"
+DEFAULT_MODEL_THRESHOLD = 0.5
+_UNSET = object()
+
+
+def _configured(key: str, default):
+    try:
+        from detectors.common import thresholds
+        return (thresholds().get("dga") or {}).get(key, default)
+    except Exception:  # pragma: no cover - config missing
+        return default
 
 # Default top-level domains to strip when extracting domain core
 COMMON_TLDS = {
@@ -153,7 +170,8 @@ class _SourceDGAState:
         self.queries: list[dict[str, Any]] = []
         self.nxdomain_count = 0
 
-    def add_query(self, qname: str, nxdomain: bool, score: float, features: dict[str, float], now: float) -> None:
+    def add_query(self, qname: str, nxdomain: bool, score: float, features: dict[str, float], now: float,
+                  model_probability: float | None = None) -> None:
         self.last_seen = now
         if nxdomain:
             self.nxdomain_count += 1
@@ -163,6 +181,7 @@ class _SourceDGAState:
                 "nxdomain": nxdomain,
                 "score": score,
                 "features": features,
+                "model_probability": model_probability,
             })
 
 
@@ -176,7 +195,21 @@ class DGADetector:
         nxdomain_rate_min: float = DEFAULT_NXDOMAIN_RATE_MIN,
         allowlist: Iterable[str] | None = None,
         max_sources: int = DEFAULT_MAX_SOURCES,
+        model: Any = _UNSET,
+        model_mode: str | None = None,
+        model_threshold: float | None = None,
     ) -> None:
+        self.model_mode = str(model_mode or _configured("model_mode", DEFAULT_MODEL_MODE)).lower()
+        if self.model_mode not in ("off", "shadow", "on"):
+            raise ValueError(f"dga model_mode must be off|shadow|on, not {self.model_mode!r}")
+        self.model_threshold = float(model_threshold if model_threshold is not None else _configured("model_threshold", DEFAULT_MODEL_THRESHOLD))
+        if self.model_mode == "off":
+            self.model = None
+        elif model is _UNSET:
+            from models.dga_model import load_default_model
+            self.model = load_default_model()
+        else:
+            self.model = model
         self.score_threshold = score_threshold
         self.min_queries = min_queries
         self.nxdomain_rate_min = nxdomain_rate_min
@@ -270,7 +303,10 @@ class DGADetector:
             self._sources[ev.src_ip] = state
 
         domain_score, feats = self.score_domain(qname)
-        state.add_query(qname, nxdomain, domain_score, feats, now)
+        model_p = None
+        if self.model is not None:
+            model_p = 0.0 if self.is_allowlisted(qname) else round(float(self.model.predict_probability(qname)), 4)
+        state.add_query(qname, nxdomain, domain_score, feats, now, model_p)
 
         return self._check_source_state(state, now, ev)
 
@@ -293,11 +329,18 @@ class DGADetector:
         avg_score = sum(q["score"] for q in state.queries) / query_count
         nx_rate = state.nxdomain_count / query_count
 
-        # A burst of DGA queries is detected when average score exceeds threshold
-        # and/or combined with high NXDOMAIN failure rate
-        exceeds_threshold = (avg_score >= self.score_threshold) or (
-            avg_score >= 0.70 and nx_rate >= self.nxdomain_rate_min
-        )
+        probs = [q["model_probability"] for q in state.queries if q.get("model_probability") is not None]
+        model_mean = sum(probs) / len(probs) if probs else None
+        model_decides = self.model_mode == "on" and model_mean is not None and len(probs) == query_count
+
+        if model_decides:
+            exceeds_threshold = model_mean >= self.model_threshold
+        else:
+            # A burst of DGA queries is detected when average score exceeds threshold
+            # and/or combined with high NXDOMAIN failure rate
+            exceeds_threshold = (avg_score >= self.score_threshold) or (
+                avg_score >= 0.70 and nx_rate >= self.nxdomain_rate_min
+            )
 
         if not exceeds_threshold:
             return None
@@ -326,6 +369,21 @@ class DGADetector:
             "latest_features": latest_feats,
             "model_version": MODEL_VERSION,
         }
+        if model_mean is not None:
+            evidence["model"] = {
+                "mode": "decides" if model_decides else "shadow (rules decide)",
+                "model_version": getattr(self.model, "version", "unknown"),
+                "mean_probability": round(model_mean, 4),
+                "max_probability": round(max(probs), 4),
+                "queries_scored": len(probs),
+                "threshold": self.model_threshold,
+            }
+        if model_decides:
+            evidence["interpretation"] = (
+                f"DGA burst detected from {state.src_ip}: {query_count} queries, "
+                f"mean LightGBM P(DGA) {model_mean:.2f} (calibrated), NXDOMAIN rate {nx_rate:.1%}"
+            )
+            evidence["model_version"] = getattr(self.model, "version", "unknown")
 
         input_mode = str(ev.input_mode) if ev.input_mode else "pcap_replay"
 
@@ -367,4 +425,10 @@ class DGADetector:
             },
             "recommendation": f"ADVISORY: DGA resolution patterns observed from {state.src_ip}. Inspect endpoint for malware beaconing and sinkhole resolving names.",
         }
+        if model_decides:
+            alert["score"] = round(model_mean, 4)
+            alert["score_type"] = "model_probability"
+            alert["model_version"] = getattr(self.model, "version", "unknown")
+            alert["threshold"]["model_threshold"] = self.model_threshold
+            alert["severity"] = "HIGH" if model_mean >= 0.9 else "MEDIUM"
         return apply_confidence(alert)

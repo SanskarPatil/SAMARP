@@ -1,15 +1,21 @@
-"""Build the vendored deterministic DGA artifact and evaluation report."""
-from __future__ import annotations
-import json
-from pathlib import Path
-from .dga_dataset import build_dga_corpus, split_holdouts
-from .dga_model import evaluate_model, train_lightgbm
+"""Superseded by scripts/train_eval_dga.py (task 8).
 
-ROOT = Path(__file__).resolve().parents[1]
+The v0.1 script trained on the 96-domain corpus and pickled the model. The
+current pipeline evaluates with grouped, word-level and family hold-outs and
+saves a text booster + JSON (no pickle). This entry point forwards to it.
+"""
+from __future__ import annotations
+
+import runpy
+import sys
+from pathlib import Path
+
+
 def main() -> None:
-    partitions = split_holdouts(build_dga_corpus())
-    model = train_lightgbm(partitions["train"])
-    model.save(ROOT / "models" / "artifact" / "dga_lightgbm.pkl")
-    report = {name: evaluate_model(model, examples) for name, examples in partitions.items() if examples}
-    (ROOT / "models" / "evaluation.json").write_text(json.dumps(report, sort_keys=True, indent=2), encoding="utf-8")
-if __name__ == "__main__": main()
+    script = Path(__file__).resolve().parents[1] / "scripts" / "train_eval_dga.py"
+    sys.argv = [str(script), "--save-model"]
+    runpy.run_path(str(script), run_name="__main__")
+
+
+if __name__ == "__main__":
+    main()

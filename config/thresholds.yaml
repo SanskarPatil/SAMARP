@@ -26,6 +26,10 @@ dga:
   score_threshold: 0.85
   min_queries: 5
   nxdomain_rate_min: 0.4
+  # LightGBM model (models/artifact/, scripts/train_eval_dga.py --save-model):
+  # off | shadow (rules decide, model probability recorded in evidence) | on (model decides)
+  model_mode: shadow
+  model_threshold: 0.5
 
 dns_tunnel:
   qname_len_min: 50
