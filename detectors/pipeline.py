@@ -17,6 +17,7 @@ from detectors.ddos import DDoSDetector
 from detectors.dga import DGADetector
 from detectors.dns import DNSTunnelDetector
 from detectors.exfil import ExfilDetector
+from detectors.reflection import ReflectionDetector
 from detectors.scan import ScanDetector
 from detectors.tls_quic import TLSQuicDetector, load_fingerprint_baseline
 from features.rolling import TumblingWindowAggregator
@@ -37,6 +38,7 @@ class DetectionPipeline:
         enable_dns: bool = True,
         enable_exfil: bool = True,
         enable_tls_quic: bool = True,
+        enable_reflection: bool = True,
     ) -> None:
         self.rolling_aggregator = TumblingWindowAggregator(
             window_duration_s=window_duration_s,
@@ -50,6 +52,7 @@ class DetectionPipeline:
         self.dga = DGADetector() if enable_dga else None
         self.dns_tunnel = DNSTunnelDetector() if enable_dns else None
         self.exfil = ExfilDetector() if enable_exfil else None
+        self.reflection = ReflectionDetector() if enable_reflection else None
         # Site JA3/JA4 baseline (config/tls_fingerprint_baseline.json) when present;
         # otherwise the detector warms up in-stream before novelty alerts fire.
         self.tls_quic = TLSQuicDetector(baseline=load_fingerprint_baseline()) if enable_tls_quic else None
@@ -102,6 +105,11 @@ class DetectionPipeline:
 
         if self.exfil is not None:
             alert = self.exfil.evaluate_event(event)
+            if alert is not None:
+                emitted_alerts.append(alert)
+
+        if self.reflection is not None:
+            alert = self.reflection.evaluate_event(event)
             if alert is not None:
                 emitted_alerts.append(alert)
 
