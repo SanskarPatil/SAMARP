@@ -168,9 +168,18 @@ class TLSQuicDetector:
 
         state.update_metadata(ev.tls, ev.quic)
 
-        # Ingest shape from event if available
-        size = ev.bytes or (ev.shape.get("packet_size_first_n", [None])[0] if ev.shape else None)
-        state.add_packet(size, ev.direction, ev.flow_id, now)
+        # Packet sizes: a flow record's ev.bytes is the whole flow, not a packet
+        # size. Use the observed first-N packet sizes when the record carries
+        # them; use ev.bytes only for a single-packet event.
+        shape_sizes = (ev.shape or {}).get("packet_size_first_n") or []
+        if shape_sizes:
+            state.add_packet(int(shape_sizes[0]), ev.direction, ev.flow_id, now)
+            for extra in shape_sizes[1:]:
+                if len(state.packet_sizes) < 32:
+                    state.packet_sizes.append(int(extra))
+        else:
+            single = ev.bytes if (ev.packets in (None, 1)) else None
+            state.add_packet(single, ev.direction, ev.flow_id, now)
 
         return self._check_state(state, now, ev)
 
