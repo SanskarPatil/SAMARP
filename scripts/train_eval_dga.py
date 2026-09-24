@@ -4,6 +4,8 @@ Usage (from the project root, venv active):
     python scripts/train_eval_dga.py                                   # evaluate, LightGBM
     python scripts/train_eval_dga.py --save-model                      # + save models/artifact/
     python scripts/train_eval_dga.py --real-benign intel\\tranco\\top-1m.csv   # + REAL benign test set
+    python scripts/train_eval_dga.py --save-model --real-benign intel\\tranco\\top-1m.csv --train-real --real-top 30000
+        # REAL benign also used for TRAINING: hash-split by domain, train half / disjoint test half
 
 Writes benchmarks/dga_eval_<UTC>.json and .md with machine spec and command.
 
@@ -82,6 +84,9 @@ def main() -> int:
     parser.add_argument("--real-benign", default=None, help="Tranco CSV (rank,domain) or one domain per line; evaluated as REAL benign")
     parser.add_argument("--real-top", type=int, default=10_000)
     parser.add_argument("--threshold", type=float, default=0.5)
+    parser.add_argument("--train-real", action="store_true",
+                        help="also TRAIN on real benign: hash-split the list by domain into a train half and a disjoint test half")
+    parser.add_argument("--real-train-max", type=int, default=6000, help="cap on real benign training names (keeps class balance)")
     args = parser.parse_args()
     factory = _classifier_factory(args.classifier)
     thr = args.threshold
@@ -99,8 +104,26 @@ def main() -> int:
                  "train_words": len(train_words), "heldout_words": list(heldout_words)},
     }
 
+    real, provenance, real_train, real_test = [], None, [], []
+    if args.real_benign:
+        from models.dga_dataset import _bucket
+
+        real, provenance = load_real_benign(args.real_benign, args.real_top)
+        if args.train_real:
+            # Deterministic, domain-disjoint halves: a domain is in exactly one half.
+            real_train = [e for e in real if _bucket(f"real:{e.qname}", 2) == 0][: args.real_train_max]
+            real_test = [e for e in real if _bucket(f"real:{e.qname}", 2) == 1]
+            assert not {e.qname for e in real_train} & {e.qname for e in real_test}
+        else:
+            real_test = real
+    elif args.train_real:
+        raise SystemExit("--train-real needs --real-benign PATH")
+    result["data"]["benign_training_sources"] = ["synthetic in-vocabulary"] + (["REAL (Tranco train half)"] if real_train else [])
+    result["data"]["real_train"] = len(real_train)
+    result["data"]["real_test"] = len(real_test)
+
     split = grouped_train_validation_split(in_vocab)
-    model = train_lightgbm(split["train"], factory)
+    model = train_lightgbm(list(split["train"]) + real_train, factory)
     val_dga = [e for e in split["validation"] if e.label == 1]
     result["grouped_validation_in_vocab"] = {
         "train_size": len(split["train"]), "validation_size": len(split["validation"]),
@@ -117,18 +140,20 @@ def main() -> int:
                            "rules_fallback_0.85": _rule_baseline(mixed, 0.85), "rules_fallback_0.70": _rule_baseline(mixed, 0.70)}
 
     if args.real_benign:
-        real, provenance = load_real_benign(args.real_benign, args.real_top)
-        result["real_benign"] = {"available": True, "provenance": provenance, **_benign_only(model, real, thr),
+        result["real_benign"] = {"available": True, "provenance": provenance, "used_for_training": bool(real_train),
+                                 "evaluated_on": "disjoint test half (hash split by domain)" if real_train else "whole list",
+                                 **_benign_only(model, real_test, thr),
                                  "note": "rules fallback allowlists ~30 top domains, which favours it on the head of a popularity list"}
     else:
         result["real_benign"] = {"available": False, "reason": "no real benign list supplied (--real-benign); intel/tranco_sample.txt has 5 domains, too few to report"}
 
     folds = []
     for family, train, test in family_holdout_splits(in_vocab):
-        fold_model = train_lightgbm(train, factory)
+        fold_model = train_lightgbm(list(train) + real_train, factory)
         folds.append({"held_out_family": family, "train_size": len(train), "test_size": len(test), "test_dga": sum(e.label for e in test),
                       "model": evaluate_model(fold_model, test, thr), "rules_fallback_0.70": _rule_baseline(test, 0.70),
-                      "oov_benign": _benign_only(fold_model, oov, thr)})
+                      "oov_benign": _benign_only(fold_model, oov, thr),
+                      **({"real_benign_test": _benign_only(fold_model, real_test, thr)} if real_test else {})})
     result["leave_one_family_out"] = folds
 
     out = Path(args.out_dir); out.mkdir(parents=True, exist_ok=True)
@@ -138,7 +163,7 @@ def main() -> int:
     if args.save_model:
         if args.classifier != "lightgbm":
             raise SystemExit("--save-model writes a LightGBM artifact; run with --classifier lightgbm")
-        full = train_lightgbm(corpus, factory)
+        full = train_lightgbm(list(corpus) + real_train, factory)
         paths = full.save_artifact(ARTIFACT_DIR, {"trained_on": result["data"], "trained_at_utc": result["machine"]["captured_at_utc"],
                                                   "metrics_file": f"benchmarks/{json_path.name}", "threshold": thr,
                                                   "note": "refit on ALL synthetic data after evaluation; see metrics_file for hold-out estimates"})
@@ -167,7 +192,9 @@ def main() -> int:
     lines = [f"# DGA model evaluation ({stamp})", "",
              f"Classifier: **{args.classifier}**, model `{MODEL_VERSION}`. Data: {result['data']['source']} "
              f"({result['data']['benign_in_vocab']} in-vocabulary benign, {len(oov)} out-of-vocabulary benign, {result['data']['dga']} DGA). "
-             f"**Synthetic corpus - not real traffic**, except the row labelled *real*.", "",
+             f"**Synthetic corpus - not real traffic**, except the rows labelled *real*.", "",
+             (f"**Benign training data includes REAL domains**: {len(real_train)} from the Tranco list (train half); every *real* number below is on the "
+              f"other {len(real_test)} domains, which were never trained on." if real_train else "Benign training data: synthetic only."), "",
              f"Held-out benign words ({len(heldout_words)} of {len(train_words) + len(heldout_words)}, never in training): {', '.join(heldout_words)}.", "",
              "## Machine", "| key | value |", "|---|---|", spec_markdown(result["machine"]), "",
              f"## 1. Grouped validation, in-vocabulary (train {gv['train_size']}, validation {gv['validation_size']})", "",
@@ -178,7 +205,7 @@ def main() -> int:
              "| Benign set | n | Model FPR (count) | Rules FPR 0.85 | Rules FPR 0.70 | Model mean P(DGA) |", "|---|---|---|---|---|---|",
              fp_row("in-vocabulary (validation, synthetic)", result["benign_only"]["in_vocab_validation"]),
              fp_row("out-of-vocabulary (held-out words, synthetic)", result["benign_only"]["oov_heldout_words"]),
-             fp_row(f"**real** ({rb['provenance']['file']}, top {rb['provenance']['domains_used']})", rb) if rb["available"] else f"| **real** | not available: {rb['reason']} | | | | |",
+             fp_row(f"**real** ({rb['provenance']['file']}, {rb['evaluated_on']})", rb) if rb["available"] else f"| **real** | not available: {rb['reason']} | | | | |",
              "", f"OOV false positives (up to 10): {', '.join(result['benign_only']['oov_heldout_words']['example_false_positives']) or 'none'}.", "",
              "## 3. Out-of-vocabulary mixed set (OOV benign + validation DGA)", "",
              "| Detector | Benign P | Benign R | Benign F1 | DGA P | DGA R | DGA F1 |", "|---|---|---|---|---|---|---|",
@@ -191,11 +218,16 @@ def main() -> int:
         lines.append(f"| {f['held_out_family']} | {f['test_dga']} | {d['precision']:.3f} | {d['recall']:.3f} | {d['f1']:.3f} | {b['f1']:.3f} | {r['recall']:.3f} |")
     lines += ["", "Same folds, out-of-vocabulary benign false-positive rate of each fold model:", "",
               "| Held-out family | OOV benign n | Model FPR (count) |", "|---|---|---|"]
-    lines += [f"| {f['held_out_family']} | {f['oov_benign']['n']} | {f['oov_benign']['model_fpr']:.4f} ({f['oov_benign']['model_false_positives']}) |" for f in folds]
+    if real_test:
+        lines[-2:] = ["| Held-out family | OOV benign n | Model FPR (count) | Real benign n | Model real FPR (count) |", "|---|---|---|---|---|"]
+        lines += [f"| {f['held_out_family']} | {f['oov_benign']['n']} | {f['oov_benign']['model_fpr']:.4f} ({f['oov_benign']['model_false_positives']}) | "
+                  f"{f['real_benign_test']['n']} | {f['real_benign_test']['model_fpr']:.4f} ({f['real_benign_test']['model_false_positives']}) |" for f in folds]
+    else:
+        lines += [f"| {f['held_out_family']} | {f['oov_benign']['n']} | {f['oov_benign']['model_fpr']:.4f} ({f['oov_benign']['model_false_positives']}) |" for f in folds]
     lines += ["", "> Caveats: all rows except *real* use our synthetic generators. The attack suite in scripts/evaluate.py draws DGA names from the same",
               "> five families, so the live-pipeline DGA recall with the model is an in-family number; section 4 is the unseen-family estimate."]
     if args.save_model:
-        lines += ["", f"Saved artifact (refit on all synthetic data): {result['saved_artifact']}"]
+        lines += ["", f"Saved artifact (refit on all synthetic data{' + real train half' if real_train else ''}): {result['saved_artifact']}"]
     (out / f"dga_eval_{stamp}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
     print(f"\nwrote {json_path}")
