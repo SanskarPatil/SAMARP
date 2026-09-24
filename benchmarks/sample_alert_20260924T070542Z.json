@@ -1,0 +1,776 @@
+{
+  "machine": {
+    "captured_at_utc": "2026-09-24T07:05:42+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "git_commit": "584b5b2",
+    "command": "python.exe scripts\\show_sample_alert.py"
+  },
+  "note": "latency_ms = event entering pipeline -> incident signed into hash chain; in-memory SQLite",
+  "sample": {
+    "calibrated": false,
+    "calibrated_on": "uncalibrated",
+    "capability": {
+      "detector_state": "OBSERVABLE",
+      "input_mode": "pcap_replay",
+      "missing_evidence": []
+    },
+    "confidence": 0.991,
+    "contributing_flow_ids": [
+      "bf73a2528cd00ffb"
+    ],
+    "dedup_key": "[\"Botnet C2 beaconing\",\"10.0.0.22\",\"198.51.100.44\",8443]",
+    "detector": "c2",
+    "entry_hash": "cb6648a6b4093fa2f8ef0a63cd993ef6eeb3e975f730734d428dfb2e111811f5",
+    "event_count": 8,
+    "evidence": {
+      "duration_s": 34.99,
+      "event_count": 8,
+      "iat_cv": 0.0027,
+      "iat_mad": 0.01,
+      "iat_mean": 4.999,
+      "iat_median": 5.0,
+      "iat_std": 0.013,
+      "interpretation": "Periodic C2 beaconing observed from 10.0.0.22 to 198.51.100.44:8443: 8 events over 35.0s, mean IAT 5.00s, CV=0.003 <= 0.15",
+      "repeated_destination": "198.51.100.44:8443",
+      "sample_iats": [
+        4.99,
+        5.0,
+        5.02,
+        4.98,
+        5.01,
+        5.0,
+        4.99
+      ]
+    },
+    "first_observed": "2026-03-12T01:47:15.010000+00:00",
+    "flow_id": "6b33ffc8a11a7a5b",
+    "flow_ref_type": "aggregate",
+    "incident_id": "51ee4faff5c81713",
+    "last_observed": "2026-03-12T01:47:50.000000+00:00",
+    "latency_ms": 0.2862,
+    "payload_hash": "2b22371ba6da657643fd6b93df3d41363b01d0e5dd62f5391fd28862aeff7e3d",
+    "prev_hash": "dfbc652fe9c3cb24edc26bd993d87e03ec7fe417da6b4e8c2bb60c0a1fe32fea",
+    "ps_class": "Botnet C2 beaconing",
+    "recommendation": "ADVISORY: Highly regular beaconing communication detected to 198.51.100.44:8443. Investigate host for persistent implant or RAT activity.",
+    "schema_version": "1.3",
+    "score": 0.991,
+    "score_type": "anomaly_score",
+    "seq": 3,
+    "severity": "CRITICAL",
+    "status": "NEW",
+    "threat_class": "c2_beacon",
+    "threshold": {
+      "cv_max": 0.15,
+      "min_events": 8,
+      "window_s": 300.0
+    },
+    "timestamp": "2026-03-12T01:47:50.000000+00:00",
+    "window": {
+      "duration_s": 34.99,
+      "end": "2026-03-12T01:47:50.000000+00:00",
+      "start": "2026-03-12T01:47:15.010000+00:00"
+    }
+  },
+  "incidents": [
+    {
+      "baseline": {
+        "history_samples": 33,
+        "mad_pps": 0.0,
+        "median_pps": 1.0
+      },
+      "calibrated": false,
+      "calibrated_on": "uncalibrated",
+      "capability": {
+        "detector_state": "OBSERVABLE",
+        "input_mode": "pcap_replay",
+        "missing_evidence": []
+      },
+      "confidence": 1.0,
+      "contributing_flow_ids": [
+        "ddf5612258c5b580",
+        "0aba8b86a5ead09e",
+        "0f622e85283bd3a3",
+        "a989c67d6b4dc31f",
+        "247a72a9001632d1",
+        "7e69ce3852dfe529",
+        "d9d275e4915577df",
+        "a54c276a2ea85350",
+        "4f012deeb7c7556b",
+        "5e9557daf89ff33e",
+        "1ef2e10328f1d49d",
+        "3d8287d7ed609df9",
+        "cc649fb7b92dae37",
+        "ac79a9b74ed01bb3",
+        "aa63c9eb72298dcf",
+        "64d7aca396e3f34e",
+        "3814d6fd75cc617c",
+        "9bf38f932493d49e",
+        "3972baafdfc79b2d",
+        "28aa6b532aea602e",
+        "7cc76bbd3ae8bf32",
+        "b7d09fc982d05ca3",
+        "614f438adeeffe18",
+        "067e917bb13b75d3",
+        "7efa89eb22c8e22a",
+        "e4ac597da3456a36",
+        "8f8e7b835dcf1b74",
+        "189ef32aa58f34b2",
+        "972675f634d0374d",
+        "1daa70d51b08ebb5",
+        "c030df51e2fa84f3",
+        "2f4514e2f80934bf"
+      ],
+      "dedup_key": "[\"Volumetric DDoS / flooding\",\"10.0.0.5\",80]",
+      "detector": "ddos",
+      "entry_hash": "6b76aa7c568bb91241c0a36cd27501baaad797de336526c3d135165a20aa2844",
+      "event_count": 6000,
+      "evidence": {
+        "ack_count": 0,
+        "byte_rate_bps": 2880000.0,
+        "interpretation": "High SYN-to-ACK ratio (12000 SYNs vs 0 ACKs) exceeding threshold (z=5999.00)",
+        "packet_rate_pps": 6000.0,
+        "protocol_breakdown": {
+          "TCP": 6000
+        },
+        "source_entropy": 7.6439,
+        "syn_ack_ratio": 12000.0,
+        "syn_count": 12000,
+        "target_ip": "10.0.0.5",
+        "target_port": 80,
+        "unique_source_count": 200
+      },
+      "first_observed": "2026-03-12T01:52:11.000000+00:00",
+      "flow_id": "76a0e06761163ee9",
+      "flow_ref_type": "aggregate",
+      "incident_id": "76a0e06761163ee9",
+      "last_observed": "2026-03-12T01:52:12.000000+00:00",
+      "latency_ms": 0.4923,
+      "payload_hash": "4509555a79eac6559ba8d84ed6887af200a69ae63905b6aae08525bdb673f371",
+      "prev_hash": "84ccd0daf0b8c49070ec3b224322997add478f0558e84e1572f68e661e849054",
+      "ps_class": "Volumetric DDoS / flooding",
+      "recommendation": "ADVISORY: Volumetric traffic flood observed targeting internal host. Recommend perimeter upstream ratelimiting.",
+      "schema_version": "1.3",
+      "score": 5999.0,
+      "score_type": "robust_z",
+      "seq": 13,
+      "severity": "HIGH",
+      "status": "NEW",
+      "threat_class": "syn_flood",
+      "threshold": {
+        "hysteresis_windows": 2,
+        "min_pps": 5000,
+        "robust_z": 6.0
+      },
+      "timestamp": "2026-03-12T01:52:12.000000+00:00",
+      "window": {
+        "duration_s": 1.0,
+        "end": "2026-03-12T01:52:12.000000+00:00",
+        "start": "2026-03-12T01:52:11.000000+00:00"
+      }
+    },
+    {
+      "baseline": {
+        "history_samples": 32,
+        "mad_pps": 0.0,
+        "median_pps": 1.0
+      },
+      "calibrated": false,
+      "calibrated_on": "uncalibrated",
+      "capability": {
+        "detector_state": "OBSERVABLE",
+        "input_mode": "pcap_replay",
+        "missing_evidence": []
+      },
+      "confidence": 1.0,
+      "contributing_flow_ids": [
+        "b6002154f1e85ea6",
+        "4cdb4d791a2e550c",
+        "8b53dad50b0cae51",
+        "e093311b335e26f0"
+      ],
+      "dedup_key": "[\"Volumetric DDoS / flooding\",\"203.0.113.88\",443]",
+      "detector": "ddos",
+      "entry_hash": "84ccd0daf0b8c49070ec3b224322997add478f0558e84e1572f68e661e849054",
+      "event_count": 4,
+      "evidence": {
+        "ack_count": 0,
+        "byte_rate_bps": 24080000.0,
+        "interpretation": "Packet rate anomaly (2020.0 pps) exceeding threshold (z=2019.00)",
+        "packet_rate_pps": 2020.0,
+        "protocol_breakdown": {
+          "TCP": 1
+        },
+        "source_entropy": 0.0,
+        "syn_ack_ratio": 0.0,
+        "syn_count": 0,
+        "target_ip": "203.0.113.88",
+        "target_port": 443,
+        "unique_source_count": 1
+      },
+      "first_observed": "2026-03-12T01:50:13.000000+00:00",
+      "flow_id": "847c8cbb230938f6",
+      "flow_ref_type": "aggregate",
+      "incident_id": "847c8cbb230938f6",
+      "last_observed": "2026-03-12T01:50:23.000000+00:00",
+      "latency_ms": 0.1988,
+      "payload_hash": "46f90bd7bdd9c870a3e2feecf711ff0a7ff71cb815f6b47bec510f8244e58c0a",
+      "prev_hash": "4451cc3680b4c137db52d82fec173b6101970786e1fc5284922c537c88420ef9",
+      "ps_class": "Volumetric DDoS / flooding",
+      "recommendation": "ADVISORY: Volumetric traffic flood observed targeting internal host. Recommend perimeter upstream ratelimiting.",
+      "schema_version": "1.3",
+      "score": 2019.0,
+      "score_type": "robust_z",
+      "seq": 12,
+      "severity": "HIGH",
+      "status": "UPDATED",
+      "threat_class": "volumetric_flood",
+      "threshold": {
+        "hysteresis_windows": 2,
+        "min_pps": 5000,
+        "robust_z": 6.0
+      },
+      "timestamp": "2026-03-12T01:50:23.000000+00:00",
+      "window": {
+        "duration_s": 10.0,
+        "end": "2026-03-12T01:50:23.000000+00:00",
+        "start": "2026-03-12T01:50:13.000000+00:00"
+      }
+    },
+    {
+      "baseline": {
+        "min_outbound_bytes": 250000,
+        "outbound_ratio_min": 10.0
+      },
+      "calibrated": false,
+      "calibrated_on": "uncalibrated",
+      "capability": {
+        "detector_state": "OBSERVABLE",
+        "input_mode": "pcap_replay",
+        "missing_evidence": []
+      },
+      "confidence": 1.0,
+      "contributing_flow_ids": [
+        "22a5c9eb062deea0"
+      ],
+      "dedup_key": "[\"Data exfiltration\",\"10.0.0.15\",\"203.0.113.88\"]",
+      "detector": "exfil",
+      "entry_hash": "5a2aa7fac04e57389d0f85d1b4bcb37d5a28e8339f71615b98e70ea9629192af",
+      "event_count": 2020,
+      "evidence": {
+        "burst_or_sustained": "burst",
+        "destination": "203.0.113.88",
+        "direction": "outbound",
+        "duration_s": 0.0,
+        "inbound_bytes": 0,
+        "inbound_packets": 0,
+        "interpretation": "Data exfiltration pattern detected: 10.0.0.15 -> 203.0.113.88 transferred 3,010,000 outbound bytes vs 0 inbound bytes (asymmetry ratio 3010000.0 >= 10.0) The system does not infer data content.",
+        "outbound_bytes": 3010000,
+        "outbound_packets": 2020,
+        "outbound_ratio": 3010000.0,
+        "protocol": "TCP",
+        "robust_z": null,
+        "source": "10.0.0.15"
+      },
+      "first_observed": "2026-03-12T01:50:10.000000+00:00",
+      "flow_id": "f800af0d254e92fa",
+      "flow_ref_type": "aggregate",
+      "incident_id": "f66f7058cc8d0a2f",
+      "last_observed": "2026-03-12T01:50:10.000000+00:00",
+      "latency_ms": 0.2061,
+      "payload_hash": "f40979d83c324f8bf8632a5d947d4ebf37b6e1e64c0014c219393a14ab11d47a",
+      "prev_hash": "db4563d01700c93a04c81b88e5e42775133db02e6ddd2d078233aa56e4186653",
+      "ps_class": "Data exfiltration",
+      "recommendation": "ADVISORY: Massive outbound data transfer anomaly detected from internal host 10.0.0.15 to external endpoint 203.0.113.88. Check egress DLP and restrict destination IP.",
+      "schema_version": "1.3",
+      "score": 1.0,
+      "score_type": "anomaly_score",
+      "seq": 8,
+      "severity": "CRITICAL",
+      "status": "NEW",
+      "threat_class": "data_exfil",
+      "threshold": {
+        "min_outbound_bytes": 250000,
+        "outbound_ratio_min": 10.0,
+        "window_s": 300.0
+      },
+      "timestamp": "2026-03-12T01:50:10.000000+00:00",
+      "window": {
+        "duration_s": 0.001,
+        "end": "2026-03-12T01:50:10.000000+00:00",
+        "start": "2026-03-12T01:50:10.000000+00:00"
+      }
+    },
+    {
+      "calibrated": false,
+      "calibrated_on": "uncalibrated",
+      "capability": {
+        "detector_state": "OBSERVABLE",
+        "input_mode": "pcap_replay",
+        "missing_evidence": []
+      },
+      "confidence": 1.0,
+      "contributing_flow_ids": [
+        "7c4b16b221aebb2e",
+        "e7256429e10a4451",
+        "2a15d3601f4d78b2",
+        "fa183c6693b7bdf2",
+        "0cd93979fbf043b0",
+        "3b9b22627490fa1b",
+        "14cfd410981a3904"
+      ],
+      "dedup_key": "[\"Botnet C2 beaconing\",\"10.0.0.60\",\"8.8.8.8\",53]",
+      "detector": "c2",
+      "entry_hash": "db4563d01700c93a04c81b88e5e42775133db02e6ddd2d078233aa56e4186653",
+      "event_count": 8,
+      "evidence": {
+        "duration_s": 14.0,
+        "event_count": 8,
+        "iat_cv": 0.0,
+        "iat_mad": 0.0,
+        "iat_mean": 2.0,
+        "iat_median": 2.0,
+        "iat_std": 0.0,
+        "interpretation": "Periodic C2 beaconing observed from 10.0.0.60 to 8.8.8.8:53: 8 events over 14.0s, mean IAT 2.00s, CV=0.000 <= 0.15",
+        "repeated_destination": "8.8.8.8:53",
+        "sample_iats": [
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "first_observed": "2026-03-12T01:49:10.000000+00:00",
+      "flow_id": "84e52e4ac80f97e6",
+      "flow_ref_type": "aggregate",
+      "incident_id": "3d7a5a6f8397c6f1",
+      "last_observed": "2026-03-12T01:49:24.000000+00:00",
+      "latency_ms": 0.2703,
+      "payload_hash": "2e1190f9185e32b59597a0e090f9b02167ecdb373a0d138012dc25ff364edc4f",
+      "prev_hash": "352aef63eccad41443a950f0037d3bc049e9a6694133ad5bd098b83304f00771",
+      "ps_class": "Botnet C2 beaconing",
+      "recommendation": "ADVISORY: Highly regular beaconing communication detected to 8.8.8.8:53. Investigate host for persistent implant or RAT activity.",
+      "schema_version": "1.3",
+      "score": 1.0,
+      "score_type": "anomaly_score",
+      "seq": 7,
+      "severity": "CRITICAL",
+      "status": "NEW",
+      "threat_class": "c2_beacon",
+      "threshold": {
+        "cv_max": 0.15,
+        "min_events": 8,
+        "window_s": 300.0
+      },
+      "timestamp": "2026-03-12T01:49:24.000000+00:00",
+      "window": {
+        "duration_s": 14.0,
+        "end": "2026-03-12T01:49:24.000000+00:00",
+        "start": "2026-03-12T01:49:10.000000+00:00"
+      }
+    },
+    {
+      "calibrated": false,
+      "calibrated_on": "uncalibrated",
+      "capability": {
+        "detector_state": "OBSERVABLE",
+        "input_mode": "pcap_replay",
+        "missing_evidence": []
+      },
+      "confidence": 1.0,
+      "dedup_key": "[\"DGA / DNS tunnelling\",\"10.0.0.60\",\"attacker.org\"]",
+      "detector": "dns",
+      "entry_hash": "352aef63eccad41443a950f0037d3bc049e9a6694133ad5bd098b83304f00771",
+      "event_count": 5,
+      "evidence": {
+        "avg_entropy": 4.501,
+        "avg_length": 57.0,
+        "interpretation": "DNS tunnelling activity detected for domain 'attacker.org' from 10.0.0.60: 5 queries, avg length 57.0, entropy 4.50, qtype shares: TXT=100.0%, NULL=0.0%, CNAME=0.0%",
+        "qps": 0.62,
+        "qtype_cname_ratio": 0.0,
+        "qtype_distribution": {
+          "TXT": 5
+        },
+        "qtype_entropy": 0.0,
+        "qtype_null_ratio": 0.0,
+        "qtype_txt_ratio": 1.0,
+        "query_count": 5,
+        "registered_domain": "attacker.org",
+        "sample_queries": [
+          "chunk00.a89bf234cde780ffff.tunnel.exfil-corp.attacker.org",
+          "chunk01.a89bf234cde780ffff.tunnel.exfil-corp.attacker.org",
+          "chunk02.a89bf234cde780ffff.tunnel.exfil-corp.attacker.org",
+          "chunk03.a89bf234cde780ffff.tunnel.exfil-corp.attacker.org",
+          "chunk04.a89bf234cde780ffff.tunnel.exfil-corp.attacker.org"
+        ]
+      },
+      "first_observed": "2026-03-12T01:49:10.000000+00:00",
+      "flow_id": "96c69c82fb0d3954",
+      "flow_ref_type": "aggregate",
+      "incident_id": "dae28a2d46192116",
+      "last_observed": "2026-03-12T01:49:18.000000+00:00",
+      "latency_ms": 0.2359,
+      "payload_hash": "b88979077e8270b6b84b44be1c761249cf57d59ba3658a151227938bab424a7a",
+      "prev_hash": "f0729902b39778300a9f2fbb8495d28b94c55d8f172cec8a04e03cef3a59dab4",
+      "ps_class": "DGA / DNS tunnelling",
+      "recommendation": "ADVISORY: Encapsulated DNS tunnel data detected to attacker.org. Inspect querying client 10.0.0.60 and block unauthorized external DNS resolvers.",
+      "schema_version": "1.3",
+      "score": 1.0,
+      "score_type": "anomaly_score",
+      "seq": 6,
+      "severity": "HIGH",
+      "status": "NEW",
+      "threat_class": "dns_tunnel",
+      "threshold": {
+        "entropy_min": 3.5,
+        "qname_len_min": 50,
+        "qps_per_domain_min": 10
+      },
+      "timestamp": "2026-03-12T01:49:18.000000+00:00",
+      "window": {
+        "duration_s": 8.0,
+        "end": "2026-03-12T01:49:18.000000+00:00",
+        "start": "2026-03-12T01:49:10.000000+00:00"
+      }
+    },
+    {
+      "calibrated": false,
+      "calibrated_on": "uncalibrated",
+      "capability": {
+        "detector_state": "OBSERVABLE",
+        "input_mode": "pcap_replay",
+        "missing_evidence": []
+      },
+      "confidence": 1.0,
+      "contributing_flow_ids": [
+        "445460d1a9dea933",
+        "b72d18692d5b29fd",
+        "610ad5e0c7680879",
+        "84a253e506dd0e4f",
+        "fad0400f669e0295",
+        "02e4ab5e7e9ec8b4",
+        "bd9724fad46fd263"
+      ],
+      "dedup_key": "[\"Botnet C2 beaconing\",\"10.0.0.45\",\"1.1.1.1\",53]",
+      "detector": "c2",
+      "entry_hash": "f0729902b39778300a9f2fbb8495d28b94c55d8f172cec8a04e03cef3a59dab4",
+      "event_count": 8,
+      "evidence": {
+        "duration_s": 10.5,
+        "event_count": 8,
+        "iat_cv": 0.0,
+        "iat_mad": 0.0,
+        "iat_mean": 1.5,
+        "iat_median": 1.5,
+        "iat_std": 0.0,
+        "interpretation": "Periodic C2 beaconing observed from 10.0.0.45 to 1.1.1.1:53: 8 events over 10.5s, mean IAT 1.50s, CV=0.000 <= 0.15",
+        "repeated_destination": "1.1.1.1:53",
+        "sample_iats": [
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5
+        ]
+      },
+      "first_observed": "2026-03-12T01:48:10.000000+00:00",
+      "flow_id": "7bc47b1cc2521c1d",
+      "flow_ref_type": "aggregate",
+      "incident_id": "de7379f5fefecb35",
+      "last_observed": "2026-03-12T01:48:20.500000+00:00",
+      "latency_ms": 0.2965,
+      "payload_hash": "a0fce422560155b95f4f9a0661f827b18ba0b66079f4848158e403e013ed9dba",
+      "prev_hash": "53ea1a2e8deafbad955d656e9ce093199ddf8d0dd0a8c5469fda25a65c20d326",
+      "ps_class": "Botnet C2 beaconing",
+      "recommendation": "ADVISORY: Highly regular beaconing communication detected to 1.1.1.1:53. Investigate host for persistent implant or RAT activity.",
+      "schema_version": "1.3",
+      "score": 1.0,
+      "score_type": "anomaly_score",
+      "seq": 5,
+      "severity": "CRITICAL",
+      "status": "NEW",
+      "threat_class": "c2_beacon",
+      "threshold": {
+        "cv_max": 0.15,
+        "min_events": 8,
+        "window_s": 300.0
+      },
+      "timestamp": "2026-03-12T01:48:20.500000+00:00",
+      "window": {
+        "duration_s": 10.5,
+        "end": "2026-03-12T01:48:20.500000+00:00",
+        "start": "2026-03-12T01:48:10.000000+00:00"
+      }
+    },
+    {
+      "calibrated": false,
+      "calibrated_on": "uncalibrated",
+      "capability": {
+        "detector_state": "OBSERVABLE",
+        "input_mode": "pcap_replay",
+        "missing_evidence": []
+      },
+      "confidence": 0.882,
+      "dedup_key": "[\"DGA / DNS tunnelling\",\"10.0.0.45\"]",
+      "detector": "dga",
+      "entry_hash": "53ea1a2e8deafbad955d656e9ce093199ddf8d0dd0a8c5469fda25a65c20d326",
+      "event_count": 5,
+      "evidence": {
+        "avg_score": 0.882,
+        "interpretation": "DGA burst detected from 10.0.0.45: 5 queries, avg rule score 0.88, NXDOMAIN rate 100.0%",
+        "latest_features": {
+          "digit_ratio": 0.1429,
+          "entropy": 3.6645,
+          "label_count": 2.0,
+          "length": 14.0,
+          "lm_bigram": 0.9091,
+          "vowel_ratio": 0.0714
+        },
+        "model_version": "rules-fallback",
+        "nxdomain_rate": 1.0,
+        "query_count": 5,
+        "sample_domains": [
+          "xzkjqwyfp7931.org",
+          "qwrtyzxvbm992.net",
+          "bdfhjlnprtxz12.com",
+          "zxvcbmnlkjhg88.info",
+          "mnbvcxzasdfg77.ru"
+        ]
+      },
+      "first_observed": "2026-03-12T01:48:10.000000+00:00",
+      "flow_id": "8270d1e1d802714e",
+      "flow_ref_type": "entity",
+      "incident_id": "81f514ff615fbfbc",
+      "last_observed": "2026-03-12T01:48:16.000000+00:00",
+      "latency_ms": 0.2373,
+      "model_version": "rules-fallback",
+      "payload_hash": "55bcc959abac8bdd05368f5933d2ffff363cdf1e4e95a9a56149dec78d16fe17",
+      "prev_hash": "cb6648a6b4093fa2f8ef0a63cd993ef6eeb3e975f730734d428dfb2e111811f5",
+      "ps_class": "DGA / DNS tunnelling",
+      "recommendation": "ADVISORY: DGA resolution patterns observed from 10.0.0.45. Inspect endpoint for malware beaconing and sinkhole resolving names.",
+      "schema_version": "1.3",
+      "score": 0.882,
+      "score_type": "rule_score",
+      "seq": 4,
+      "severity": "MEDIUM",
+      "status": "NEW",
+      "threat_class": "dga_domain",
+      "threshold": {
+        "min_queries": 5,
+        "nxdomain_rate_min": 0.4,
+        "score_threshold": 0.85
+      },
+      "timestamp": "2026-03-12T01:48:16.000000+00:00",
+      "window": {
+        "duration_s": 6.0,
+        "end": "2026-03-12T01:48:16.000000+00:00",
+        "start": "2026-03-12T01:48:10.000000+00:00"
+      }
+    },
+    {
+      "calibrated": false,
+      "calibrated_on": "uncalibrated",
+      "capability": {
+        "detector_state": "OBSERVABLE",
+        "input_mode": "pcap_replay",
+        "missing_evidence": []
+      },
+      "confidence": 0.991,
+      "contributing_flow_ids": [
+        "bf73a2528cd00ffb"
+      ],
+      "dedup_key": "[\"Botnet C2 beaconing\",\"10.0.0.22\",\"198.51.100.44\",8443]",
+      "detector": "c2",
+      "entry_hash": "cb6648a6b4093fa2f8ef0a63cd993ef6eeb3e975f730734d428dfb2e111811f5",
+      "event_count": 8,
+      "evidence": {
+        "duration_s": 34.99,
+        "event_count": 8,
+        "iat_cv": 0.0027,
+        "iat_mad": 0.01,
+        "iat_mean": 4.999,
+        "iat_median": 5.0,
+        "iat_std": 0.013,
+        "interpretation": "Periodic C2 beaconing observed from 10.0.0.22 to 198.51.100.44:8443: 8 events over 35.0s, mean IAT 5.00s, CV=0.003 <= 0.15",
+        "repeated_destination": "198.51.100.44:8443",
+        "sample_iats": [
+          4.99,
+          5.0,
+          5.02,
+          4.98,
+          5.01,
+          5.0,
+          4.99
+        ]
+      },
+      "first_observed": "2026-03-12T01:47:15.010000+00:00",
+      "flow_id": "6b33ffc8a11a7a5b",
+      "flow_ref_type": "aggregate",
+      "incident_id": "51ee4faff5c81713",
+      "last_observed": "2026-03-12T01:47:50.000000+00:00",
+      "latency_ms": 0.2862,
+      "payload_hash": "2b22371ba6da657643fd6b93df3d41363b01d0e5dd62f5391fd28862aeff7e3d",
+      "prev_hash": "dfbc652fe9c3cb24edc26bd993d87e03ec7fe417da6b4e8c2bb60c0a1fe32fea",
+      "ps_class": "Botnet C2 beaconing",
+      "recommendation": "ADVISORY: Highly regular beaconing communication detected to 198.51.100.44:8443. Investigate host for persistent implant or RAT activity.",
+      "schema_version": "1.3",
+      "score": 0.991,
+      "score_type": "anomaly_score",
+      "seq": 3,
+      "severity": "CRITICAL",
+      "status": "NEW",
+      "threat_class": "c2_beacon",
+      "threshold": {
+        "cv_max": 0.15,
+        "min_events": 8,
+        "window_s": 300.0
+      },
+      "timestamp": "2026-03-12T01:47:50.000000+00:00",
+      "window": {
+        "duration_s": 34.99,
+        "end": "2026-03-12T01:47:50.000000+00:00",
+        "start": "2026-03-12T01:47:15.010000+00:00"
+      }
+    },
+    {
+      "calibrated": false,
+      "calibrated_on": "uncalibrated",
+      "capability": {
+        "detector_state": "DEGRADED",
+        "input_mode": "pcap_replay",
+        "missing_evidence": [
+          "ja3"
+        ]
+      },
+      "confidence": 0.75,
+      "contributing_flow_ids": [
+        "bf73a2528cd00ffb"
+      ],
+      "dedup_key": "[\"Malware in encrypted sessions\",\"10.0.0.22\",\"NOT_OBSERVABLE\",\"198.51.100.44\"]",
+      "detector": "tls_quic",
+      "entry_hash": "dfbc652fe9c3cb24edc26bd993d87e03ec7fe417da6b4e8c2bb60c0a1fe32fea",
+      "event_count": 5,
+      "evidence": {
+        "direction_first_n": null,
+        "downstream_packet_ratio": null,
+        "iat_cv": 0.0034,
+        "iat_median": 4.995,
+        "iat_p95": 5.02,
+        "interpretation": "Suspicious encrypted session from 10.0.0.22 to 198.51.100.44:8443. Stealth periodic shape: uniform packet size (120B) with low timing jitter. Suspicion based on handshake metadata and traffic shape only; no decrypted payload bytes inspected.",
+        "ja3": null,
+        "ja3s": null,
+        "ja4": null,
+        "packet_size_first_n": [
+          120,
+          120,
+          120,
+          120,
+          120
+        ],
+        "packet_size_mean": 120.0,
+        "packet_size_p95": 120.0,
+        "sni": null,
+        "target_ip": "198.51.100.44",
+        "target_port": 8443,
+        "upstream_packet_ratio": null
+      },
+      "first_observed": "2026-03-12T01:47:15.010000+00:00",
+      "flow_id": "11b4e16f90c9bc00",
+      "flow_ref_type": "aggregate",
+      "incident_id": "ef257092b435d449",
+      "last_observed": "2026-03-12T01:47:35.000000+00:00",
+      "latency_ms": 0.3145,
+      "payload_hash": "5196be8a221f86c450648e99163d672dabb2b6ce95a8f43e886ef571c28f81c9",
+      "prev_hash": "96c135e54ccd503c931a75c7e4500d4925513146a388efaa262b94260272fb4e",
+      "ps_class": "Malware in encrypted sessions",
+      "recommendation": "ADVISORY: Anomalous encrypted session detected to 198.51.100.44:8443. Inspect destination certificate validity and host process lineage.",
+      "schema_version": "1.3",
+      "score": 0.75,
+      "score_type": "anomaly_score",
+      "seq": 2,
+      "severity": "MEDIUM",
+      "status": "NEW",
+      "threat_class": "suspicious_encrypted_session",
+      "timestamp": "2026-03-12T01:47:35.000000+00:00",
+      "window": {
+        "duration_s": 19.99,
+        "end": "2026-03-12T01:47:35.000000+00:00",
+        "start": "2026-03-12T01:47:15.010000+00:00"
+      }
+    },
+    {
+      "calibrated": false,
+      "calibrated_on": "uncalibrated",
+      "capability": {
+        "detector_state": "OBSERVABLE",
+        "input_mode": "pcap_replay",
+        "missing_evidence": []
+      },
+      "confidence": 1.0,
+      "dedup_key": "[\"Port scanning / reconnaissance\",\"192.168.1.100\"]",
+      "detector": "scan",
+      "entry_hash": "96c135e54ccd503c931a75c7e4500d4925513146a388efaa262b94260272fb4e",
+      "event_count": 100,
+      "evidence": {
+        "duration_s": 4.95,
+        "interpretation": "Vertical port scan: probed 100 ports on target hosts in 5.0s",
+        "packets_sent": 100,
+        "sample_ports": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "sample_targets": [
+          "10.0.0.50"
+        ],
+        "scan_pattern": "vertical",
+        "unique_dst_count": 1,
+        "unique_port_count": 100
+      },
+      "first_observed": "2026-03-12T01:46:40.050000+00:00",
+      "flow_id": "2a39f1eedcd9f986",
+      "flow_ref_type": "entity",
+      "incident_id": "246005e93c8997cc",
+      "last_observed": "2026-03-12T01:46:45.000000+00:00",
+      "latency_ms": 0.3519,
+      "payload_hash": "a41e6e46aa9f5b5e3c836d2adf82ce1b5cb91ab7430741dcade8b1cf1ad4cba7",
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "ps_class": "Port scanning / reconnaissance",
+      "recommendation": "ADVISORY: Reconnaissance probe detected from 192.168.1.100. Inspect source reputation and restrict perimeter ingress ACLs.",
+      "schema_version": "1.3",
+      "score": 1.0,
+      "score_type": "anomaly_score",
+      "seq": 1,
+      "severity": "MEDIUM",
+      "status": "NEW",
+      "threat_class": "port_scan",
+      "threshold": {
+        "unique_dst_min": 50,
+        "unique_port_min": 100,
+        "window_s": 10.0
+      },
+      "timestamp": "2026-03-12T01:46:45.000000+00:00",
+      "window": {
+        "duration_s": 4.95,
+        "end": "2026-03-12T01:46:45.000000+00:00",
+        "start": "2026-03-12T01:46:40.050000+00:00"
+      }
+    }
+  ]
+}
