@@ -58,6 +58,38 @@ def _ram_bytes() -> int | None:
     return None
 
 
+def _power_state() -> dict[str, object] | None:
+    """AC vs battery and Windows battery saver, so throttled runs are labelled as such."""
+    try:
+        if platform.system() == "Windows":
+            import ctypes
+
+            class _SPS(ctypes.Structure):
+                _fields_ = [("ACLineStatus", ctypes.c_ubyte), ("BatteryFlag", ctypes.c_ubyte), ("BatteryLifePercent", ctypes.c_ubyte),
+                            ("SystemStatusFlag", ctypes.c_ubyte), ("BatteryLifeTime", ctypes.c_ulong), ("BatteryFullLifeTime", ctypes.c_ulong)]
+
+            status = _SPS()
+            if not ctypes.windll.kernel32.GetSystemPowerStatus(ctypes.byref(status)):  # type: ignore[attr-defined]
+                return None
+            ac = {0: "battery", 1: "ac", 255: "unknown"}.get(status.ACLineStatus, "unknown")
+            plan = None
+            try:
+                out = subprocess.check_output(["powercfg", "/getactivescheme"], text=True, stderr=subprocess.DEVNULL)
+                plan = out.split("(")[-1].rstrip(")\n ") if "(" in out else out.strip()
+            except Exception:
+                pass
+            return {"power_source": ac, "battery_percent": None if status.BatteryLifePercent == 255 else status.BatteryLifePercent,
+                    "battery_saver_on": bool(status.SystemStatusFlag & 1), "power_plan": plan}
+        if platform.system() == "Linux":
+            supply = Path("/sys/class/power_supply")
+            online = [p for p in supply.glob("A*/online")] if supply.exists() else []
+            if online:
+                return {"power_source": "ac" if online[0].read_text().strip() == "1" else "battery"}
+    except Exception:  # pragma: no cover
+        pass
+    return None
+
+
 def _git_commit(root: Path) -> str | None:
     try:
         return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=root, text=True, stderr=subprocess.DEVNULL).strip()
@@ -76,6 +108,7 @@ def machine_spec() -> dict[str, object]:
         "ram_gb": round(ram / 2**30, 1) if ram else None,
         "python": platform.python_version(),
         "python_impl": platform.python_implementation(),
+        "power": _power_state(),
         "git_commit": _git_commit(root),
         "command": " ".join([Path(sys.executable).name, *sys.argv]),
     }
