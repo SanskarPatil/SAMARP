@@ -180,6 +180,7 @@ def main() -> int:
     parser.add_argument("--replay-only", action="store_true", help="Execute canonical campaign and exit")
     parser.add_argument("--serve", action="store_true", default=False, help="Launch read-only Plane B API server")
     parser.add_argument("--db-path", default="sentinel_demo.db", help="Path to SQLite database")
+    parser.add_argument("--export-dir", default=None, help="Write the JSON/CSV export here instead of export/")
     parser.add_argument("--keep-db", action="store_true", help="Append to the existing database instead of starting from an empty one")
     parser.add_argument("--host", default="127.0.0.1", help="API server host")
     parser.add_argument("--port", type=int, default=8000, help="API server port")
@@ -201,7 +202,7 @@ def main() -> int:
             return 1
 
     # Run campaign replay
-    app_state, stats = run_campaign_replay(db_path=args.db_path, fresh_db=not args.keep_db)
+    app_state, stats = run_campaign_replay(db_path=args.db_path, export_dir=args.export_dir, fresh_db=not args.keep_db)
 
     if not stats["hash_chain_valid"]:
         print(f"FATAL: Hash chain verification failed: {stats['hash_chain_error']}", file=sys.stderr)

@@ -8,7 +8,8 @@ Checks
   2. API + integration tests only         python -m pytest -q tests/api tests/integration
   3. read-only proof (405 on writes)      python -m pytest -q tests/api -k read_only
   4. static scan: no write routes         regex over api/*.py for POST/PUT/PATCH/DELETE route decorators
-  5. canonical replay from an empty DB    python scripts/run_demo.py --replay-only --db-path <temp>
+  5. canonical replay from an empty DB    python scripts/run_demo.py --replay-only --db-path <temp> --export-dir <temp>
+     (export/ is not touched: latency_ms is measured wall time, so a re-run changes its values and hashes)
   6. hash-chain verification of export    python scripts/run_demo.py --verify-only export/canonical_campaign_export.json
   7. dashboard unit tests                 npm test          (in dashboard/)
   8. dashboard production build           npm run build     (in dashboard/)
@@ -56,7 +57,7 @@ def main() -> int:
         ("API + integration tests", [PY, "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/api", "tests/integration"], ROOT, "pytest"),
         ("read-only proof (405 on writes)", [PY, "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/api", "-k", "read_only"], ROOT, "pytest"),
         ("static scan: no write routes", None, ROOT, "scan"),
-        ("canonical replay from empty DB", [PY, "scripts/run_demo.py", "--replay-only", "--db-path", str(tmp_db)], ROOT, "replay"),
+        ("canonical replay from empty DB", [PY, "scripts/run_demo.py", "--replay-only", "--db-path", str(tmp_db), "--export-dir", str(tmp_db.parent)], ROOT, "replay"),
         ("hash-chain verification of export", [PY, "scripts/run_demo.py", "--verify-only", "export/canonical_campaign_export.json"], ROOT, "plain"),
         ("dashboard unit tests (vitest)", [npm, "test"] if npm else None, ROOT / "dashboard", "npm"),
         ("dashboard production build", [npm, "run", "build"] if npm else None, ROOT / "dashboard", "npm"),
