@@ -69,6 +69,9 @@ class WindowSummary:
     src_ip_counts: dict[str, int] = field(default_factory=dict)
     dst_ip_counts: dict[str, int] = field(default_factory=dict)
     dst_port_counts: dict[int, int] = field(default_factory=dict)
+    #: Share of the window's packets carried by its single largest 5-tuple
+    #: (0.0 when unknown). A bulk transfer is one flow; a flood is many.
+    top_flow_packet_share: float = 0.0
 
     # Latest capability context seen in this window
     latest_capability: Any = None
@@ -119,6 +122,7 @@ class _OpenWindow:
         "_src_entropy",
         "_dst_entropy",
         "_dst_ports",
+        "_flow_pkts",
         "contributing_flow_ids",
         "sample_events",
         "dns_queries",
@@ -151,6 +155,7 @@ class _OpenWindow:
         self._src_entropy = StreamingEntropy(max_distinct=max_entities)
         self._dst_entropy = StreamingEntropy(max_distinct=max_entities)
         self._dst_ports: Counter[int] = Counter()
+        self._flow_pkts: Counter[tuple] = Counter()
 
         self.contributing_flow_ids: list[str] = []
         self.sample_events: list[NormalizedEvent] = []
@@ -189,7 +194,10 @@ class _OpenWindow:
             self._dst_entropy.add(ev.dst_ip, pkts)
         if ev.dst_port is not None:
             if len(self._dst_ports) < self._max_entities or ev.dst_port in self._dst_ports:
-                self._dst_ports[ev.dst_port] += 1
+                self._dst_ports[ev.dst_port] += pkts
+        five_tuple = (ev.src_ip, ev.dst_ip, ev.src_port, ev.dst_port, str(ev.protocol))
+        if len(self._flow_pkts) < self._max_entities or five_tuple in self._flow_pkts:
+            self._flow_pkts[five_tuple] += pkts
 
         if ev.flow_id and len(self.contributing_flow_ids) < 32:
             if ev.flow_id not in self.contributing_flow_ids:
@@ -237,6 +245,7 @@ class _OpenWindow:
             src_ip_counts=src_counts,
             dst_ip_counts=dst_counts,
             dst_port_counts=dict(self._dst_ports),
+            top_flow_packet_share=(max(self._flow_pkts.values()) / self.packet_count) if self._flow_pkts and self.packet_count else 0.0,
             latest_capability=self.latest_capability,
             latest_input_mode=self.latest_input_mode,
         )

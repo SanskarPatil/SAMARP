@@ -30,6 +30,11 @@ DEFAULT_MIN_PPS = 5000
 DEFAULT_ROBUST_Z = 6.0
 DEFAULT_HYSTERESIS_WINDOWS = 2
 DEFAULT_WARMUP_WINDOWS = 30
+# A generic volumetric alert needs the packets spread over many flows. If one
+# 5-tuple carries at least this share of the window's packets, the window is a
+# bulk transfer (download, backup), not a flood. SYN and UDP flood signatures
+# are not gated by this.
+DEFAULT_MAX_SINGLE_FLOW_SHARE = 0.5
 
 # Slowloris thresholds (low-rate, long-duration, high concurrency)
 DEFAULT_SLOWLORIS_MIN_CONCURRENCY = 5
@@ -67,7 +72,9 @@ class DDoSDetector:
         slowloris_min_duration_s: float = DEFAULT_SLOWLORIS_MIN_DURATION_S,
         slowloris_max_bytes_per_conn: float = DEFAULT_SLOWLORIS_MAX_BYTES_PER_CONN,
         slowloris_max_pps: float = DEFAULT_SLOWLORIS_MAX_PPS,
+        max_single_flow_share: float = DEFAULT_MAX_SINGLE_FLOW_SHARE,
     ) -> None:
+        self.max_single_flow_share = max_single_flow_share
         self.min_pps = min_pps
         self.robust_z_threshold = robust_z_threshold
         self.hysteresis_windows = hysteresis_windows
@@ -166,6 +173,11 @@ class DDoSDetector:
             threat_class = "udp_flood"
             detail = f"High UDP traffic volume ({udp_pkts} UDP packets, {window.pps:.1f} pps)"
         else:
+            if window.top_flow_packet_share >= self.max_single_flow_share:
+                # One flow carries most of the packets: bulk transfer, not a flood.
+                # Do not count this window towards hysteresis or the baseline.
+                self._consecutive_flood_windows = 0
+                return None
             threat_class = "volumetric_flood"
             detail = f"Packet rate anomaly ({current_pps:.1f} pps)"
 
@@ -182,6 +194,7 @@ class DDoSDetector:
             "protocol_breakdown": window.protocols,
             "target_ip": top_dst_ip,
             "target_port": top_dst_port,
+            "top_flow_packet_share": round(window.top_flow_packet_share, 3),
         }
 
         # Capability state
