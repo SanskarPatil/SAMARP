@@ -18,7 +18,7 @@ from detectors.dga import DGADetector
 from detectors.dns import DNSTunnelDetector
 from detectors.exfil import ExfilDetector
 from detectors.scan import ScanDetector
-from detectors.tls_quic import TLSQuicDetector
+from detectors.tls_quic import TLSQuicDetector, load_fingerprint_baseline
 from features.rolling import TumblingWindowAggregator
 from ingest.normalized_event import NormalizedEvent
 
@@ -50,7 +50,9 @@ class DetectionPipeline:
         self.dga = DGADetector() if enable_dga else None
         self.dns_tunnel = DNSTunnelDetector() if enable_dns else None
         self.exfil = ExfilDetector() if enable_exfil else None
-        self.tls_quic = TLSQuicDetector() if enable_tls_quic else None
+        # Site JA3/JA4 baseline (config/tls_fingerprint_baseline.json) when present;
+        # otherwise the detector warms up in-stream before novelty alerts fire.
+        self.tls_quic = TLSQuicDetector(baseline=load_fingerprint_baseline()) if enable_tls_quic else None
 
     @staticmethod
     def _stamp_latency(alerts: list[dict[str, Any]], ingest_perf_ns: int) -> list[dict[str, Any]]:

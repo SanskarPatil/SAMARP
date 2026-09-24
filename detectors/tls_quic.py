@@ -13,8 +13,10 @@ Hard Constraints:
 
 from __future__ import annotations
 
+import json
 import statistics
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from features.rolling import WindowSummary
@@ -26,6 +28,12 @@ PS_CLASS = "Malware in encrypted sessions"
 DETECTOR_NAME = "tls_quic"
 
 DEFAULT_NOVELTY_DAYS = 7
+# Without a site baseline file, the detector learns fingerprints for this long
+# (stream time) before novelty alerts are allowed; otherwise every fingerprint
+# would be "new" at start-up.
+DEFAULT_NOVELTY_WARMUP_S = 3600.0
+DEFAULT_MAX_FINGERPRINTS = 20_000
+BASELINE_FILE = Path(__file__).resolve().parents[1] / "config" / "tls_fingerprint_baseline.json"
 DEFAULT_WINDOW_S = 300.0
 DEFAULT_MAX_SESSIONS = 1024
 
@@ -37,6 +45,15 @@ KNOWN_SUSPICIOUS_JA3 = {
     "51c64c77e60f3980eea90869b68c58a8",  # Emotet
     "b32309a26951912be7dba376398abc3b",  # Generic suspicious implant
 }
+
+
+def load_fingerprint_baseline(path: Path | str = BASELINE_FILE) -> dict[str, Any] | None:
+    """Read a site fingerprint baseline written by scripts/learn_tls_baseline.py (None if absent)."""
+    p = Path(path)
+    if not p.is_file():
+        return None
+    data = json.loads(p.read_text(encoding="utf-8"))
+    return {"ja3": dict(data.get("ja3", {})), "ja4": dict(data.get("ja4", {})), "source": data.get("source", str(p))}
 
 
 def _iso_utc(ts: float | datetime | None = None) -> str:
@@ -66,9 +83,11 @@ class _TLSSessionState:
         "first_seen",
         "last_seen",
         "flow_ids",
+        "novel_fingerprints",
     )
 
     def __init__(self, src_ip: str, dst_ip: str, dst_port: int, now: float) -> None:
+        self.novel_fingerprints: list[str] = []
         self.src_ip = src_ip
         self.dst_ip = dst_ip
         self.dst_port = dst_port
@@ -119,7 +138,23 @@ class TLSQuicDetector:
         known_suspicious_ja3: set[str] | None = None,
         window_s: float = DEFAULT_WINDOW_S,
         max_sessions: int = DEFAULT_MAX_SESSIONS,
+        novelty_days: float = DEFAULT_NOVELTY_DAYS,
+        baseline: dict[str, Any] | None = None,
+        novelty_warmup_s: float = DEFAULT_NOVELTY_WARMUP_S,
+        max_fingerprints: int = DEFAULT_MAX_FINGERPRINTS,
     ) -> None:
+        # --- JA3/JA4 novelty: fingerprint -> last seen (epoch s), bounded LRU ---
+        self.novelty_days = float(novelty_days)
+        self.novelty_warmup_s = float(novelty_warmup_s)
+        self.max_fingerprints = int(max_fingerprints)
+        self._fp_last_seen: dict[str, float] = {}
+        self.baseline_source = None
+        if baseline:
+            self.baseline_source = str(baseline.get("source", "baseline"))
+            for kind in ("ja3", "ja4"):
+                for fp, ts in (baseline.get(kind) or {}).items():
+                    self._fp_last_seen[f"{kind}:{str(fp).lower()}"] = float(ts)
+        self._first_tls_time: float | None = None
         self.known_suspicious_ja3 = set(KNOWN_SUSPICIOUS_JA3)
         if known_suspicious_ja3:
             self.known_suspicious_ja3.update(known_suspicious_ja3)
@@ -167,6 +202,9 @@ class TLSQuicDetector:
             self._sessions[key] = state
 
         state.update_metadata(ev.tls, ev.quic)
+        novel = self._observe_fingerprints(ev.tls or ev.quic, now)
+        if novel:
+            state.novel_fingerprints.extend(fp for fp in novel if fp not in state.novel_fingerprints)
 
         # Packet sizes: a flow record's ev.bytes is the whole flow, not a packet
         # size. Use the observed first-N packet sizes when the record carries
@@ -182,6 +220,36 @@ class TLSQuicDetector:
             state.add_packet(single, ev.direction, ev.flow_id, now)
 
         return self._check_state(state, now, ev)
+
+    def novelty_state(self, now: float) -> str:
+        """'active' when novelty alerts may fire, 'learning' during warm-up without a baseline."""
+        if self.baseline_source is not None:
+            return "active"
+        if self._first_tls_time is None or now - self._first_tls_time < self.novelty_warmup_s:
+            return "learning"
+        return "active"
+
+    def _observe_fingerprints(self, meta: dict[str, Any] | None, now: float) -> list[str]:
+        """Record this event's JA3/JA4 sightings; return those novel within novelty_days."""
+        if not meta:
+            return []
+        if self._first_tls_time is None:
+            self._first_tls_time = now
+        active = self.novelty_state(now) == "active"
+        horizon = self.novelty_days * 86400.0
+        novel: list[str] = []
+        for kind in ("ja3", "ja4"):
+            value = meta.get(kind)
+            if not value:
+                continue
+            key = f"{kind}:{str(value).lower()}"
+            last = self._fp_last_seen.pop(key, None)
+            if active and (last is None or now - last > horizon):
+                novel.append(key)
+            self._fp_last_seen[key] = max(now, last) if last is not None else now
+            while len(self._fp_last_seen) > self.max_fingerprints:
+                self._fp_last_seen.pop(next(iter(self._fp_last_seen)))
+        return novel
 
     def evaluate_window(self, window: WindowSummary) -> list[dict[str, Any]]:
         """Evaluate a closed window for encrypted session anomalies."""
@@ -233,7 +301,10 @@ class TLSQuicDetector:
             and iat_cv < 0.20
         )
 
-        suspicious = is_suspicious_ja3 or no_sni or fixed_size_shape
+        # 4. JA3/JA4 not seen on this network within novelty_days
+        novel_fingerprint = bool(state.novel_fingerprints)
+
+        suspicious = is_suspicious_ja3 or no_sni or fixed_size_shape or novel_fingerprint
         if not suspicious:
             return None
 
@@ -272,6 +343,11 @@ class TLSQuicDetector:
             reasons.append(f"Direct IP TLS connection without SNI on port {state.dst_port}")
         if fixed_size_shape:
             reasons.append(f"Stealth periodic shape: uniform packet size ({state.packet_sizes[0]}B) with low timing jitter")
+        if novel_fingerprint:
+            reasons.append(
+                "Client fingerprint not seen on this network in the last "
+                f"{self.novelty_days:g} days ({', '.join(state.novel_fingerprints)}); novelty is weak evidence on its own"
+            )
 
         duration = max(state.last_seen - state.first_seen, 0.001)
 
@@ -296,6 +372,10 @@ class TLSQuicDetector:
             "target_ip": state.dst_ip,
             "target_port": state.dst_port,
             "sni": state.sni,
+            "novel_fingerprints": list(state.novel_fingerprints),
+            "novelty_days": self.novelty_days,
+            "novelty_state": self.novelty_state(now),
+            "novelty_baseline": self.baseline_source or "learned in-stream",
         }
 
         cap_state = "OBSERVABLE" if state.ja3 else "DEGRADED"
@@ -311,7 +391,7 @@ class TLSQuicDetector:
             "threat_class": "suspicious_encrypted_session",
             "detector": DETECTOR_NAME,
             "confidence": None,
-            "score": 0.90 if is_suspicious_ja3 else 0.75,
+            "score": 0.90 if is_suspicious_ja3 else (0.75 if (no_sni or fixed_size_shape) else 0.60),
             "score_type": "anomaly_score",
             "calibrated": False,
             "evidence": evidence,
