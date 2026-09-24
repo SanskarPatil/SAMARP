@@ -33,20 +33,41 @@ from ingest.capability import raise_from_observed
 from scenarios.canonical_campaign import generate_canonical_campaign_events
 
 
+def reset_demo_db(db_path: str | Path) -> list[str]:
+    """Delete a demo database file and its SQLite side files. Returns what was removed."""
+    if str(db_path) == ":memory:":
+        return []
+    base = Path(db_path)
+    removed = []
+    for candidate in (base, Path(f"{base}-wal"), Path(f"{base}-shm"), Path(f"{base}-journal")):
+        if candidate.is_file():
+            candidate.unlink()
+            removed.append(str(candidate))
+    return removed
+
+
 def run_campaign_replay(
     db_path: str = "sentinel_demo.db",
     export_dir: str | Path | None = None,
     verbose: bool = True,
+    fresh_db: bool = True,
 ) -> tuple[AppState, dict[str, Any]]:
-    """Execute the canonical campaign through the live detection and persistence pipeline."""
+    """Execute the canonical campaign through the live detection and persistence pipeline.
+
+    ``fresh_db`` (default) deletes the demo SQLite file and its WAL/SHM/journal
+    side files first, so the export holds exactly one replay and its hash chain
+    starts at sequence 1. Without it, AppState resumes the previous chain and
+    every run appends to the last export.
+    """
     export_path = Path(export_dir) if export_dir else PROJECT_ROOT / "export"
     export_path.mkdir(parents=True, exist_ok=True)
+    removed = reset_demo_db(db_path) if fresh_db else []
 
     if verbose:
         print("=" * 72)
-        print("  CYBER SENTINEL - PS26145 CANONICAL CAMPAIGN REPLAY")
+        print("  SAMARP - PS26145 CANONICAL CAMPAIGN REPLAY")
         print("=" * 72)
-        print(f"[*] Target SQLite Database: {db_path}")
+        print(f"[*] Target SQLite Database: {db_path}" + (" (fresh: previous file removed)" if removed else " (fresh)" if fresh_db else " (appending to existing chain)"))
 
     # 1. Initialize State & Store
     app_state = AppState(db_path=db_path)
@@ -149,10 +170,11 @@ def run_campaign_replay(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Cyber Sentinel PS26145 Demo Launcher")
+    parser = argparse.ArgumentParser(description="SAMARP PS26145 Demo Launcher")
     parser.add_argument("--replay-only", action="store_true", help="Execute canonical campaign and exit")
     parser.add_argument("--serve", action="store_true", default=False, help="Launch read-only Plane B API server")
     parser.add_argument("--db-path", default="sentinel_demo.db", help="Path to SQLite database")
+    parser.add_argument("--keep-db", action="store_true", help="Append to the existing database instead of starting from an empty one")
     parser.add_argument("--host", default="127.0.0.1", help="API server host")
     parser.add_argument("--port", type=int, default=8000, help="API server port")
     parser.add_argument("--verify-only", type=str, default=None, help="Verify an exported JSON file")
@@ -173,7 +195,7 @@ def main() -> int:
             return 1
 
     # Run campaign replay
-    app_state, stats = run_campaign_replay(db_path=args.db_path)
+    app_state, stats = run_campaign_replay(db_path=args.db_path, fresh_db=not args.keep_db)
 
     if not stats["hash_chain_valid"]:
         print(f"FATAL: Hash chain verification failed: {stats['hash_chain_error']}", file=sys.stderr)
