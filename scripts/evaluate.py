@@ -122,7 +122,7 @@ def main() -> int:
     lines += [f"| {d} | {r['n']} | {r['positives']} | {r['mean_confidence']} | {r['brier']} | {', '.join(r['calibrated_on'])} |" for d, r in result["confidence_brier_by_detector"].items()]
     (out / f"evaluation_{stamp}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     cut = next(i for i, l in enumerate(lines) if l.startswith("## Per attack"))
-    print("\n".join(l for l in lines[:cut] if not l.startswith("| ") or not l.startswith("| captured") and "`" not in l))
+    print("\n".join(lines[:cut]))
     print(f"\nwrote {out / f'evaluation_{stamp}.json'}  ({result['wall_seconds']} s)")
     return 0
 

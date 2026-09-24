@@ -1,0 +1,1409 @@
+{
+  "machine": {
+    "captured_at_utc": "2026-09-24T14:43:34+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "power": {
+      "power_source": "ac",
+      "battery_percent": 44,
+      "battery_saver_on": false,
+      "power_plan": "Ultimate Performance"
+    },
+    "git_commit": "6e12d55",
+    "command": "python.exe scripts\\evaluate.py"
+  },
+  "data_label": "synthetic benign replay + synthetic attack suite",
+  "config": {
+    "seeds": [
+      1,
+      2,
+      3
+    ],
+    "background_seconds_per_seed": 8400.0,
+    "attack_suite_seed_base": 11,
+    "attacks_per_run": 30,
+    "attribution": "shared address + time overlap (grace 120 s)"
+  },
+  "benign_only": {
+    "label": "synthetic benign replay",
+    "hours": 6.999,
+    "false_incidents": 14202,
+    "false_incidents_per_hour": 2029.147,
+    "per_class_incidents_per_hour": {
+      "a": 6.144,
+      "b": 28.718,
+      "f": 1994.285
+    },
+    "runs": [
+      {
+        "stream": "synthetic benign replay seed 1",
+        "hours": 2.333,
+        "events": 51266,
+        "false_alerts": 5315,
+        "false_alerts_per_hour": 2277.969,
+        "false_incidents": 4715,
+        "false_incidents_per_hour": 2020.813,
+        "by_ps_class": {
+          "b": {
+            "alerts": 67,
+            "incidents": 67,
+            "incidents_per_hour": 28.716
+          },
+          "f": {
+            "alerts": 5228,
+            "incidents": 4630,
+            "incidents_per_hour": 1984.383
+          },
+          "a": {
+            "alerts": 20,
+            "incidents": 18,
+            "incidents_per_hour": 7.715
+          }
+        },
+        "by_detector": {
+          "exfil": 5228,
+          "c2": 67,
+          "ddos": 20
+        },
+        "examples": [
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.53 -> 198.18.199.111 transferred 758,020 outbound bytes vs 0 inbound bytes (asymmetry ratio 758020.0 >= 10.0) The sys"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.39 -> 198.18.129.183 transferred 332,364 outbound bytes vs 0 inbound bytes (asymmetry ratio 332364.0 >= 10.0) The sys"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.15 -> 198.18.155.63 transferred 1,546,318 outbound bytes vs 0 inbound bytes (asymmetry ratio 1546318.0 >= 10.0) The s"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.48 -> 198.18.180.118 transferred 640,635 outbound bytes vs 0 inbound bytes (asymmetry ratio 640635.0 >= 10.0) The sys"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.30 -> 198.18.50.191 transferred 360,953 outbound bytes vs 0 inbound bytes (asymmetry ratio 360953.0 >= 10.0) The syst"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.33 -> 198.18.191.147 transferred 467,099 outbound bytes vs 0 inbound bytes (asymmetry ratio 467099.0 >= 10.0) The sys"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.31 -> 198.18.148.18 transferred 256,323 outbound bytes vs 0 inbound bytes (asymmetry ratio 256323.0 >= 10.0) The syst"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.44 -> 198.18.173.44 transferred 924,499 outbound bytes vs 0 inbound bytes (asymmetry ratio 924499.0 >= 10.0) The syst"
+          }
+        ]
+      },
+      {
+        "stream": "synthetic benign replay seed 2",
+        "hours": 2.333,
+        "events": 51807,
+        "false_alerts": 5377,
+        "false_alerts_per_hour": 2304.424,
+        "false_incidents": 4758,
+        "false_incidents_per_hour": 2039.139,
+        "by_ps_class": {
+          "b": {
+            "alerts": 69,
+            "incidents": 69,
+            "incidents_per_hour": 29.571
+          },
+          "f": {
+            "alerts": 5276,
+            "incidents": 4676,
+            "incidents_per_hour": 2003.996
+          },
+          "a": {
+            "alerts": 32,
+            "incidents": 13,
+            "incidents_per_hour": 5.571
+          }
+        },
+        "by_detector": {
+          "exfil": 5276,
+          "c2": 69,
+          "ddos": 32
+        },
+        "examples": [
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.46 -> 198.18.88.135 transferred 340,848 outbound bytes vs 0 inbound bytes (asymmetry ratio 340848.0 >= 10.0) The syst"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.26 -> 198.18.10.47 transferred 527,838 outbound bytes vs 0 inbound bytes (asymmetry ratio 527838.0 >= 10.0) The syste"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.29 -> 198.18.238.167 transferred 310,810 outbound bytes vs 0 inbound bytes (asymmetry ratio 310810.0 >= 10.0) The sys"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.51 -> 198.18.83.131 transferred 251,722 outbound bytes vs 0 inbound bytes (asymmetry ratio 251722.0 >= 10.0) The syst"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.32 -> 198.18.182.36 transferred 555,609 outbound bytes vs 0 inbound bytes (asymmetry ratio 555609.0 >= 10.0) The syst"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.47 -> 198.18.191.48 transferred 2,804,487 outbound bytes vs 0 inbound bytes (asymmetry ratio 2804487.0 >= 10.0) The s"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.50 -> 198.18.171.165 transferred 645,681 outbound bytes vs 0 inbound bytes (asymmetry ratio 645681.0 >= 10.0) The sys"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.49 -> 198.18.106.126 transferred 480,832 outbound bytes vs 0 inbound bytes (asymmetry ratio 480832.0 >= 10.0) The sys"
+          }
+        ]
+      },
+      {
+        "stream": "synthetic benign replay seed 3",
+        "hours": 2.333,
+        "events": 51693,
+        "false_alerts": 5311,
+        "false_alerts_per_hour": 2276.333,
+        "false_incidents": 4729,
+        "false_incidents_per_hour": 2026.884,
+        "by_ps_class": {
+          "b": {
+            "alerts": 65,
+            "incidents": 65,
+            "incidents_per_hour": 27.859
+          },
+          "f": {
+            "alerts": 5231,
+            "incidents": 4652,
+            "incidents_per_hour": 1993.881
+          },
+          "a": {
+            "alerts": 15,
+            "incidents": 12,
+            "incidents_per_hour": 5.143
+          }
+        },
+        "by_detector": {
+          "exfil": 5231,
+          "c2": 65,
+          "ddos": 15
+        },
+        "examples": [
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.24 -> 198.18.136.228 transferred 345,451 outbound bytes vs 0 inbound bytes (asymmetry ratio 345451.0 >= 10.0) The sys"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.18 -> 198.18.173.173 transferred 556,430 outbound bytes vs 0 inbound bytes (asymmetry ratio 556430.0 >= 10.0) The sys"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.30 -> 198.18.76.46 transferred 393,720 outbound bytes vs 0 inbound bytes (asymmetry ratio 393720.0 >= 10.0) The syste"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.36 -> 198.18.93.222 transferred 335,489 outbound bytes vs 0 inbound bytes (asymmetry ratio 335489.0 >= 10.0) The syst"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.33 -> 198.18.70.230 transferred 446,719 outbound bytes vs 0 inbound bytes (asymmetry ratio 446719.0 >= 10.0) The syst"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.19 -> 198.18.102.112 transferred 283,851 outbound bytes vs 0 inbound bytes (asymmetry ratio 283851.0 >= 10.0) The sys"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.21 -> 198.18.138.178 transferred 467,389 outbound bytes vs 0 inbound bytes (asymmetry ratio 467389.0 >= 10.0) The sys"
+          },
+          {
+            "detector": "exfil",
+            "threat_class": "data_exfil",
+            "interpretation": "Data exfiltration pattern detected: 10.0.1.44 -> 198.18.122.203 transferred 2,251,139 outbound bytes vs 0 inbound bytes (asymmetry ratio 2251139.0 >= 10.0) The "
+          }
+        ]
+      }
+    ]
+  },
+  "mixed": {
+    "hours_of_background": 7.0,
+    "per_class": {
+      "a": {
+        "ps_class": "Volumetric DDoS / flooding",
+        "attacks": 15,
+        "detected": 11,
+        "missed": 4,
+        "recall": 0.733,
+        "alerts": 104,
+        "tp_alerts": 27,
+        "overlap_alerts": 8,
+        "false_alerts": 69,
+        "precision": 0.26,
+        "false_incidents": 45,
+        "false_incidents_per_hour": 6.429
+      },
+      "b": {
+        "ps_class": "Botnet C2 beaconing",
+        "attacks": 15,
+        "detected": 12,
+        "missed": 3,
+        "recall": 0.8,
+        "alerts": 230,
+        "tp_alerts": 12,
+        "overlap_alerts": 24,
+        "false_alerts": 194,
+        "precision": 0.052,
+        "false_incidents": 194,
+        "false_incidents_per_hour": 27.715
+      },
+      "c": {
+        "ps_class": "DGA / DNS tunnelling",
+        "attacks": 15,
+        "detected": 12,
+        "missed": 3,
+        "recall": 0.8,
+        "alerts": 12,
+        "tp_alerts": 12,
+        "overlap_alerts": 0,
+        "false_alerts": 0,
+        "precision": 1.0,
+        "false_incidents": 0,
+        "false_incidents_per_hour": 0.0
+      },
+      "d": {
+        "ps_class": "Malware in encrypted sessions",
+        "attacks": 15,
+        "detected": 6,
+        "missed": 9,
+        "recall": 0.4,
+        "alerts": 6,
+        "tp_alerts": 6,
+        "overlap_alerts": 0,
+        "false_alerts": 0,
+        "precision": 1.0,
+        "false_incidents": 0,
+        "false_incidents_per_hour": 0.0
+      },
+      "e": {
+        "ps_class": "Port scanning / reconnaissance",
+        "attacks": 15,
+        "detected": 9,
+        "missed": 6,
+        "recall": 0.6,
+        "alerts": 9,
+        "tp_alerts": 9,
+        "overlap_alerts": 0,
+        "false_alerts": 0,
+        "precision": 1.0,
+        "false_incidents": 0,
+        "false_incidents_per_hour": 0.0
+      },
+      "f": {
+        "ps_class": "Data exfiltration",
+        "attacks": 15,
+        "detected": 15,
+        "missed": 0,
+        "recall": 1.0,
+        "alerts": 15749,
+        "tp_alerts": 15,
+        "overlap_alerts": 0,
+        "false_alerts": 15734,
+        "precision": 0.001,
+        "false_incidents": 13957,
+        "false_incidents_per_hour": 1993.944
+      }
+    },
+    "per_attack": [
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "a1",
+        "ps_letter": "a",
+        "variant": "SYN flood 6k pps, 200 spoofed src, 3 s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "ddos": 3
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "a2",
+        "ps_letter": "a",
+        "variant": "SYN flood 12k pps, 500 spoofed src, 3 s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "ddos": 3
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "a3",
+        "ps_letter": "a",
+        "variant": "UDP flood 8k pps to :53, 3 s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "ddos": 3
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "a4",
+        "ps_letter": "a",
+        "variant": "SYN flood 3k pps, 50 src, 4 s (below min_pps)",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "a5",
+        "ps_letter": "a",
+        "variant": "low-rate SYN 800 pps, 20 src, 5 s",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "b1",
+        "ps_letter": "b",
+        "variant": "beacon 5 s, 1 % jitter",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "b2",
+        "ps_letter": "b",
+        "variant": "beacon 20 s, 5 % jitter",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "b3",
+        "ps_letter": "b",
+        "variant": "beacon 30 s, 10 % jitter",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "b4",
+        "ps_letter": "b",
+        "variant": "beacon 30 s, 30 % jitter",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "b5",
+        "ps_letter": "b",
+        "variant": "beacon 90 s, 5 % jitter (long period)",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "c1",
+        "ps_letter": "c",
+        "variant": "DGA numeric_seed, 12 q, 90 % NXDOMAIN",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "dga": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "c2",
+        "ps_letter": "c",
+        "variant": "DGA base32, 12 q, 90 % NXDOMAIN",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "dga": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "c3",
+        "ps_letter": "c",
+        "variant": "DGA dictcat (word-based), 12 q, 60 % NXDOMAIN",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "c4",
+        "ps_letter": "c",
+        "variant": "DNS tunnel TXT, 60-char labels, 30 q @1/s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "dns": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "c5",
+        "ps_letter": "c",
+        "variant": "DNS tunnel CNAME, 40-char labels, 20 q @0.2/s",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "dns": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "d1",
+        "ps_letter": "d",
+        "variant": "known-bad JA3 (CobaltStrike list), SNI present",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "tls_quic": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "d2",
+        "ps_letter": "d",
+        "variant": "no SNI, direct IP, port 4443",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "tls_quic": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "d3",
+        "ps_letter": "d",
+        "variant": "novel JA3 + JA4, SNI present, 1 session (canonical beat 6 shape)",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "d4",
+        "ps_letter": "d",
+        "variant": "novel JA3, SNI present, 4 sessions",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "d5",
+        "ps_letter": "d",
+        "variant": "fixed-size small-packet shape, 6 sessions",
+        "expected_hard": false,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "e1",
+        "ps_letter": "e",
+        "variant": "vertical scan 150 ports @50/s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "scan": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "e2",
+        "ps_letter": "e",
+        "variant": "horizontal sweep :445 on 80 hosts @40/s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "scan": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "e3",
+        "ps_letter": "e",
+        "variant": "hybrid 20 hosts x 10 ports @30/s",
+        "expected_hard": false,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "e4",
+        "ps_letter": "e",
+        "variant": "slow vertical scan 120 ports @0.2/s",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "scan": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "e5",
+        "ps_letter": "e",
+        "variant": "small scan 40 ports @20/s",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "f1",
+        "ps_letter": "f",
+        "variant": "exfil 5 MB in 5 records",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "f2",
+        "ps_letter": "f",
+        "variant": "exfil 20 MB in 10 records",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1,
+          "ddos": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "f3",
+        "ps_letter": "f",
+        "variant": "exfil 60 MB in 20 records",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1,
+          "ddos": 4,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "f4",
+        "ps_letter": "f",
+        "variant": "slow exfil 3 MB over 30 min",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 1",
+        "attack_id": "f5",
+        "ps_letter": "f",
+        "variant": "exfil 400 KB in 4 records",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "a1",
+        "ps_letter": "a",
+        "variant": "SYN flood 6k pps, 200 spoofed src, 3 s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "ddos": 2
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "a2",
+        "ps_letter": "a",
+        "variant": "SYN flood 12k pps, 500 spoofed src, 3 s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "ddos": 2
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "a3",
+        "ps_letter": "a",
+        "variant": "UDP flood 8k pps to :53, 3 s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "ddos": 2
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "a4",
+        "ps_letter": "a",
+        "variant": "SYN flood 3k pps, 50 src, 4 s (below min_pps)",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "ddos": 2
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "a5",
+        "ps_letter": "a",
+        "variant": "low-rate SYN 800 pps, 20 src, 5 s",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "b1",
+        "ps_letter": "b",
+        "variant": "beacon 5 s, 1 % jitter",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "b2",
+        "ps_letter": "b",
+        "variant": "beacon 20 s, 5 % jitter",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "b3",
+        "ps_letter": "b",
+        "variant": "beacon 30 s, 10 % jitter",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "b4",
+        "ps_letter": "b",
+        "variant": "beacon 30 s, 30 % jitter",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "b5",
+        "ps_letter": "b",
+        "variant": "beacon 90 s, 5 % jitter (long period)",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "c1",
+        "ps_letter": "c",
+        "variant": "DGA numeric_seed, 12 q, 90 % NXDOMAIN",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "dga": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "c2",
+        "ps_letter": "c",
+        "variant": "DGA base32, 12 q, 90 % NXDOMAIN",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "dga": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "c3",
+        "ps_letter": "c",
+        "variant": "DGA dictcat (word-based), 12 q, 60 % NXDOMAIN",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "c4",
+        "ps_letter": "c",
+        "variant": "DNS tunnel TXT, 60-char labels, 30 q @1/s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "dns": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "c5",
+        "ps_letter": "c",
+        "variant": "DNS tunnel CNAME, 40-char labels, 20 q @0.2/s",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "dns": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "d1",
+        "ps_letter": "d",
+        "variant": "known-bad JA3 (CobaltStrike list), SNI present",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "tls_quic": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "d2",
+        "ps_letter": "d",
+        "variant": "no SNI, direct IP, port 4443",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "tls_quic": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "d3",
+        "ps_letter": "d",
+        "variant": "novel JA3 + JA4, SNI present, 1 session (canonical beat 6 shape)",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "d4",
+        "ps_letter": "d",
+        "variant": "novel JA3, SNI present, 4 sessions",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "d5",
+        "ps_letter": "d",
+        "variant": "fixed-size small-packet shape, 6 sessions",
+        "expected_hard": false,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "e1",
+        "ps_letter": "e",
+        "variant": "vertical scan 150 ports @50/s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "scan": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "e2",
+        "ps_letter": "e",
+        "variant": "horizontal sweep :445 on 80 hosts @40/s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "scan": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "e3",
+        "ps_letter": "e",
+        "variant": "hybrid 20 hosts x 10 ports @30/s",
+        "expected_hard": false,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "e4",
+        "ps_letter": "e",
+        "variant": "slow vertical scan 120 ports @0.2/s",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "scan": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "e5",
+        "ps_letter": "e",
+        "variant": "small scan 40 ports @20/s",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "f1",
+        "ps_letter": "f",
+        "variant": "exfil 5 MB in 5 records",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "f2",
+        "ps_letter": "f",
+        "variant": "exfil 20 MB in 10 records",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "f3",
+        "ps_letter": "f",
+        "variant": "exfil 60 MB in 20 records",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1,
+          "c2": 1,
+          "ddos": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "f4",
+        "ps_letter": "f",
+        "variant": "slow exfil 3 MB over 30 min",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 2",
+        "attack_id": "f5",
+        "ps_letter": "f",
+        "variant": "exfil 400 KB in 4 records",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "a1",
+        "ps_letter": "a",
+        "variant": "SYN flood 6k pps, 200 spoofed src, 3 s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "ddos": 3
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "a2",
+        "ps_letter": "a",
+        "variant": "SYN flood 12k pps, 500 spoofed src, 3 s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "ddos": 2
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "a3",
+        "ps_letter": "a",
+        "variant": "UDP flood 8k pps to :53, 3 s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "ddos": 2
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "a4",
+        "ps_letter": "a",
+        "variant": "SYN flood 3k pps, 50 src, 4 s (below min_pps)",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "ddos": 3
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "a5",
+        "ps_letter": "a",
+        "variant": "low-rate SYN 800 pps, 20 src, 5 s",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "b1",
+        "ps_letter": "b",
+        "variant": "beacon 5 s, 1 % jitter",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "b2",
+        "ps_letter": "b",
+        "variant": "beacon 20 s, 5 % jitter",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "b3",
+        "ps_letter": "b",
+        "variant": "beacon 30 s, 10 % jitter",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "b4",
+        "ps_letter": "b",
+        "variant": "beacon 30 s, 30 % jitter",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "b5",
+        "ps_letter": "b",
+        "variant": "beacon 90 s, 5 % jitter (long period)",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "c1",
+        "ps_letter": "c",
+        "variant": "DGA numeric_seed, 12 q, 90 % NXDOMAIN",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "dga": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "c2",
+        "ps_letter": "c",
+        "variant": "DGA base32, 12 q, 90 % NXDOMAIN",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "dga": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "c3",
+        "ps_letter": "c",
+        "variant": "DGA dictcat (word-based), 12 q, 60 % NXDOMAIN",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "c4",
+        "ps_letter": "c",
+        "variant": "DNS tunnel TXT, 60-char labels, 30 q @1/s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "dns": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "c5",
+        "ps_letter": "c",
+        "variant": "DNS tunnel CNAME, 40-char labels, 20 q @0.2/s",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "dns": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "d1",
+        "ps_letter": "d",
+        "variant": "known-bad JA3 (CobaltStrike list), SNI present",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "tls_quic": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "d2",
+        "ps_letter": "d",
+        "variant": "no SNI, direct IP, port 4443",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "tls_quic": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "d3",
+        "ps_letter": "d",
+        "variant": "novel JA3 + JA4, SNI present, 1 session (canonical beat 6 shape)",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "d4",
+        "ps_letter": "d",
+        "variant": "novel JA3, SNI present, 4 sessions",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "d5",
+        "ps_letter": "d",
+        "variant": "fixed-size small-packet shape, 6 sessions",
+        "expected_hard": false,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "e1",
+        "ps_letter": "e",
+        "variant": "vertical scan 150 ports @50/s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "scan": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "e2",
+        "ps_letter": "e",
+        "variant": "horizontal sweep :445 on 80 hosts @40/s",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "scan": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "e3",
+        "ps_letter": "e",
+        "variant": "hybrid 20 hosts x 10 ports @30/s",
+        "expected_hard": false,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "e4",
+        "ps_letter": "e",
+        "variant": "slow vertical scan 120 ports @0.2/s",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "scan": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "e5",
+        "ps_letter": "e",
+        "variant": "small scan 40 ports @20/s",
+        "expected_hard": true,
+        "detected": false,
+        "alerts_by_detector": {}
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "f1",
+        "ps_letter": "f",
+        "variant": "exfil 5 MB in 5 records",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "f2",
+        "ps_letter": "f",
+        "variant": "exfil 20 MB in 10 records",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1,
+          "ddos": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "f3",
+        "ps_letter": "f",
+        "variant": "exfil 60 MB in 20 records",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1,
+          "c2": 1,
+          "ddos": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "f4",
+        "ps_letter": "f",
+        "variant": "slow exfil 3 MB over 30 min",
+        "expected_hard": true,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1,
+          "c2": 1
+        }
+      },
+      {
+        "run": "synthetic benign replay seed 3",
+        "attack_id": "f5",
+        "ps_letter": "f",
+        "variant": "exfil 400 KB in 4 records",
+        "expected_hard": false,
+        "detected": true,
+        "alerts_by_detector": {
+          "exfil": 1
+        }
+      }
+    ],
+    "overlap_matrix": [
+      {
+        "alert_class": "a",
+        "attack_class": "f",
+        "alerts": 8
+      },
+      {
+        "alert_class": "b",
+        "attack_class": "c",
+        "alerts": 15
+      },
+      {
+        "alert_class": "b",
+        "attack_class": "f",
+        "alerts": 9
+      }
+    ]
+  },
+  "confidence_brier_by_detector": {
+    "c2": {
+      "n": 230,
+      "positives": 12,
+      "brier": 0.941,
+      "mean_confidence": 0.9917,
+      "calibrated_on": [
+        "uncalibrated"
+      ]
+    },
+    "ddos": {
+      "n": 104,
+      "positives": 27,
+      "brier": 0.273,
+      "mean_confidence": 0.4572,
+      "calibrated_on": [
+        "synthetic_replay"
+      ]
+    },
+    "dga": {
+      "n": 6,
+      "positives": 6,
+      "brier": 0.0516,
+      "mean_confidence": 0.7733,
+      "calibrated_on": [
+        "uncalibrated"
+      ]
+    },
+    "dns": {
+      "n": 6,
+      "positives": 6,
+      "brier": 0.0,
+      "mean_confidence": 1.0,
+      "calibrated_on": [
+        "uncalibrated"
+      ]
+    },
+    "exfil": {
+      "n": 15749,
+      "positives": 15,
+      "brier": 0.999,
+      "mean_confidence": 1.0,
+      "calibrated_on": [
+        "uncalibrated"
+      ]
+    },
+    "scan": {
+      "n": 9,
+      "positives": 9,
+      "brier": 0.0,
+      "mean_confidence": 1.0,
+      "calibrated_on": [
+        "uncalibrated"
+      ]
+    },
+    "tls_quic": {
+      "n": 6,
+      "positives": 6,
+      "brier": 0.0362,
+      "mean_confidence": 0.825,
+      "calibrated_on": [
+        "uncalibrated"
+      ]
+    }
+  },
+  "wall_seconds": 119.7
+}

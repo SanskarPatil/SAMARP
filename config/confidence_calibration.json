@@ -1,0 +1,16 @@
+{
+  "source": "synthetic_replay",
+  "note": "fitted on synthetic benign replay + synthetic attack suite; re-fit after any detector change",
+  "seed": 101,
+  "background_seconds": 8400.0,
+  "fitted_at_utc": "2026-09-24T14:40:55+00:00",
+  "detectors": {
+    "ddos": {
+      "a": 0.838563,
+      "b": -2.955641,
+      "n": 34,
+      "positives": 10,
+      "negatives": 24
+    }
+  }
+}

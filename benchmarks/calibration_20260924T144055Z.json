@@ -1,0 +1,80 @@
+{
+  "machine": {
+    "captured_at_utc": "2026-09-24T14:40:55+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "power": {
+      "power_source": "ac",
+      "battery_percent": 41,
+      "battery_saver_on": false,
+      "power_plan": "Ultimate Performance"
+    },
+    "git_commit": "6e12d55",
+    "command": "python.exe scripts\\calibrate_confidence.py"
+  },
+  "calibration": {
+    "source": "synthetic_replay",
+    "note": "fitted on synthetic benign replay + synthetic attack suite; re-fit after any detector change",
+    "seed": 101,
+    "background_seconds": 8400.0,
+    "fitted_at_utc": "2026-09-24T14:40:55+00:00",
+    "detectors": {
+      "ddos": {
+        "a": 0.838563,
+        "b": -2.955641,
+        "n": 34,
+        "positives": 10,
+        "negatives": 24
+      }
+    }
+  },
+  "per_detector": {
+    "c2": {
+      "status": "uncalibrated",
+      "n": 77,
+      "positives": 5,
+      "negatives": 72,
+      "reason": "score is not predictive: fitted slope a=-33.891 <= 0 (false alerts score as high as true ones)"
+    },
+    "ddos": {
+      "status": "calibrated",
+      "a": 0.838563,
+      "b": -2.955641,
+      "n": 34,
+      "positives": 10,
+      "negatives": 24
+    },
+    "dga": {
+      "status": "uncalibrated",
+      "reason": "needs >= 5 true and >= 5 false alerts; has 2 / 0",
+      "n": 2
+    },
+    "dns": {
+      "status": "uncalibrated",
+      "reason": "needs >= 5 true and >= 5 false alerts; has 2 / 0",
+      "n": 2
+    },
+    "exfil": {
+      "status": "uncalibrated",
+      "n": 5225,
+      "positives": 5,
+      "negatives": 5220,
+      "reason": "score is not predictive: fitted slope a=-3.475 <= 0 (false alerts score as high as true ones)"
+    },
+    "scan": {
+      "status": "uncalibrated",
+      "reason": "needs >= 5 true and >= 5 false alerts; has 3 / 0",
+      "n": 3
+    },
+    "tls_quic": {
+      "status": "uncalibrated",
+      "reason": "needs >= 5 true and >= 5 false alerts; has 2 / 0",
+      "n": 2
+    }
+  },
+  "written": true
+}
