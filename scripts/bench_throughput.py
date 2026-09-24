@@ -65,7 +65,8 @@ TICK_S = 0.001             # producer pacing tick
 
 
 # --------------------------------------------------------------------------- process stats
-def peak_rss_mb() -> float | None:
+def rss_mb() -> tuple[float | None, float | None]:
+    """(current, peak) resident memory of this process in MB; (None, None) if unavailable."""
     try:
         if platform.system() == "Windows":
             import ctypes
@@ -77,16 +78,26 @@ def peak_rss_mb() -> float | None:
                             ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t), ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
                             ("PagefileUsage", ctypes.c_size_t), ("PeakPagefileUsage", ctypes.c_size_t)]
 
+            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+            kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+            kernel32.K32GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(_PMC), wintypes.DWORD]
+            kernel32.K32GetProcessMemoryInfo.restype = wintypes.BOOL
             counters = _PMC(); counters.cb = ctypes.sizeof(_PMC)
-            handle = ctypes.windll.kernel32.GetCurrentProcess()  # type: ignore[attr-defined]
-            ctypes.windll.psapi.GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb)  # type: ignore[attr-defined]
-            return round(counters.PeakWorkingSetSize / 2**20, 1)
+            if not kernel32.K32GetProcessMemoryInfo(kernel32.GetCurrentProcess(), ctypes.byref(counters), counters.cb):
+                return None, None
+            return round(counters.WorkingSetSize / 2**20, 1), round(counters.PeakWorkingSetSize / 2**20, 1)
+        current = None
+        status = Path("/proc/self/status")
+        if status.exists():
+            for line in status.read_text().splitlines():
+                if line.startswith("VmRSS:"):
+                    current = round(int(line.split()[1]) / 1024, 1)
         import resource
 
         peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        return round(peak / 1024 / (1024 if platform.system() == "Darwin" else 1), 1)
+        return current, round(peak / 1024 / (1024 if platform.system() == "Darwin" else 1), 1)
     except Exception:
-        return None
+        return None, None
 
 
 def pct(values, q: float) -> float | None:
@@ -115,22 +126,21 @@ def run_step(rate: int, duration_s: float, capacity: int, db_mode: str, base_eve
                 break
             due = int(rate * elapsed) - sent
             if due > 0:
+                with depth_lock:                      # one-way link: no back-pressure, overflow is dropped
+                    keep = min(due, max(capacity - depth[0], 0))
+                    depth[0] += keep
+                stats["dropped"] += due - keep
                 chunk = []
-                for _ in range(due):
-                    ev = copy.copy(base_events[idx])
-                    ev.observed_time = float(base_events[idx].observed_time) + loop * span
-                    chunk.append(ev)
+                for i in range(due):
+                    if i < keep:                      # dropped events are skipped, never copied or queued
+                        ev = copy.copy(base_events[idx])
+                        ev.observed_time = float(base_events[idx].observed_time) + loop * span
+                        chunk.append(ev)
                     idx += 1
                     if idx == n:
                         idx, loop = 0, loop + 1
                 sent += due
                 stats["offered"] += due
-                with depth_lock:
-                    room = capacity - depth[0]
-                    if room < len(chunk):             # one-way link: no back-pressure, drop the overflow
-                        stats["dropped"] += len(chunk) - max(room, 0)
-                        chunk = chunk[: max(room, 0)]
-                    depth[0] += len(chunk)
                 if chunk:
                     buf.put((time.perf_counter_ns(), chunk))
             time.sleep(TICK_S)
@@ -200,7 +210,8 @@ def run_step(rate: int, duration_s: float, capacity: int, db_mode: str, base_eve
         "worst_1s_processed_eps": min(per_second[1:-1] or per_second or [0]),
         "median_1s_processed_eps": int(statistics.median(per_second)) if per_second else 0,
         "cpu_pct_of_one_core": round(100.0 * cpu / wall, 1),
-        "peak_rss_mb_process": peak_rss_mb(),
+        "rss_mb_end_of_step": rss_mb()[0],
+        "peak_rss_mb_process": rss_mb()[1],
         "alerts_emitted": len(alert_lat),
         "incidents": incidents,
         "hash_chain_entries": chain,
@@ -253,16 +264,17 @@ def main() -> int:
              f"Buffer {args.buffer} events, SQLite {args.db}, {args.duration:.0f} s per step. One-way link: overflow is dropped, never back-pressured.", "",
              "## Machine", "| key | value |", "|---|---|", spec_markdown(result["machine"]), "",
              "## Results", "",
-             "| Offered /s | Sustained /s | Worst 1 s /s | Dropped (%) | CPU % 1 core | Peak RSS MB | Alerts | Event→alert p50 / p95 / p99 ms | Event→processed p50 / p95 / p99 ms | Backlog at end | Pass |",
+             "| Offered /s | Sustained /s | Worst 1 s /s | Dropped (%) | CPU % 1 core | RSS MB (end / peak) | Alerts | Event→alert p50 / p95 / p99 ms | Event→processed p50 / p95 / p99 ms | Backlog at end | Pass |",
              "|---|---|---|---|---|---|---|---|---|---|---|"]
     for s in result["steps"]:
         a, e = s["event_to_alert_latency_ms"], s["event_to_processed_latency_ms"]
         lines.append(f"| {s['target_rate_eps']:,} | {s['sustained_processed_eps']:,.0f} | {s['worst_1s_processed_eps']:,} | {s['dropped_events']:,} ({s['dropped_pct']}) | "
-                     f"{s['cpu_pct_of_one_core']} | {s['peak_rss_mb_process']} | {s['alerts_emitted']} | {a['p50']} / {a['p95']} / {a['p99']} | {e['p50']} / {e['p95']} / {e['p99']} | "
+                     f"{s['cpu_pct_of_one_core']} | {s['rss_mb_end_of_step']} / {s['peak_rss_mb_process']} | {s['alerts_emitted']} | {a['p50']} / {a['p95']} / {a['p99']} | {e['p50']} / {e['p95']} / {e['p99']} | "
                      f"{s['backlog_at_end_events']:,} | {'yes' if s['passes_loss_ceiling'] else 'no'} |")
     lines += ["", f"Pass rule: {result['config']['pass_rule']}.",
               f"Highest offered rate that passes: **{result['summary']['max_offered_rate_with_loss_below_ceiling']}** events/s.",
-              "Peak RSS is the process high-water mark, so it never decreases across steps."]
+              "Peak RSS is the process high-water mark, so it never decreases across steps. The sender thread shares the Python GIL with the "
+              "receiver, so under heavy overload the simulated sender itself costs receiver CPU; a real sensor is a separate process."]
     (out / f"throughput_{stamp}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines[-(len(result['steps']) + 5):]))
     print(f"\nwrote {out / f'throughput_{stamp}.json'}")
