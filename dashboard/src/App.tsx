@@ -151,8 +151,8 @@ export const App: React.FC = () => {
 
               <div className="hud hud-bottomright">
                 <span className="hud-label">Hash chain</span>
-                <span className="hud-value">#{health?.chain_seq ?? 0}</span>
-                <span className="hud-foot">{health?.total_updates ?? 0} chained updates</span>
+                <span className="hud-value">{isDemo ? 'n/a' : `#${health?.chain_seq ?? 0}`}</span>
+                <span className="hud-foot">{isDemo ? 'demo fixtures are not chained' : `${health?.total_updates ?? 0} chained updates`}</span>
               </div>
             </div>
           </section>

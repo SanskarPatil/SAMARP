@@ -56,7 +56,6 @@ export const IncidentRow: React.FC<IncidentRowProps> = ({ incident, isSelected, 
       className={`incident-row ${isSelected ? 'selected' : ''} severity-${severity.toLowerCase()}`}
     >
       <div className="incident-row-main">
-        {isDemo && <span className="demo-tag" title="Synthetic demo fixture, not a detection">DEMO</span>}
         {/* Severity Badge */}
         <div className={`severity-badge ${severity.toLowerCase()}`}>
           {severity === 'CRITICAL' ? <ShieldAlert size={13} /> : <AlertCircle size={13} />}
@@ -65,7 +64,10 @@ export const IncidentRow: React.FC<IncidentRowProps> = ({ incident, isSelected, 
 
         {/* Threat Class & Key Details */}
         <div className="incident-info">
-          <div className="ps-class-title">{ps_class}</div>
+          <div className="ps-class-title">
+            {isDemo && <span className="demo-tag" title="Synthetic demo fixture, not a detection">DEMO</span>}
+            {ps_class}
+          </div>
           <div className="threat-subline">
             <span className="threat-class-tag">{threat_class}</span>
             <span className="key-metric-tag">{getKeyMetric()}</span>
