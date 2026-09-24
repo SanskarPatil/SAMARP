@@ -1,0 +1,35 @@
+{
+  "source": "synthetic benign replay (seed 202)",
+  "learned_at_utc": "2026-09-24T15:06:37+00:00",
+  "events_read": 51076,
+  "note": "synthetic benign replay uses a small fixed set of client fingerprints; a real network has many more, so expect more novelty alerts on real traffic",
+  "machine": {
+    "captured_at_utc": "2026-09-24T15:06:37+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "power": {
+      "power_source": "ac",
+      "battery_percent": 72,
+      "battery_saver_on": false,
+      "power_plan": "Ultimate Performance"
+    },
+    "git_commit": "63fc94b",
+    "command": "python.exe scripts\\learn_tls_baseline.py"
+  },
+  "ja3": {
+    "9e10692f1b7f78228b2d4e424db3a98c": 1773288400.156677,
+    "cd08e31494f9531f560d64c695473da9": 1773288399.9816706,
+    "579ccef312d18482fc42e2b822ca2430": 1773288399.3901079,
+    "773906b0efdefa24a7f2b8eb6985bf37": 1773288399.545444
+  },
+  "ja4": {
+    "t13d1715h2_5b57614c22b0_3d5424432f57": 1773288400.156677,
+    "t13d1516h2_8daaf6152771_b0da82dd1658": 1773288399.9816706,
+    "t13d1516h2_acb858a92679_c2f7e8a0e5a1": 1773288399.3901079,
+    "t13d1517h2_8daaf6152771_b1ff8ab2d16f": 1773288399.545444
+  }
+}
