@@ -6,6 +6,7 @@ Source: FINAL_DEVELOPMENT_PLAN_V6.3.md sections 17, 18, 19, design.md section 19
 from __future__ import annotations
 
 import asyncio
+import time
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
@@ -71,9 +72,16 @@ class AppState:
         """Return serialized capability state conforming to frozen schema."""
         return self.capability_state.to_dict()
 
-    def ingest_alert(self, raw_alert: dict[str, Any]) -> dict[str, Any]:
-        """Deduplicate an alert into an incident, sign via hash chain, persist, and queue for push."""
+    def ingest_alert(self, raw_alert: dict[str, Any], ingest_perf_ns: int | None = None) -> dict[str, Any]:
+        """Deduplicate an alert into an incident, sign via hash chain, persist, and queue for push.
+
+        When ``ingest_perf_ns`` (time.perf_counter_ns() at event receipt) is given,
+        ``latency_ms`` is re-measured here so it covers detection + deduplication
+        + scoring up to the moment the incident is signed into the hash chain.
+        """
         incident = self.deduplicator.process_alert(raw_alert)
+        if ingest_perf_ns is not None:
+            incident["latency_ms"] = round((time.perf_counter_ns() - ingest_perf_ns) / 1e6, 4)
         signed = self.chain_writer.append(incident)
         persisted = self.store.save_incident(signed)
         self.batch_queue.append(persisted)

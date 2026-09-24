@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from features.rolling import WindowSummary
+from alerts.confidence import apply_confidence
 from ingest.identity import NOT_OBSERVABLE, canonical, identifier
 from ingest.normalized_event import NormalizedEvent
 
@@ -259,4 +260,4 @@ class ExfilDetector:
             },
             "recommendation": f"ADVISORY: Massive outbound data transfer anomaly detected from internal host {state.src_ip} to external endpoint {state.dst_ip}. Check egress DLP and restrict destination IP.",
         }
-        return alert
+        return apply_confidence(alert)

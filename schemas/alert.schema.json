@@ -19,7 +19,8 @@
     "calibrated",
     "evidence",
     "incident_id",
-    "capability"
+    "capability",
+    "calibrated_on"
   ],
 
   "properties": {
@@ -76,10 +77,15 @@
     },
 
     "confidence": {
-      "type": ["number", "null"],
+      "type": "number",
       "minimum": 0,
       "maximum": 1,
-      "description": "PS constraint-(e) mandatory field - the property is always present. May be null for statistical detectors, where the UI labels the output a risk/anomaly score. Semantics are governed by score_type and calibrated."
+      "description": "PS constraint-(e) mandatory field. ALWAYS a number in [0,1], never null (alerts/confidence.py). How it was obtained is stated in calibrated_on; the raw detector score stays in score / score_type."
+    },
+    "calibrated_on": {
+      "type": "string",
+      "enum": ["synthetic_replay", "platt_dga", "uncalibrated"],
+      "description": "Source of confidence. synthetic_replay = per-detector logistic fit on the labelled synthetic replay; platt_dga = Platt-calibrated LightGBM DGA probability; uncalibrated = documented bounded mapping of the raw score, NOT a probability. calibrated is true only for the first two."
     },
     "score": {
       "type": ["number", "null"],
@@ -210,7 +216,7 @@
     "latency_ms": {
       "type": ["number", "null"],
       "minimum": 0,
-      "description": "t_observed to t_websocket_emit. MEASURED, never estimated. SLO p95 below 2000 ms."
+      "description": "MEASURED with time.perf_counter_ns, never estimated: triggering event entering detectors/pipeline.py to the alert leaving it; re-measured by api/state.py up to hash-chain signing. Always set on pipeline-emitted alerts. WebSocket push adds at most the 250 ms batch interval. SLO p95 below 2000 ms."
     },
 
     "recommendation": {

@@ -77,6 +77,7 @@ export interface Incident {
   score: number | null;
   score_type: ScoreType;
   calibrated: boolean;
+  calibrated_on?: 'synthetic_replay' | 'platt_dga' | 'uncalibrated';
   evidence: IncidentEvidence;
   baseline?: Record<string, any> | null;
   threshold?: Record<string, any> | null;

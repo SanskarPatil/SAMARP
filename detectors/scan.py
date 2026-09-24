@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from features.rolling import WindowSummary
+from alerts.confidence import apply_confidence
 from ingest.identity import NOT_OBSERVABLE, canonical, identifier
 from ingest.normalized_event import NormalizedEvent
 
@@ -224,4 +225,4 @@ class ScanDetector:
             },
             "recommendation": f"ADVISORY: Reconnaissance probe detected from {state.src_ip}. Inspect source reputation and restrict perimeter ingress ACLs.",
         }
-        return alert
+        return apply_confidence(alert)

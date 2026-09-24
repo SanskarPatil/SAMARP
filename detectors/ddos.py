@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from typing import Any, Sequence
 
 from features.rolling import WindowSummary
+from alerts.confidence import apply_confidence
 from ingest.identity import NOT_OBSERVABLE, canonical, identifier
 
 PS_CLASS = "Volumetric DDoS / flooding"
@@ -228,7 +229,7 @@ class DDoSDetector:
             "baseline": baseline_dict,
             "recommendation": "ADVISORY: Volumetric traffic flood observed targeting internal host. Recommend perimeter upstream ratelimiting.",
         }
-        return alert
+        return apply_confidence(alert)
 
     def _check_slowloris(self, window: WindowSummary) -> dict[str, Any] | None:
         """Check for Slowloris low-rate HTTP connection-exhaustion attack."""
@@ -343,6 +344,6 @@ class DDoSDetector:
                     },
                     "recommendation": "ADVISORY: Low-rate Slowloris connection starvation detected. Recommend tuning server keep-alive timeouts and connection limits per client IP.",
                 }
-                return alert
+                return apply_confidence(alert)
 
         return None

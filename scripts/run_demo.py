@@ -29,6 +29,7 @@ from alerts.hash_chain import verify_hash_chain
 from api.main import create_app
 from api.state import AppState
 from detectors.pipeline import DetectionPipeline
+from ingest.capability import raise_from_observed
 from scenarios.canonical_campaign import generate_canonical_campaign_events
 
 
@@ -63,18 +64,25 @@ def run_campaign_replay(
     if verbose:
         print("[*] Replaying events through detection pipeline and alert deduplicator...")
 
+    # Declare what this replay actually carries (DNS names, TLS/JA3/JA4, ...) so the
+    # capability banner matches the evidence on screen. Only fields present in the
+    # records are raised; nothing is claimed optimistically.
+    raise_from_observed(app_state.capability_state, events)
+
     raw_alert_count = 0
     for ev in events:
-        alerts = pipeline.process_event(ev)
+        ingest_ns = time.perf_counter_ns()
+        alerts = pipeline.process_event(ev, ingest_perf_ns=ingest_ns)
         for a in alerts:
             raw_alert_count += 1
-            app_state.ingest_alert(a)
+            app_state.ingest_alert(a, ingest_perf_ns=ingest_ns)
 
     # Flush any remaining tumbling windows
-    flushed_alerts = pipeline.flush()
+    flush_ns = time.perf_counter_ns()
+    flushed_alerts = pipeline.flush(ingest_perf_ns=flush_ns)
     for a in flushed_alerts:
         raw_alert_count += 1
-        app_state.ingest_alert(a)
+        app_state.ingest_alert(a, ingest_perf_ns=flush_ns)
 
     elapsed = time.perf_counter() - t0
 

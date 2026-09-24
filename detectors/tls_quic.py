@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from features.rolling import WindowSummary
+from alerts.confidence import apply_confidence
 from ingest.identity import NOT_OBSERVABLE, canonical, identifier
 from ingest.normalized_event import NormalizedEvent
 
@@ -325,4 +326,4 @@ class TLSQuicDetector:
             },
             "recommendation": f"ADVISORY: Anomalous encrypted session detected to {state.dst_ip}:{state.dst_port}. Inspect destination certificate validity and host process lineage.",
         }
-        return alert
+        return apply_confidence(alert)

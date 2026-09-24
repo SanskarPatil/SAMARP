@@ -8,7 +8,7 @@
     "ps_class": "Volumetric DDoS / flooding",
     "threat_class": "syn_flood",
     "detector": "ddos",
-    "confidence": null,
+    "confidence": 0.9542,
     "score": 18.5,
     "score_type": "robust_z",
     "calibrated": false,
@@ -45,10 +45,11 @@
     },
     "latency_ms": 142.5,
     "recommendation": "ADVISORY TEXT ONLY. Upstream rate-limiting recommended. No active response path in system.",
+    "calibrated_on": "uncalibrated",
     "seq": 1,
     "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
-    "payload_hash": "82bbc2439908f94255bec816c6019d023d8b21c9e53ddc1388542a41d4486b20",
-    "entry_hash": "a7fdb1fadc143c15ba6eb773355864cbb98bed914658e45dd7cfe2d466328ba4"
+    "payload_hash": "fc7874fd59e31f8b724318e5fd1746d30e7a88153f8094b81d877a5bd0e6bd06",
+    "entry_hash": "131709276b4b7d1a87561c95cdd6c1e6f88c3938bf9f460357a1d888eb5d625b"
   },
   {
     "schema_version": "1.3",
@@ -58,7 +59,7 @@
     "ps_class": "Port scanning / reconnaissance",
     "threat_class": "vertical_port_scan",
     "detector": "scan",
-    "confidence": null,
+    "confidence": 1.0,
     "score": 42.0,
     "score_type": "anomaly_score",
     "calibrated": false,
@@ -85,10 +86,11 @@
     },
     "latency_ms": 88.0,
     "recommendation": "ADVISORY TEXT ONLY. Investigate host 192.168.1.105 for credential discovery. No mitigation command.",
+    "calibrated_on": "uncalibrated",
     "seq": 2,
-    "prev_hash": "a7fdb1fadc143c15ba6eb773355864cbb98bed914658e45dd7cfe2d466328ba4",
-    "payload_hash": "1c9c9ad06cb0d681ebaa709c285f8c70dc40a5cc2862937ebfae156fb36f0f1f",
-    "entry_hash": "3314ab41eb6832fac88bc38b10e877f297d229574552680334338c9bedd81212"
+    "prev_hash": "131709276b4b7d1a87561c95cdd6c1e6f88c3938bf9f460357a1d888eb5d625b",
+    "payload_hash": "82b7c0d562e54db3fd7a39bafd73bc0fb679de8ca86d8b4e3e0aeefa8789f7e1",
+    "entry_hash": "15cee2dbcc7fbbd61cdeb3b2734aaabe14bbfe96bd9342e715d512fc6cb4020b"
   },
   {
     "schema_version": "1.3",
@@ -98,7 +100,7 @@
     "ps_class": "Botnet C2 beaconing",
     "threat_class": "periodic_beacon",
     "detector": "c2",
-    "confidence": null,
+    "confidence": 1.0,
     "score": 9.4,
     "score_type": "rule_score",
     "calibrated": false,
@@ -124,10 +126,11 @@
     },
     "latency_ms": 115.0,
     "recommendation": "ADVISORY TEXT ONLY. Review endpoint process tree on 10.0.0.22. System operates passively.",
+    "calibrated_on": "uncalibrated",
     "seq": 3,
-    "prev_hash": "3314ab41eb6832fac88bc38b10e877f297d229574552680334338c9bedd81212",
-    "payload_hash": "5a5dff42b1eea0e2ec42694c6f5c918002e7b2a1c835727137fc4b52e3f5e6bf",
-    "entry_hash": "ec4e0413b1057224aae4707b376c5bd3ec9aa69a86ab0da7706f07a9d725903c"
+    "prev_hash": "15cee2dbcc7fbbd61cdeb3b2734aaabe14bbfe96bd9342e715d512fc6cb4020b",
+    "payload_hash": "73cbcd222139c12b8ed8b16fbc30df28916c13f93fcaa17075f0807ec34890ab",
+    "entry_hash": "8789998c74e055c327b54dad05de4f101edc995ffc809339ebce8d625f68f802"
   },
   {
     "schema_version": "1.3",
@@ -165,10 +168,11 @@
     },
     "latency_ms": 95.0,
     "recommendation": "ADVISORY TEXT ONLY. Inspect authoritative DNS server forwarding logs. No automated blocking.",
+    "calibrated_on": "platt_dga",
     "seq": 4,
-    "prev_hash": "ec4e0413b1057224aae4707b376c5bd3ec9aa69a86ab0da7706f07a9d725903c",
-    "payload_hash": "d95f831f0ba7b20fcd2e03bf2dfbf3da94dc6718ac24c2270ddc7e293986f691",
-    "entry_hash": "0dded3d47259ae6ee5c84a3ca015dd2baaeeb62a4cf18d99f1e06b560604dc25"
+    "prev_hash": "8789998c74e055c327b54dad05de4f101edc995ffc809339ebce8d625f68f802",
+    "payload_hash": "11e0069e3d09101376083a2f33b14b9069da9aa0512ab1884981a1498ca1b914",
+    "entry_hash": "273e10eb9810a07754e760eda946f6a88523a95b34f007316656c197c19157e5"
   },
   {
     "schema_version": "1.3",
@@ -178,7 +182,7 @@
     "ps_class": "Malware in encrypted sessions",
     "threat_class": "tls_fingerprint_anomaly",
     "detector": "tls_quic",
-    "confidence": null,
+    "confidence": 1.0,
     "score": 7.8,
     "score_type": "anomaly_score",
     "calibrated": false,
@@ -216,10 +220,11 @@
     },
     "latency_ms": 130.0,
     "recommendation": "ADVISORY TEXT ONLY. Metadata analysis only \u2014 payload decryption is strictly out of scope.",
+    "calibrated_on": "uncalibrated",
     "seq": 5,
-    "prev_hash": "0dded3d47259ae6ee5c84a3ca015dd2baaeeb62a4cf18d99f1e06b560604dc25",
-    "payload_hash": "8739e89c1f6f02b4b72ee650b4da1141b3f393477c8b7696c898cd90e3e2ff04",
-    "entry_hash": "f09b520f20cf070196c145b34cada676b2d1cabbb4783a62350165625da7193e"
+    "prev_hash": "273e10eb9810a07754e760eda946f6a88523a95b34f007316656c197c19157e5",
+    "payload_hash": "867df0be10f1cd3cf6bc3057c2a77f121f0f60a7380b301ee2f88b31690851b3",
+    "entry_hash": "0e4e712a7a95cc7a18060924b3adf961dc47f6ca985045bae67d97c3fcaa15cc"
   },
   {
     "schema_version": "1.3",
@@ -229,7 +234,7 @@
     "ps_class": "Data exfiltration",
     "threat_class": "outbound_volume_anomaly",
     "detector": "exfil",
-    "confidence": null,
+    "confidence": 0.8935,
     "score": 11.2,
     "score_type": "robust_z",
     "calibrated": false,
@@ -258,9 +263,10 @@
     },
     "latency_ms": 160.0,
     "recommendation": "ADVISORY TEXT ONLY. Verify destination 203.0.113.88 in data loss prevention logs.",
+    "calibrated_on": "uncalibrated",
     "seq": 6,
-    "prev_hash": "f09b520f20cf070196c145b34cada676b2d1cabbb4783a62350165625da7193e",
-    "payload_hash": "ccf56ab5aacffa78d3ea6f44aa8446c3a43d90ce5456cbb4013b0253caeb0001",
-    "entry_hash": "85bbfb29edd7915f462f766865a9edb9a40894dc1c87f0f3a91e76bd838ab3c4"
+    "prev_hash": "0e4e712a7a95cc7a18060924b3adf961dc47f6ca985045bae67d97c3fcaa15cc",
+    "payload_hash": "000a1699a1288a43e94eb64d682286d8ef9b17c82532f9acf6310c50c6f6cc83",
+    "entry_hash": "cf609544fe7bf826ff5c554d37614d23f6c3097d373e3ea435794d6409bcc361"
   }
 ]

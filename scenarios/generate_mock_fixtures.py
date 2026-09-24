@@ -26,6 +26,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from alerts.confidence import apply_confidence
 from alerts.hash_chain import HashChainWriter
 SCHEMA_PATH = PROJECT_ROOT / "schemas" / "alert.schema.json"
 FIXTURES_DIR = PROJECT_ROOT / "scenarios" / "mock_fixtures"
@@ -255,6 +256,10 @@ def generate_canonical_fixtures() -> list[dict[str, Any]]:
             "recommendation": "ADVISORY TEXT ONLY. Verify destination 203.0.113.88 in data loss prevention logs.",
         },
     ]
+
+    # Every alert carries a non-null confidence + calibration source (PS constraint e)
+    for fixture in fixtures:
+        apply_confidence(fixture)
 
     # Cryptographically sign all mock fixtures
     writer = HashChainWriter()

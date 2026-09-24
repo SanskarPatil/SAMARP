@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Incident } from '../types';
+import { CALIBRATION_LABEL, formatConfidence, formatRawScore } from '../services/scoreFormat';
 import {
   ShieldAlert,
   Copy,
@@ -46,7 +47,6 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({ incident, isDemo
     detector,
     status,
     severity,
-    confidence,
     score,
     score_type,
     calibrated,
@@ -149,27 +149,20 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({ incident, isDemo
           <div className="section-title">Detector Scoring Contract</div>
           <div className="score-box">
             <div className="score-main">
-              {calibrated && confidence !== null ? (
-                <>
-                  <span className="score-val text-emerald-400">{(confidence * 100).toFixed(1)}%</span>
-                  <div className="score-meta">
-                    <span className="score-type-badge calibrated">Calibrated Probability</span>
-                    <span className="score-note">Model-calibrated against offline holdout corpus</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <span className="score-val text-amber-400">{score !== null ? score.toFixed(1) : 'N/A'}</span>
-                  <div className="score-meta">
-                    <span className="score-type-badge uncalibrated">{score_type}</span>
-                    <span className="score-note">Risk / anomaly metric (Uncalibrated &bull; No percent sign)</span>
-                  </div>
-                </>
-              )}
+              <span className={`score-val ${calibrated ? 'text-emerald-400' : 'text-amber-400'}`}>{formatConfidence(incident)}</span>
+              <div className="score-meta">
+                <span className={`score-type-badge ${calibrated ? 'calibrated' : 'uncalibrated'}`}>
+                  confidence · {CALIBRATION_LABEL[incident.calibrated_on ?? 'uncalibrated']}
+                </span>
+                <span className="score-note">
+                  Raw {score_type}: {formatRawScore(score, score_type)}
+                  {calibrated ? '' : ' • no percent sign unless calibrated'}
+                </span>
+              </div>
             </div>
             {latency_ms !== null && latency_ms !== undefined && (
-              <div className="latency-indicator" title="Measured observation-to-emission latency (SLO p95 < 2000 ms)">
-                <span>Detection Latency:</span> <strong>{latency_ms.toFixed(1)} ms</strong>
+              <div className="latency-indicator" title="Measured: event entering the pipeline to the incident being signed into the hash chain (SLO p95 < 2000 ms)">
+                <span>Measured latency:</span> <strong>{latency_ms.toFixed(1)} ms</strong>
               </div>
             )}
           </div>

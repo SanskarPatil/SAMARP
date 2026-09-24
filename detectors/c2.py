@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from features.rolling import WindowSummary
+from alerts.confidence import apply_confidence
 from ingest.identity import NOT_OBSERVABLE, canonical, identifier
 from ingest.normalized_event import NormalizedEvent
 
@@ -223,4 +224,4 @@ class C2Detector:
             },
             "recommendation": f"ADVISORY: Highly regular beaconing communication detected to {state.dst_ip}:{state.dst_port}. Investigate host for persistent implant or RAT activity.",
         }
-        return alert
+        return apply_confidence(alert)

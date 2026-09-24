@@ -27,7 +27,7 @@ silently omitted, never defaulted to zero, and never inferred.
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Any
+from typing import Any, Iterable
 
 # --------------------------------------------------------------------------
 # Frozen vocabularies
@@ -253,3 +253,34 @@ __all__ = [
     "CapabilityState",
     "baseline_for",
 ]
+
+
+# --------------------------------------------------------------------------
+# Raising capability from records actually observed
+# --------------------------------------------------------------------------
+
+def raise_from_observed(state: CapabilityState, events: Iterable[Any]) -> CapabilityState:
+    """Raise DNS / TLS / QUIC / fingerprint fields to OBSERVABLE only where a
+    record in ``events`` actually carries that field ("by the record itself",
+    see :meth:`CapabilityState.set`).  Never lowers a field and never raises a
+    field nothing in the stream carried.  Returns ``state`` for chaining.
+    """
+    seen: set[str] = set()
+    for event in events:
+        dns = getattr(event, "dns", None) or {}
+        tls = getattr(event, "tls", None) or {}
+        quic = getattr(event, "quic", None) or {}
+        if dns.get("qname"):
+            seen.add("dns_names")
+        if any(dns.get(key) is not None for key in ("rcode", "nxdomain", "answers")):
+            seen.add("dns_responses")
+        if tls:
+            seen.add("tls_handshake")
+        if quic:
+            seen.add("quic_metadata")
+        for fingerprint in ("ja3", "ja3s", "ja4"):
+            if tls.get(fingerprint) or quic.get(fingerprint):
+                seen.add(fingerprint)
+    for field in sorted(seen):
+        state.set(field, Capability.OBSERVABLE)
+    return state

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Incident } from '../types';
+import { CALIBRATION_LABEL, formatConfidence, formatRawScore } from '../services/scoreFormat';
 import { ShieldAlert, AlertCircle, Clock, Hash, Layers } from 'lucide-react';
 
 interface IncidentRowProps {
@@ -17,7 +18,6 @@ export const IncidentRow: React.FC<IncidentRowProps> = ({ incident, isSelected, 
     severity,
     status,
     event_count,
-    confidence,
     score,
     score_type,
     calibrated,
@@ -76,17 +76,13 @@ export const IncidentRow: React.FC<IncidentRowProps> = ({ incident, isSelected, 
 
         {/* Confidence or Anomaly Score (Strict formatting) */}
         <div className="score-display">
-          {calibrated && confidence !== null ? (
-            <div className="calibrated-confidence" title="Calibrated Machine Learning Probability">
-              <span className="score-number">{(confidence * 100).toFixed(1)}%</span>
-              <span className="score-label">Calibrated</span>
-            </div>
-          ) : (
-            <div className="uncalibrated-score" title="Uncalibrated Anomaly / Rule / Robust Z-Score (Never a probability)">
-              <span className="score-number">{score !== null && score !== undefined ? score.toFixed(1) : 'N/A'}</span>
-              <span className="score-label">{score_type}</span>
-            </div>
-          )}
+          <div
+            className={calibrated ? 'calibrated-confidence' : 'uncalibrated-score'}
+            title={`Confidence ${formatConfidence(incident)} (${CALIBRATION_LABEL[incident.calibrated_on ?? 'uncalibrated']}); raw ${score_type} ${formatRawScore(score, score_type)}`}
+          >
+            <span className="score-number">{formatConfidence(incident)}</span>
+            <span className="score-label">{calibrated ? 'calibrated' : 'uncal. conf'}</span>
+          </div>
         </div>
 
         {/* Status Pill */}

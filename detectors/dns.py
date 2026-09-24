@@ -19,6 +19,7 @@ from typing import Any
 
 from features.entropy import shannon_entropy, shannon_entropy_from_counts
 from features.rolling import WindowSummary
+from alerts.confidence import apply_confidence
 from ingest.identity import NOT_OBSERVABLE, canonical, identifier
 from ingest.normalized_event import NormalizedEvent
 
@@ -286,4 +287,4 @@ class DNSTunnelDetector:
             },
             "recommendation": f"ADVISORY: Encapsulated DNS tunnel data detected to {state.registered_domain}. Inspect querying client {state.src_ip} and block unauthorized external DNS resolvers.",
         }
-        return alert
+        return apply_confidence(alert)

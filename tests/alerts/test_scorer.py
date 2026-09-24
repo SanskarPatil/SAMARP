@@ -82,11 +82,12 @@ def test_scorer_preserves_valid_confidence() -> None:
     assert scored["confidence"] == 0.88
     assert scored["severity"] == "HIGH"
 
-    # Out of bounds confidence converted to None
+    # Out of bounds confidence is recomputed from the raw score (never left null)
     alert_bad = {
         "score": 0.88,
         "score_type": "model_probability",
         "confidence": 2.5,
     }
     scored_bad = scorer.score_alert(alert_bad)
-    assert scored_bad["confidence"] is None
+    assert scored_bad["confidence"] == 0.88
+    assert scored_bad["calibrated_on"] == "platt_dga"

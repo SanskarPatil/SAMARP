@@ -206,9 +206,14 @@ class Deduplicator:
             alert.get("severity", "MEDIUM"),
         )
 
-        # Preserve confidence if present in incoming alert
-        if alert.get("confidence") is not None:
+        # Confidence keeps the peak (with the calibration source that produced it);
+        # latency_ms is per update - it describes the alert that just arrived.
+        if alert.get("confidence") is not None and (existing.get("confidence") is None or alert["confidence"] >= existing["confidence"]):
             existing["confidence"] = alert["confidence"]
+            existing["calibrated_on"] = alert.get("calibrated_on", existing.get("calibrated_on"))
+            existing["calibrated"] = alert.get("calibrated", existing.get("calibrated"))
+        if alert.get("latency_ms") is not None:
+            existing["latency_ms"] = alert["latency_ms"]
 
         # Merge contributing flow IDs (capped at 32 per schema line 51)
         raw_flows = alert.get("contributing_flow_ids") or []

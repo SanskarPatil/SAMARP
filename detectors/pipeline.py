@@ -9,6 +9,7 @@ NormalizedEvent -> RollingWindowAggregator (ddos) & Stateless Detectors -> Raw A
 
 from __future__ import annotations
 
+import time
 from typing import Any
 
 from detectors.c2 import C2Detector
@@ -51,12 +52,29 @@ class DetectionPipeline:
         self.exfil = ExfilDetector() if enable_exfil else None
         self.tls_quic = TLSQuicDetector() if enable_tls_quic else None
 
-    def process_event(self, event: NormalizedEvent) -> list[dict[str, Any]]:
+    @staticmethod
+    def _stamp_latency(alerts: list[dict[str, Any]], ingest_perf_ns: int) -> list[dict[str, Any]]:
+        """latency_ms = wall time from the triggering event entering the pipeline to the alert leaving it.
+
+        Measured with time.perf_counter_ns(), never estimated.  api/state.py
+        extends it to cover deduplication, scoring and hash-chain signing when
+        the same ingest timestamp is passed to AppState.ingest_alert().
+        """
+        now = time.perf_counter_ns()
+        for alert in alerts:
+            alert["latency_ms"] = round((now - ingest_perf_ns) / 1e6, 4)
+        return alerts
+
+    def process_event(self, event: NormalizedEvent, ingest_perf_ns: int | None = None) -> list[dict[str, Any]]:
         """Process a single NormalizedEvent through all active detectors and window aggregators.
+
+        ``ingest_perf_ns`` is the time.perf_counter_ns() value at which the event
+        was received; it defaults to "now" (the moment this call starts).
 
         Returns:
             List of emitted raw alert dictionaries matching schemas/alert.schema.json.
         """
+        ingest_perf_ns = ingest_perf_ns if ingest_perf_ns is not None else time.perf_counter_ns()
         emitted_alerts: list[dict[str, Any]] = []
 
         # 1. Stateless and session-level detectors
@@ -97,14 +115,15 @@ class DetectionPipeline:
                 ddos_alerts = self.ddos.evaluate_window(window)
                 emitted_alerts.extend(ddos_alerts)
 
-        return emitted_alerts
+        return self._stamp_latency(emitted_alerts, ingest_perf_ns)
 
-    def flush(self) -> list[dict[str, Any]]:
+    def flush(self, ingest_perf_ns: int | None = None) -> list[dict[str, Any]]:
         """Flush any remaining closed windows from the rolling aggregator."""
+        ingest_perf_ns = ingest_perf_ns if ingest_perf_ns is not None else time.perf_counter_ns()
         emitted_alerts: list[dict[str, Any]] = []
         if self.ddos is not None:
             remaining_windows = self.rolling_aggregator.flush()
             for window in remaining_windows:
                 ddos_alerts = self.ddos.evaluate_window(window)
                 emitted_alerts.extend(ddos_alerts)
-        return emitted_alerts
+        return self._stamp_latency(emitted_alerts, ingest_perf_ns)

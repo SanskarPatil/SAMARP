@@ -18,6 +18,8 @@ Responsibilities:
 from __future__ import annotations
 
 from copy import deepcopy
+
+from alerts.confidence import CALIBRATED_ON_VALUES, apply_confidence
 from typing import Any
 
 SEVERITY_LEVELS: dict[str, int] = {
@@ -98,16 +100,15 @@ class AlertScorer:
             score_type = "anomaly_score"
             scored["score_type"] = score_type
 
-        # Contract Rule: robust_z and rule_score are NEVER probabilities.
-        # Only model_probability may be calibrated.
-        if score_type in ("robust_z", "rule_score", "anomaly_score"):
-            scored["calibrated"] = False
-
-        # Validate confidence field semantics
+        # Contract Rule: robust_z and rule_score are NEVER probabilities - the raw
+        # ``score`` is left untouched.  The separate ``confidence`` field is always
+        # present in [0, 1]; ``calibrated`` follows how it was obtained
+        # (alerts/confidence.py).  Anything missing or out of range is recomputed.
         confidence = scored.get("confidence")
-        if confidence is not None:
-            if not isinstance(confidence, (int, float)) or not (0.0 <= confidence <= 1.0):
-                scored["confidence"] = None
+        valid = isinstance(confidence, (int, float)) and not isinstance(confidence, bool) and 0.0 <= float(confidence) <= 1.0
+        if not valid or scored.get("calibrated_on") not in CALIBRATED_ON_VALUES:
+            apply_confidence(scored)
+        scored["calibrated"] = scored["calibrated_on"] != "uncalibrated"
 
         # Severity evaluation: use explicit severity if provided and valid, otherwise evaluate
         current_sev = scored.get("severity")

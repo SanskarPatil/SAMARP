@@ -23,6 +23,7 @@ from typing import Any, Iterable
 
 from features.entropy import shannon_entropy
 from features.rolling import WindowSummary
+from alerts.confidence import apply_confidence
 from ingest.identity import NOT_OBSERVABLE, canonical, identifier
 from ingest.normalized_event import NormalizedEvent
 
@@ -366,4 +367,4 @@ class DGADetector:
             },
             "recommendation": f"ADVISORY: DGA resolution patterns observed from {state.src_ip}. Inspect endpoint for malware beaconing and sinkhole resolving names.",
         }
-        return alert
+        return apply_confidence(alert)
