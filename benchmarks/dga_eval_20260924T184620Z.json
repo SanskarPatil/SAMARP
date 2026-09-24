@@ -1,0 +1,954 @@
+{
+  "machine": {
+    "captured_at_utc": "2026-09-24T18:46:16+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "power": {
+      "power_source": "ac",
+      "battery_percent": 91,
+      "battery_saver_on": false,
+      "power_plan": "Normal mode"
+    },
+    "git_commit": "e37d1c4",
+    "command": "python.exe scripts\\train_eval_dga.py --save-model --real-benign intel\\tranco\\top-1m.csv"
+  },
+  "model_version": "dga-lightgbm-0.3.0",
+  "classifier": "lightgbm",
+  "features": [
+    "length",
+    "entropy",
+    "digit_ratio",
+    "vowel_ratio",
+    "label_count",
+    "lm_bigram",
+    "lm_trigram"
+  ],
+  "leakage_note": "nxdomain_rate removed; features from qname only; held-out benign WORDS never appear in training",
+  "data": {
+    "source": "synthetic: models/dga_dataset.build_vocab_holdout_corpus (seed 26145)",
+    "benign_in_vocab": 1395,
+    "benign_oov": 551,
+    "dga": 1484,
+    "families": [
+      "base32",
+      "dictcat",
+      "hexflux",
+      "numeric_seed",
+      "wordmix"
+    ],
+    "train_words": 46,
+    "heldout_words": [
+      "tech",
+      "soft",
+      "global",
+      "secure",
+      "learn",
+      "bank",
+      "food",
+      "music",
+      "energy",
+      "power",
+      "open",
+      "field",
+      "digital",
+      "mobile",
+      "social",
+      "science",
+      "labs",
+      "systems",
+      "mozilla",
+      "jsdelivr"
+    ]
+  },
+  "grouped_validation_in_vocab": {
+    "train_size": 2054,
+    "validation_size": 825,
+    "model": {
+      "count": 825,
+      "threshold": 0.5,
+      "per_class": {
+        "benign": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 396,
+          "tp": 396,
+          "fp": 0,
+          "fn": 0
+        },
+        "dga": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 429,
+          "tp": 429,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "brier_score": 0.0,
+      "roc_auc": 1.0,
+      "reliability": [
+        {
+          "lower": 0.0,
+          "upper": 0.2,
+          "count": 396,
+          "mean_probability": 4.297445895641425e-10,
+          "observed_rate": 0.0
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.4,
+          "count": 0,
+          "mean_probability": 0.0,
+          "observed_rate": 0.0
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.6,
+          "count": 0,
+          "mean_probability": 0.0,
+          "observed_rate": 0.0
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.8,
+          "count": 0,
+          "mean_probability": 0.0,
+          "observed_rate": 0.0
+        },
+        {
+          "lower": 0.8,
+          "upper": 1.0,
+          "count": 429,
+          "mean_probability": 0.9999999996197976,
+          "observed_rate": 1.0
+        }
+      ]
+    },
+    "rules_fallback_0.85": {
+      "threshold": 0.85,
+      "per_class": {
+        "benign": {
+          "precision": 0.5191,
+          "recall": 0.9949,
+          "f1": 0.6823,
+          "support": 396,
+          "tp": 394,
+          "fp": 365,
+          "fn": 2
+        },
+        "dga": {
+          "precision": 0.9697,
+          "recall": 0.1492,
+          "f1": 0.2586,
+          "support": 429,
+          "tp": 64,
+          "fp": 2,
+          "fn": 365
+        }
+      }
+    },
+    "rules_fallback_0.70": {
+      "threshold": 0.7,
+      "per_class": {
+        "benign": {
+          "precision": 0.6582,
+          "recall": 0.9823,
+          "f1": 0.7882,
+          "support": 396,
+          "tp": 389,
+          "fp": 202,
+          "fn": 7
+        },
+        "dga": {
+          "precision": 0.9701,
+          "recall": 0.5291,
+          "f1": 0.6848,
+          "support": 429,
+          "tp": 227,
+          "fp": 7,
+          "fn": 202
+        }
+      }
+    },
+    "feature_importance": {
+      "length": 320,
+      "entropy": 277,
+      "digit_ratio": 9,
+      "vowel_ratio": 23,
+      "label_count": 120,
+      "lm_bigram": 171,
+      "lm_trigram": 419
+    }
+  },
+  "benign_only": {
+    "in_vocab_validation": {
+      "n": 396,
+      "model_threshold": 0.5,
+      "model_false_positives": 0,
+      "model_fpr": 0.0,
+      "model_mean_probability": 0.0,
+      "model_p95_probability": 0.0,
+      "rules_fpr_0.85": 0.0051,
+      "rules_fpr_0.70": 0.0177,
+      "example_false_positives": []
+    },
+    "oov_heldout_words": {
+      "n": 551,
+      "model_threshold": 0.5,
+      "model_false_positives": 17,
+      "model_fpr": 0.0309,
+      "model_mean_probability": 0.0309,
+      "model_p95_probability": 0.0,
+      "rules_fpr_0.85": 0.0109,
+      "rules_fpr_0.70": 0.0218,
+      "example_false_positives": [
+        "digitalscience.com",
+        "globalenergy.in",
+        "jsdelivrenergy.net",
+        "jsdelivrglobal.org",
+        "jsdelivrlearn.in",
+        "jsdelivrsoft.edu",
+        "mobilesocial.com",
+        "mozilladigital.edu",
+        "sciencemozilla.com",
+        "sciencemusic.in"
+      ]
+    }
+  },
+  "oov_mixed": {
+    "description": "OOV benign + grouped-validation DGA",
+    "model": {
+      "count": 980,
+      "threshold": 0.5,
+      "per_class": {
+        "benign": {
+          "precision": 1.0,
+          "recall": 0.9691,
+          "f1": 0.9843,
+          "support": 551,
+          "tp": 534,
+          "fp": 0,
+          "fn": 17
+        },
+        "dga": {
+          "precision": 0.9619,
+          "recall": 1.0,
+          "f1": 0.9806,
+          "support": 429,
+          "tp": 429,
+          "fp": 17,
+          "fn": 0
+        }
+      },
+      "brier_score": 0.0173,
+      "roc_auc": 0.988,
+      "reliability": [
+        {
+          "lower": 0.0,
+          "upper": 0.2,
+          "count": 534,
+          "mean_probability": 5.107820895649355e-10,
+          "observed_rate": 0.0
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.4,
+          "count": 0,
+          "mean_probability": 0.0,
+          "observed_rate": 0.0
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.6,
+          "count": 0,
+          "mean_probability": 0.0,
+          "observed_rate": 0.0
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.8,
+          "count": 0,
+          "mean_probability": 0.0,
+          "observed_rate": 0.0
+        },
+        {
+          "lower": 0.8,
+          "upper": 1.0,
+          "count": 446,
+          "mean_probability": 0.9999999996094395,
+          "observed_rate": 0.9618834080717489
+        }
+      ]
+    },
+    "rules_fallback_0.85": {
+      "threshold": 0.85,
+      "per_class": {
+        "benign": {
+          "precision": 0.5989,
+          "recall": 0.9891,
+          "f1": 0.7461,
+          "support": 551,
+          "tp": 545,
+          "fp": 365,
+          "fn": 6
+        },
+        "dga": {
+          "precision": 0.9143,
+          "recall": 0.1492,
+          "f1": 0.2565,
+          "support": 429,
+          "tp": 64,
+          "fp": 6,
+          "fn": 365
+        }
+      }
+    },
+    "rules_fallback_0.70": {
+      "threshold": 0.7,
+      "per_class": {
+        "benign": {
+          "precision": 0.7274,
+          "recall": 0.9782,
+          "f1": 0.8344,
+          "support": 551,
+          "tp": 539,
+          "fp": 202,
+          "fn": 12
+        },
+        "dga": {
+          "precision": 0.9498,
+          "recall": 0.5291,
+          "f1": 0.6796,
+          "support": 429,
+          "tp": 227,
+          "fp": 12,
+          "fn": 202
+        }
+      }
+    }
+  },
+  "real_benign": {
+    "available": true,
+    "provenance": {
+      "label": "real",
+      "file": "top-1m.csv",
+      "sha256": "e60e32c9089007014d993bef1aa8e39e10f0a88c7e1697d58fcf83ad6963eb94",
+      "bytes": 22622336,
+      "file_mtime_utc": "2026-09-23T16:51:30+00:00",
+      "domains_used": 10000,
+      "top": 10000
+    },
+    "n": 10000,
+    "model_threshold": 0.5,
+    "model_false_positives": 1168,
+    "model_fpr": 0.1168,
+    "model_mean_probability": 0.1168,
+    "model_p95_probability": 1.0,
+    "rules_fpr_0.85": 0.0004,
+    "rules_fpr_0.70": 0.0017,
+    "example_false_positives": [
+      "domaincontrol.com",
+      "googletagmanager.com",
+      "gtld-servers.net",
+      "appsflyersdk.com",
+      "googleusercontent.com",
+      "trafficmanager.net",
+      "googledomains.com",
+      "googlesyndication.com",
+      "root-servers.net",
+      "cdninstagram.com"
+    ],
+    "note": "rules fallback allowlists ~30 top domains, which favours it on the head of a popularity list"
+  },
+  "leave_one_family_out": [
+    {
+      "held_out_family": "numeric_seed",
+      "train_size": 2287,
+      "test_size": 592,
+      "test_dga": 300,
+      "model": {
+        "count": 592,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 292,
+            "tp": 292,
+            "fp": 0,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 300,
+            "tp": 300,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "brier_score": 0.0,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 292,
+            "mean_probability": 1.4373663663765675e-09,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 300,
+            "mean_probability": 0.9999999987904286,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.8275,
+            "recall": 0.9692,
+            "f1": 0.8927,
+            "support": 292,
+            "tp": 283,
+            "fp": 59,
+            "fn": 9
+          },
+          "dga": {
+            "precision": 0.964,
+            "recall": 0.8033,
+            "f1": 0.8764,
+            "support": 300,
+            "tp": 241,
+            "fp": 9,
+            "fn": 59
+          }
+        }
+      },
+      "oov_benign": {
+        "n": 551,
+        "model_threshold": 0.5,
+        "model_false_positives": 17,
+        "model_fpr": 0.0309,
+        "model_mean_probability": 0.0309,
+        "model_p95_probability": 0.0,
+        "rules_fpr_0.85": 0.0109,
+        "rules_fpr_0.70": 0.0218,
+        "example_false_positives": [
+          "digitalscience.com",
+          "globalenergy.in",
+          "jsdelivrenergy.net",
+          "jsdelivrglobal.org",
+          "jsdelivrlearn.in",
+          "jsdelivrsoft.edu",
+          "mobilesocial.com",
+          "mozilladigital.edu",
+          "sciencemozilla.com",
+          "sciencemusic.in"
+        ]
+      }
+    },
+    {
+      "held_out_family": "hexflux",
+      "train_size": 2296,
+      "test_size": 583,
+      "test_dga": 300,
+      "model": {
+        "count": 583,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 283,
+            "tp": 283,
+            "fp": 0,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 300,
+            "tp": 300,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "brier_score": 0.0,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 283,
+            "mean_probability": 5.188685679100875e-10,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 300,
+            "mean_probability": 0.9999999862011233,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.7983,
+            "recall": 0.9788,
+            "f1": 0.8794,
+            "support": 283,
+            "tp": 277,
+            "fp": 70,
+            "fn": 6
+          },
+          "dga": {
+            "precision": 0.9746,
+            "recall": 0.7667,
+            "f1": 0.8582,
+            "support": 300,
+            "tp": 230,
+            "fp": 6,
+            "fn": 70
+          }
+        }
+      },
+      "oov_benign": {
+        "n": 551,
+        "model_threshold": 0.5,
+        "model_false_positives": 17,
+        "model_fpr": 0.0309,
+        "model_mean_probability": 0.0309,
+        "model_p95_probability": 0.0,
+        "rules_fpr_0.85": 0.0109,
+        "rules_fpr_0.70": 0.0218,
+        "example_false_positives": [
+          "digitalscience.com",
+          "globalenergy.in",
+          "jsdelivrenergy.net",
+          "jsdelivrglobal.org",
+          "jsdelivrlearn.in",
+          "jsdelivrsoft.edu",
+          "mobilesocial.com",
+          "mozilladigital.edu",
+          "sciencemozilla.com",
+          "sciencemusic.in"
+        ]
+      }
+    },
+    {
+      "held_out_family": "wordmix",
+      "train_size": 2305,
+      "test_size": 574,
+      "test_dga": 300,
+      "model": {
+        "count": 574,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 274,
+            "tp": 274,
+            "fp": 0,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 300,
+            "tp": 300,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "brier_score": 0.0,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 274,
+            "mean_probability": 1.6816489611729334e-09,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 300,
+            "mean_probability": 0.9999999985229803,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.5085,
+            "recall": 0.9854,
+            "f1": 0.6708,
+            "support": 274,
+            "tp": 270,
+            "fp": 261,
+            "fn": 4
+          },
+          "dga": {
+            "precision": 0.907,
+            "recall": 0.13,
+            "f1": 0.2274,
+            "support": 300,
+            "tp": 39,
+            "fp": 4,
+            "fn": 261
+          }
+        }
+      },
+      "oov_benign": {
+        "n": 551,
+        "model_threshold": 0.5,
+        "model_false_positives": 16,
+        "model_fpr": 0.029,
+        "model_mean_probability": 0.029,
+        "model_p95_probability": 0.0,
+        "rules_fpr_0.85": 0.0109,
+        "rules_fpr_0.70": 0.0218,
+        "example_false_positives": [
+          "digitalscience.com",
+          "globalenergy.in",
+          "jsdelivrenergy.net",
+          "jsdelivrglobal.org",
+          "jsdelivrlearn.in",
+          "jsdelivrsoft.edu",
+          "mobilesocial.com",
+          "mozilladigital.edu",
+          "sciencemozilla.com",
+          "sciencemusic.in"
+        ]
+      }
+    },
+    {
+      "held_out_family": "dictcat",
+      "train_size": 2329,
+      "test_size": 550,
+      "test_dga": 284,
+      "model": {
+        "count": 550,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 266,
+            "tp": 266,
+            "fp": 0,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 284,
+            "tp": 284,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "brier_score": 0.0,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 266,
+            "mean_probability": 7.124576406741324e-218,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 284,
+            "mean_probability": 1.0,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.4789,
+            "recall": 0.9812,
+            "f1": 0.6436,
+            "support": 266,
+            "tp": 261,
+            "fp": 284,
+            "fn": 5
+          },
+          "dga": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 284,
+            "tp": 0,
+            "fp": 5,
+            "fn": 284
+          }
+        }
+      },
+      "oov_benign": {
+        "n": 551,
+        "model_threshold": 0.5,
+        "model_false_positives": 17,
+        "model_fpr": 0.0309,
+        "model_mean_probability": 0.0309,
+        "model_p95_probability": 0.0,
+        "rules_fpr_0.85": 0.0109,
+        "rules_fpr_0.70": 0.0218,
+        "example_false_positives": [
+          "digitalscience.com",
+          "globalenergy.in",
+          "jsdelivrenergy.net",
+          "jsdelivrglobal.org",
+          "jsdelivrlearn.in",
+          "jsdelivrsoft.edu",
+          "mobilesocial.com",
+          "mozilladigital.edu",
+          "sciencemozilla.com",
+          "sciencemusic.in"
+        ]
+      }
+    },
+    {
+      "held_out_family": "base32",
+      "train_size": 2299,
+      "test_size": 580,
+      "test_dga": 300,
+      "model": {
+        "count": 580,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 1.0,
+            "recall": 0.9964,
+            "f1": 0.9982,
+            "support": 280,
+            "tp": 279,
+            "fp": 0,
+            "fn": 1
+          },
+          "dga": {
+            "precision": 0.9967,
+            "recall": 1.0,
+            "f1": 0.9983,
+            "support": 300,
+            "tp": 300,
+            "fp": 1,
+            "fn": 0
+          }
+        },
+        "brier_score": 0.0008,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 277,
+            "mean_probability": 0.0020883648349799278,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 1,
+            "mean_probability": 0.2276522727152549,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 2,
+            "mean_probability": 0.4637877552329011,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 300,
+            "mean_probability": 1.0,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.8452,
+            "recall": 0.975,
+            "f1": 0.9055,
+            "support": 280,
+            "tp": 273,
+            "fp": 50,
+            "fn": 7
+          },
+          "dga": {
+            "precision": 0.9728,
+            "recall": 0.8333,
+            "f1": 0.8977,
+            "support": 300,
+            "tp": 250,
+            "fp": 7,
+            "fn": 50
+          }
+        }
+      },
+      "oov_benign": {
+        "n": 551,
+        "model_threshold": 0.5,
+        "model_false_positives": 62,
+        "model_fpr": 0.1125,
+        "model_mean_probability": 0.0962,
+        "model_p95_probability": 0.9851,
+        "rules_fpr_0.85": 0.0109,
+        "rules_fpr_0.70": 0.0218,
+        "example_false_positives": [
+          "bank.info",
+          "bank21.edu",
+          "bank55.com",
+          "bankopen.org",
+          "digitalscience.com",
+          "energy.org",
+          "energy13.in",
+          "energy58.io",
+          "energy81.net",
+          "energyfood.in"
+        ]
+      }
+    }
+  ],
+  "saved_artifact": {
+    "booster": {
+      "path": "models/artifact/dga_lightgbm.txt",
+      "sha256": "b3baeb9ecfa3c8f45cad5a67e7761d14666eeff38e6a315507b74ccdc7f987bd",
+      "bytes": 158710
+    },
+    "meta": {
+      "path": "models/artifact/dga_model_meta.json",
+      "sha256": "d6b09bce0c9d28b175ccb624fa4757c82ed34fc356816ec447209dff257d97eb",
+      "bytes": 173511
+    },
+    "git": "models/artifact/ is .gitignored by project policy (vendored into the offline bundle); hashes above identify it"
+  }
+}
