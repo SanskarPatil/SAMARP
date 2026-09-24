@@ -41,6 +41,17 @@ def _iso_utc(ts: float | datetime | None = None) -> str:
     return dt.astimezone(timezone.utc).isoformat(timespec="microseconds")
 
 
+
+def _declared_amplifier_ports() -> frozenset[int]:
+    try:
+        from ingest.address_plan import AddressPlan
+        return frozenset(int(p) for p in AddressPlan.load().amplifier_ports)
+    except Exception:  # pragma: no cover - plan file missing
+        return frozenset({53, 123, 389, 1900, 11211})
+
+
+_SERVICE_REPLY_PORTS = _declared_amplifier_ports()
+
 class _SourceScanState:
     """Bounded state tracking destinations and ports probed by a single source IP."""
 
@@ -105,6 +116,13 @@ class ScanDetector:
     def evaluate_event(self, ev: NormalizedEvent) -> dict[str, Any] | None:
         """Evaluate a single NormalizedEvent and emit an alert if scan threshold exceeded."""
         if not ev.src_ip:
+            return None
+        # Replies are not probes: traffic FROM a well-known service port (< 1024,
+        # or a declared amplifier port such as 1900/11211) TO an ephemeral port is a server answering (DNS/NTP responses, reflected
+        # UDP), not the sender scanning. Known gap: a scanner that fixes its
+        # source port below 1024 AND probes only ports >= 1024 is not counted.
+        if ev.src_port is not None and ev.dst_port is not None and (ev.src_port < 1024 or ev.src_port in _SERVICE_REPLY_PORTS) \
+                and ev.dst_port >= 1024 and ev.src_port != ev.dst_port:
             return None
 
         now = float(ev.observed_time.timestamp()) if isinstance(ev.observed_time, datetime) else float(ev.observed_time)

@@ -181,6 +181,10 @@ class TLSQuicDetector:
         """Evaluate a NormalizedEvent for encrypted session anomalies."""
         if not ev.src_ip or not ev.dst_ip or ev.dst_port is None:
             return None
+        # A packet FROM a service port (< 1024) TO a higher port is a server's
+        # reply (e.g. reflected DNS landing on 4433), not a client opening TLS.
+        if ev.src_port is not None and ev.src_port < 1024 <= ev.dst_port and not (ev.tls or ev.quic):
+            return None
 
         # Check if event has TLS or QUIC metadata, or is on standard TLS/QUIC ports
         is_encrypted = (

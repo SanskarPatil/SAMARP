@@ -132,3 +132,38 @@ def test_c2_ignores_active_timeout_records_of_one_bulk_flow():
     det = C2Detector()
     alerts = [det.evaluate_event(_flow(T0 + i * 10, "10.0.1.30", "192.0.2.200", 51000, 443, packets=1750, bytes=2_109_000)) for i in range(20)]
     assert not any(alerts), "10 s export records of one 2 MB-per-slice upload are not beacons"
+
+
+# ---------- scan: replies from service ports are not probes (task 7) ----------
+
+def test_scan_ignores_replies_from_service_ports():
+    from detectors.scan import ScanDetector
+    det = ScanDetector()
+    alerts = [det.evaluate_event(_flow(T0 + i * 0.01, "198.19.1.1", "10.0.1.2", 53, 20000 + i, "UDP", packets=1, bytes=300,
+                                       direction="inbound")) for i in range(300)]
+    assert not any(alerts), "a DNS server answering 300 queries is not scanning 300 ports"
+
+
+def test_scan_still_sees_vertical_probe():
+    from detectors.scan import ScanDetector
+    det = ScanDetector()
+    alerts = [det.evaluate_event(_flow(T0 + i * 0.02, "10.0.9.9", "10.0.4.20", 40000 + i, 1 + i, tcp_flags="S", packets=1, bytes=60))
+              for i in range(150)]
+    assert any(alerts)
+
+
+# ---------- tls_quic: replies from service ports are not TLS sessions (task 7) ----------
+
+def test_tls_ignores_service_port_replies_without_tls_metadata():
+    det = TLSQuicDetector()
+    alerts = [det.evaluate_event(_flow(T0 + i, "198.51.100.7", "10.0.1.245", 53, 4433, "UDP", packets=1, bytes=1200, direction="inbound"))
+              for i in range(3)]
+    assert not any(alerts), "reflected DNS landing on port 4433 is not a TLS session"
+
+
+def test_scan_ignores_replies_from_high_amplifier_ports():
+    from detectors.scan import ScanDetector
+    det = ScanDetector()
+    alerts = [det.evaluate_event(_flow(T0 + i * 0.01, "198.19.1.1", "10.0.1.247", 11211, 20000 + i, "UDP", packets=1, bytes=1400,
+                                       direction="inbound")) for i in range(300)]
+    assert not any(alerts), "memcached (11211) responses are replies, not a scan"
