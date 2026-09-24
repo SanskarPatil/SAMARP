@@ -1,0 +1,236 @@
+{
+  "machine": {
+    "captured_at_utc": "2026-09-24T07:17:20+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "git_commit": "bda1753",
+    "command": "python.exe scripts\\bench_throughput.py"
+  },
+  "config": {
+    "rates": [
+      1000,
+      2000,
+      5000,
+      10000,
+      20000,
+      40000
+    ],
+    "duration_s_per_step": 60.0,
+    "buffer_events": 50000,
+    "db": "file",
+    "loss_ceiling_pct": 1.0,
+    "pass_rule": "dropped < 1 % AND backlog when the sender stops <= 1 s of traffic (the consumer kept up)",
+    "event_source": "scenarios/canonical_campaign.py (attack-heavy, time-shifted per loop)",
+    "metric": "normalized flow events per second",
+    "scope": "pipeline + dedup + scoring + hash chain + SQLite; excludes capture, NIC, WebSocket",
+    "smoke_run": false
+  },
+  "steps": [
+    {
+      "target_rate_eps": 1000,
+      "duration_s": 60.0,
+      "offered_events": 59999,
+      "processed_events": 59999,
+      "dropped_events": 0,
+      "dropped_pct": 0.0,
+      "sustained_processed_eps": 1000.0,
+      "worst_1s_processed_eps": 999,
+      "median_1s_processed_eps": 999,
+      "cpu_pct_of_one_core": 30.0,
+      "peak_rss_mb_process": 0.0,
+      "alerts_emitted": 64,
+      "incidents": 10,
+      "hash_chain_entries": 65,
+      "event_to_alert_latency_ms": {
+        "p50": 1.0278,
+        "p95": 9.2804,
+        "p99": 10.5051,
+        "max": 10.647,
+        "n": 64
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 0.3719,
+        "p95": 0.721,
+        "p99": 1.4221,
+        "max": 11.2727,
+        "n": 59999
+      },
+      "backlog_at_end_events": 0,
+      "keeps_up": true,
+      "passes_loss_ceiling": true
+    },
+    {
+      "target_rate_eps": 2000,
+      "duration_s": 60.0,
+      "offered_events": 119997,
+      "processed_events": 119997,
+      "dropped_events": 0,
+      "dropped_pct": 0.0,
+      "sustained_processed_eps": 2000.0,
+      "worst_1s_processed_eps": 1996,
+      "median_1s_processed_eps": 2000,
+      "cpu_pct_of_one_core": 46.0,
+      "peak_rss_mb_process": 0.0,
+      "alerts_emitted": 128,
+      "incidents": 10,
+      "hash_chain_entries": 129,
+      "event_to_alert_latency_ms": {
+        "p50": 1.5906,
+        "p95": 6.1637,
+        "p99": 10.9384,
+        "max": 12.1548,
+        "n": 128
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 0.4936,
+        "p95": 0.9444,
+        "p99": 1.5377,
+        "max": 12.6083,
+        "n": 119997
+      },
+      "backlog_at_end_events": 0,
+      "keeps_up": true,
+      "passes_loss_ceiling": true
+    },
+    {
+      "target_rate_eps": 5000,
+      "duration_s": 60.0,
+      "offered_events": 299999,
+      "processed_events": 299999,
+      "dropped_events": 0,
+      "dropped_pct": 0.0,
+      "sustained_processed_eps": 5000.1,
+      "worst_1s_processed_eps": 4994,
+      "median_1s_processed_eps": 4999,
+      "cpu_pct_of_one_core": 67.3,
+      "peak_rss_mb_process": 0.0,
+      "alerts_emitted": 321,
+      "incidents": 10,
+      "hash_chain_entries": 322,
+      "event_to_alert_latency_ms": {
+        "p50": 5.2193,
+        "p95": 13.356,
+        "p99": 18.1474,
+        "max": 23.2731,
+        "n": 321
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 0.5932,
+        "p95": 1.2905,
+        "p99": 3.16,
+        "max": 24.3179,
+        "n": 299999
+      },
+      "backlog_at_end_events": 0,
+      "keeps_up": true,
+      "passes_loss_ceiling": true
+    },
+    {
+      "target_rate_eps": 10000,
+      "duration_s": 60.0,
+      "offered_events": 599894,
+      "processed_events": 541613,
+      "dropped_events": 58281,
+      "dropped_pct": 9.715,
+      "sustained_processed_eps": 8292.2,
+      "worst_1s_processed_eps": 6541,
+      "median_1s_processed_eps": 8261,
+      "cpu_pct_of_one_core": 98.0,
+      "peak_rss_mb_process": 0.0,
+      "alerts_emitted": 615,
+      "incidents": 35,
+      "hash_chain_entries": 615,
+      "event_to_alert_latency_ms": {
+        "p50": 5640.1829,
+        "p95": 6303.0546,
+        "p99": 6418.439,
+        "max": 6432.8523,
+        "n": 615
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 5544.9118,
+        "p95": 6336.9017,
+        "p99": 6423.4634,
+        "max": 6452.4965,
+        "n": 541613
+      },
+      "backlog_at_end_events": 49822,
+      "keeps_up": false,
+      "passes_loss_ceiling": false
+    },
+    {
+      "target_rate_eps": 20000,
+      "duration_s": 60.0,
+      "offered_events": 1199923,
+      "processed_events": 405794,
+      "dropped_events": 794129,
+      "dropped_pct": 66.182,
+      "sustained_processed_eps": 6086.9,
+      "worst_1s_processed_eps": 4686,
+      "median_1s_processed_eps": 5931,
+      "cpu_pct_of_one_core": 98.8,
+      "peak_rss_mb_process": 0.0,
+      "alerts_emitted": 582,
+      "incidents": 10,
+      "hash_chain_entries": 583,
+      "event_to_alert_latency_ms": {
+        "p50": 8779.9689,
+        "p95": 9338.9884,
+        "p99": 9384.0248,
+        "max": 9561.7221,
+        "n": 582
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 8517.3088,
+        "p95": 9234.1047,
+        "p99": 9433.8333,
+        "max": 9591.5055,
+        "n": 405794
+      },
+      "backlog_at_end_events": 50000,
+      "keeps_up": false,
+      "passes_loss_ceiling": false
+    },
+    {
+      "target_rate_eps": 40000,
+      "duration_s": 60.0,
+      "offered_events": 2399584,
+      "processed_events": 421123,
+      "dropped_events": 1978461,
+      "dropped_pct": 82.45,
+      "sustained_processed_eps": 6554.1,
+      "worst_1s_processed_eps": 4195,
+      "median_1s_processed_eps": 6223,
+      "cpu_pct_of_one_core": 98.2,
+      "peak_rss_mb_process": 0.0,
+      "alerts_emitted": 829,
+      "incidents": 10,
+      "hash_chain_entries": 829,
+      "event_to_alert_latency_ms": {
+        "p50": 7789.031,
+        "p95": 8650.2344,
+        "p99": 8930.6941,
+        "max": 9009.3747,
+        "n": 829
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 7762.5333,
+        "p95": 8607.2781,
+        "p99": 8845.5554,
+        "max": 9026.4157,
+        "n": 421123
+      },
+      "backlog_at_end_events": 50000,
+      "keeps_up": false,
+      "passes_loss_ceiling": false
+    }
+  ],
+  "summary": {
+    "max_offered_rate_with_loss_below_ceiling": 5000,
+    "kpi_1000_eps_60s_below_1pct_loss": true
+  }
+}
