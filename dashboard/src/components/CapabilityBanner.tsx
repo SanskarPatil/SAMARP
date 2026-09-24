@@ -17,6 +17,7 @@ export const CapabilityBanner: React.FC<CapabilityBannerProps> = ({ capabilities
     { key: 'ja3s', label: 'JA3S' },
     { key: 'ja4', label: 'JA4' },
     { key: 'flow_records', label: 'Flow Records' },
+    { key: 'geo', label: 'Geo' },
     { key: 'capture_loss', label: 'Loss Tracker' },
     { key: 'bidirectional_visibility', label: 'Bidirectional' },
   ];
