@@ -1,0 +1,145 @@
+{
+  "machine": {
+    "captured_at_utc": "2026-09-24T07:37:50+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "power": {
+      "power_source": "battery",
+      "battery_percent": 82,
+      "battery_saver_on": false,
+      "power_plan": "Ultimate Performance"
+    },
+    "git_commit": "efea925",
+    "command": "python.exe scripts\\bench_throughput.py --rates 5000 10000 15000 20000 25000 --stop-on-loss"
+  },
+  "config": {
+    "rates": [
+      5000,
+      10000,
+      15000,
+      20000,
+      25000
+    ],
+    "duration_s_per_step": 60.0,
+    "buffer_events": 50000,
+    "db": "file",
+    "loss_ceiling_pct": 1.0,
+    "pass_rule": "dropped < 1 % AND backlog when the sender stops <= 1 s of traffic (the consumer kept up)",
+    "event_source": "scenarios/canonical_campaign.py (attack-heavy, time-shifted per loop)",
+    "metric": "normalized flow events per second",
+    "scope": "pipeline + dedup + scoring + hash chain + SQLite; excludes capture, NIC, WebSocket",
+    "smoke_run": false
+  },
+  "steps": [
+    {
+      "target_rate_eps": 5000,
+      "duration_s": 60.0,
+      "offered_events": 299997,
+      "processed_events": 299997,
+      "dropped_events": 0,
+      "dropped_pct": 0.0,
+      "sustained_processed_eps": 5000.1,
+      "worst_1s_processed_eps": 4977,
+      "median_1s_processed_eps": 4999,
+      "cpu_pct_of_one_core": 63.9,
+      "rss_mb_end_of_step": 54.2,
+      "peak_rss_mb_process": 56.1,
+      "alerts_emitted": 321,
+      "incidents": 10,
+      "hash_chain_entries": 322,
+      "event_to_alert_latency_ms": {
+        "p50": 4.1823,
+        "p95": 12.3304,
+        "p99": 16.5291,
+        "max": 20.1685,
+        "n": 321
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 0.56,
+        "p95": 1.1318,
+        "p99": 2.1646,
+        "max": 21.1474,
+        "n": 299997
+      },
+      "backlog_at_end_events": 0,
+      "keeps_up": true,
+      "passes_loss_ceiling": true
+    },
+    {
+      "target_rate_eps": 10000,
+      "duration_s": 60.0,
+      "offered_events": 599994,
+      "processed_events": 599994,
+      "dropped_events": 0,
+      "dropped_pct": 0.0,
+      "sustained_processed_eps": 10000.2,
+      "worst_1s_processed_eps": 9991,
+      "median_1s_processed_eps": 10000,
+      "cpu_pct_of_one_core": 74.7,
+      "rss_mb_end_of_step": 66.8,
+      "peak_rss_mb_process": 67.0,
+      "alerts_emitted": 644,
+      "incidents": 10,
+      "hash_chain_entries": 644,
+      "event_to_alert_latency_ms": {
+        "p50": 3.8204,
+        "p95": 8.5511,
+        "p99": 13.621,
+        "max": 17.0077,
+        "n": 644
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 0.6179,
+        "p95": 1.1949,
+        "p99": 2.4203,
+        "max": 18.0882,
+        "n": 599994
+      },
+      "backlog_at_end_events": 0,
+      "keeps_up": true,
+      "passes_loss_ceiling": true
+    },
+    {
+      "target_rate_eps": 15000,
+      "duration_s": 60.0,
+      "offered_events": 899901,
+      "processed_events": 899901,
+      "dropped_events": 0,
+      "dropped_pct": 0.0,
+      "sustained_processed_eps": 14514.7,
+      "worst_1s_processed_eps": 12119,
+      "median_1s_processed_eps": 14441,
+      "cpu_pct_of_one_core": 98.8,
+      "rss_mb_end_of_step": 68.8,
+      "peak_rss_mb_process": 85.8,
+      "alerts_emitted": 966,
+      "incidents": 10,
+      "hash_chain_entries": 966,
+      "event_to_alert_latency_ms": {
+        "p50": 1131.4876,
+        "p95": 2097.3654,
+        "p99": 2190.2085,
+        "max": 2196.0008,
+        "n": 966
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 1113.6664,
+        "p95": 2069.5796,
+        "p99": 2154.5033,
+        "max": 2199.9515,
+        "n": 899901
+      },
+      "backlog_at_end_events": 32539,
+      "keeps_up": false,
+      "passes_loss_ceiling": false
+    }
+  ],
+  "summary": {
+    "max_offered_rate_with_loss_below_ceiling": 10000,
+    "kpi_1000_eps_60s_below_1pct_loss": true
+  }
+}
