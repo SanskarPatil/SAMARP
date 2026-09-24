@@ -3,12 +3,15 @@ import { Incident, SensorCapabilities, SystemHealth, ConnectionMode, Severity } 
 import { getHealth, getCapabilities, getIncidents, FALLBACK_CAPABILITIES } from '../services/api';
 import { IncidentWebSocketClient } from '../services/websocket';
 import { CANONICAL_MOCK_FIXTURES } from '../services/mockFixtures';
-
-const MAX_RING_BUFFER_SIZE = 500;
+import { DataSource, MAX_RING_BUFFER_SIZE, mergeIncidents as mergeInto, reconcile, visibleIncidents } from '../services/incidentStore';
 
 export function useIncidents() {
-  const [incidents, setIncidents] = useState<Incident[]>(CANONICAL_MOCK_FIXTURES);
-  const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(CANONICAL_MOCK_FIXTURES[0].incident_id);
+  // Live incidents come ONLY from the read-only API / WebSocket. They start empty
+  // and are never mixed with fixtures. Demo fixtures live in a separate list and
+  // are shown only while the explicit DEMO DATA toggle is on.
+  const [liveIncidents, setLiveIncidents] = useState<Incident[]>([]);
+  const [dataSource, setDataSource] = useState<DataSource>('live');
+  const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [capabilities, setCapabilities] = useState<SensorCapabilities>(FALLBACK_CAPABILITIES);
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [connectionMode, setConnectionMode] = useState<ConnectionMode>('LIVE');
@@ -24,28 +27,10 @@ export function useIncidents() {
 
   // Helper to merge batch into 500-item ring buffer
   const mergeIncidents = useCallback((incoming: Incident[]) => {
-    setIncidents((current) => {
-      const map = new Map<string, Incident>();
-      // Index existing
-      for (const item of current) {
-        map.set(item.incident_id, item);
-      }
-      // Upsert incoming
-      for (const item of incoming) {
-        map.set(item.incident_id, item);
-      }
-
-      // Convert back and sort descending by last_observed or seq
-      const list = Array.from(map.values()).sort((a, b) => {
-        const timeA = new Date(a.last_observed || a.timestamp).getTime();
-        const timeB = new Date(b.last_observed || b.timestamp).getTime();
-        return timeB - timeA;
-      });
-
-      // Bounded client ring buffer of 500
-      return list.slice(0, MAX_RING_BUFFER_SIZE);
-    });
+    setLiveIncidents((current) => mergeInto(current, incoming, MAX_RING_BUFFER_SIZE));
   }, []);
+
+  const incidents = visibleIncidents(dataSource, liveIncidents, CANONICAL_MOCK_FIXTURES) as Incident[];
 
   // Poll health and capabilities
   useEffect(() => {
@@ -54,9 +39,9 @@ export function useIncidents() {
     async function loadInitial() {
       try {
         const [h, cap, incList] = await Promise.all([
-          getHealth(),
+          getHealth().catch(() => null),
           getCapabilities(),
-          getIncidents({ limit: 100 }).catch(() => []),
+          getIncidents({ limit: MAX_RING_BUFFER_SIZE }).catch(() => []),
         ]);
 
         if (!isMounted) return;
@@ -66,12 +51,10 @@ export function useIncidents() {
 
         if (incList && incList.length > 0) {
           mergeIncidents(incList);
-          if (!selectedIncidentId) {
-            setSelectedIncidentId(incList[0].incident_id);
-          }
+          setSelectedIncidentId((prev) => prev || incList[0].incident_id);
         }
       } catch {
-        // Retain fallback mock data
+        // API unreachable: live feed stays empty. No fixture fallback.
       }
     }
 
@@ -83,7 +66,7 @@ export function useIncidents() {
         const h = await getHealth();
         if (isMounted) setHealth(h);
       } catch {
-        // Ignored in offline mode
+        if (isMounted) setHealth(null); // API offline: shown as such, never faked
       }
     }, 5000);
 
@@ -91,7 +74,7 @@ export function useIncidents() {
       isMounted = false;
       clearInterval(timer);
     };
-  }, [mergeIncidents, selectedIncidentId]);
+  }, [mergeIncidents]);
 
   // WebSocket lifecycle
   useEffect(() => {
@@ -173,12 +156,19 @@ export function useIncidents() {
     return counts;
   }, [incidents]);
 
-  // Load canonical mock fixtures manually (demo mode)
-  const loadMockFixtures = useCallback(() => {
-    mergeIncidents(CANONICAL_MOCK_FIXTURES);
-    setSelectedIncidentId(CANONICAL_MOCK_FIXTURES[0].incident_id);
-    setConnectionMode('FIXTURE');
-  }, [mergeIncidents]);
+  // Explicit DEMO DATA toggle. Switches the whole view to fixtures and back;
+  // live data keeps accumulating underneath and is never merged with fixtures.
+  const isDemo = dataSource === 'demo';
+  const toggleDemoData = useCallback(() => {
+    setDataSource((prev) => {
+      const next: DataSource = prev === 'demo' ? 'live' : 'demo';
+      setSelectedIncidentId(next === 'demo' ? CANONICAL_MOCK_FIXTURES[0].incident_id : null);
+      return next;
+    });
+  }, []);
+
+  // Live feed vs API count (GET /health total_incidents). Only meaningful in live mode.
+  const reconciliation = reconcile(liveIncidents.length, health?.total_incidents);
 
   return {
     incidents: filteredIncidents,
@@ -188,7 +178,7 @@ export function useIncidents() {
     setSelectedIncidentId,
     capabilities,
     health,
-    connectionMode,
+    connectionMode: isDemo ? ('FIXTURE' as ConnectionMode) : connectionMode,
     setConnectionMode,
     isWsConnected,
     severityCounts,
@@ -202,6 +192,9 @@ export function useIncidents() {
       searchQuery,
       setSearchQuery,
     },
-    loadMockFixtures,
+    isDemo,
+    toggleDemoData,
+    liveCount: liveIncidents.length,
+    reconciliation,
   };
 }

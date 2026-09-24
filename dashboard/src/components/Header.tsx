@@ -1,14 +1,17 @@
 import React from 'react';
 import { ConnectionMode, SystemHealth } from '../types';
+import { Reconciliation } from '../services/incidentStore';
 import { getExportJsonUrl, getExportCsvUrl } from '../services/api';
-import { Radio, Database, Download, FileSpreadsheet, PlayCircle, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Radio, Database, Download, FileSpreadsheet, PlayCircle, FlaskConical, ShieldCheck, Scale, WifiOff } from 'lucide-react';
 
 interface HeaderProps {
   connectionMode: ConnectionMode;
   isWsConnected: boolean;
   health: SystemHealth | null;
   onOpenDemoTour: () => void;
-  onLoadMockFixtures: () => void;
+  isDemo: boolean;
+  onToggleDemoData: () => void;
+  reconciliation: Reconciliation;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,13 +19,47 @@ export const Header: React.FC<HeaderProps> = ({
   isWsConnected,
   health,
   onOpenDemoTour,
-  onLoadMockFixtures,
+  isDemo,
+  onToggleDemoData,
+  reconciliation,
 }) => {
-  const feedLabel = isWsConnected
-    ? 'LIVE FEED'
-    : connectionMode === 'FIXTURE'
-      ? 'DEMO FIXTURES'
-      : 'REPLAY MODE';
+  const feedLabel = isDemo
+    ? 'DEMO DATA'
+    : isWsConnected
+      ? 'LIVE FEED'
+      : connectionMode === 'FIXTURE'
+        ? 'DEMO DATA'
+        : 'REPLAY MODE';
+
+  const reconChip = (() => {
+    if (isDemo) return null;
+    if (!health) {
+      return (
+        <div className="status-chip offline" title="GET /health is unreachable. The live feed shows only what the API delivered.">
+          <WifiOff size={13} />
+          <span>API OFFLINE</span>
+        </div>
+      );
+    }
+    if (reconciliation.state === 'unknown') return null;
+    const ok = reconciliation.state === 'match' || reconciliation.state === 'capped';
+    const text =
+      reconciliation.state === 'match'
+        ? `FEED ${reconciliation.feed} = API ${reconciliation.api}`
+        : reconciliation.state === 'capped'
+          ? `FEED ${reconciliation.feed} (ring cap) / API ${reconciliation.api}`
+          : `FEED ${reconciliation.feed} ≠ API ${reconciliation.api}`;
+    return (
+      <div
+        className={`status-chip ${ok ? 'recon-ok' : 'recon-bad'}`}
+        data-testid="feed-api-reconciliation"
+        title="Incidents shown in the live feed vs total_incidents reported by GET /health"
+      >
+        <Scale size={13} />
+        <span>{text}</span>
+      </div>
+    );
+  })();
 
   return (
     <header className="topbar">
@@ -34,7 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="topbar-status">
-        <div className={`status-chip ${isWsConnected ? 'live' : 'replay'}`}>
+        <div className={`status-chip ${isDemo ? 'demo' : isWsConnected ? 'live' : 'replay'}`}>
           <Radio size={13} className={isWsConnected ? 'pulse' : ''} />
           <span>{feedLabel}</span>
         </div>
@@ -47,7 +84,9 @@ export const Header: React.FC<HeaderProps> = ({
           <span>READ-ONLY</span>
         </div>
 
-        {health && (
+        {reconChip}
+
+        {health && !isDemo && (
           <div className="status-chip chain" title="Cryptographically chained sequence count in the SQLite store">
             <Database size={13} />
             <span>CHAIN #{health.chain_seq}</span>
@@ -77,12 +116,13 @@ export const Header: React.FC<HeaderProps> = ({
         </a>
 
         <button
-          onClick={onLoadMockFixtures}
-          className="btn btn-secondary"
-          title="Load the canonical demo fixtures"
+          onClick={onToggleDemoData}
+          className={`btn ${isDemo ? 'btn-demo-on' : 'btn-secondary'}`}
+          aria-pressed={isDemo}
+          title={isDemo ? 'Return to the live read-only feed' : 'Show bundled synthetic fixtures instead of the live feed'}
         >
-          <RefreshCw size={14} />
-          <span>Demo data</span>
+          <FlaskConical size={14} />
+          <span>{isDemo ? 'Demo data: ON' : 'Demo data: OFF'}</span>
         </button>
 
         <button onClick={onOpenDemoTour} className="btn btn-primary" title="Open the guided walkthrough">

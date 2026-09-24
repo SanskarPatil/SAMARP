@@ -6,9 +6,10 @@ interface IncidentRowProps {
   incident: Incident;
   isSelected: boolean;
   onSelect: () => void;
+  isDemo?: boolean;
 }
 
-export const IncidentRow: React.FC<IncidentRowProps> = ({ incident, isSelected, onSelect }) => {
+export const IncidentRow: React.FC<IncidentRowProps> = ({ incident, isSelected, onSelect, isDemo = false }) => {
   const {
     incident_id,
     ps_class,
@@ -55,6 +56,7 @@ export const IncidentRow: React.FC<IncidentRowProps> = ({ incident, isSelected, 
       className={`incident-row ${isSelected ? 'selected' : ''} severity-${severity.toLowerCase()}`}
     >
       <div className="incident-row-main">
+        {isDemo && <span className="demo-tag" title="Synthetic demo fixture, not a detection">DEMO</span>}
         {/* Severity Badge */}
         <div className={`severity-badge ${severity.toLowerCase()}`}>
           {severity === 'CRITICAL' ? <ShieldAlert size={13} /> : <AlertCircle size={13} />}

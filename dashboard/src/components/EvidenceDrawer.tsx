@@ -17,9 +17,10 @@ import {
 interface EvidenceDrawerProps {
   incident: Incident | null;
   onClose?: () => void;
+  isDemo?: boolean;
 }
 
-export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({ incident }) => {
+export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({ incident, isDemo = false }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   if (!incident) {
@@ -73,6 +74,7 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({ incident }) => {
     <div className="drawer-container">
       {/* Header */}
       <div className="drawer-header">
+        {isDemo && <div className="demo-tag drawer-demo-tag">DEMO DATA: synthetic fixture, not a detection</div>}
         <div className="drawer-title-group">
           <div className={`severity-tag ${severity.toLowerCase()}`}>
             <ShieldAlert size={14} />

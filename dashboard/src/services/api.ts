@@ -2,40 +2,30 @@ import { Incident, SensorCapabilities, SystemHealth } from '../types';
 
 const API_BASE = '';
 
+// Used only while the API is unreachable: nothing is claimed as observable.
 export const FALLBACK_CAPABILITIES: SensorCapabilities = {
-  input_mode: 'pcap_replay',
-  ipv4: 'OBSERVABLE',
-  ipv6: 'OBSERVABLE',
-  dns_names: 'OBSERVABLE',
-  dns_responses: 'OBSERVABLE',
-  tls_handshake: 'OBSERVABLE',
-  quic_metadata: 'OBSERVABLE',
-  ja3: 'OBSERVABLE',
-  ja3s: 'OBSERVABLE',
-  ja4: 'OBSERVABLE',
+  input_mode: 'unavailable',
+  ipv4: 'NOT_OBSERVABLE',
+  ipv6: 'NOT_OBSERVABLE',
+  dns_names: 'NOT_OBSERVABLE',
+  dns_responses: 'NOT_OBSERVABLE',
+  tls_handshake: 'NOT_OBSERVABLE',
+  quic_metadata: 'NOT_OBSERVABLE',
+  ja3: 'NOT_OBSERVABLE',
+  ja3s: 'NOT_OBSERVABLE',
+  ja4: 'NOT_OBSERVABLE',
   flow_records: 'NOT_OBSERVABLE',
   flow_sampling: 'NOT_OBSERVABLE',
   geo: 'NOT_OBSERVABLE',
-  capture_loss: 'OBSERVABLE',
-  bidirectional_visibility: 'OBSERVABLE',
+  capture_loss: 'NOT_OBSERVABLE',
+  bidirectional_visibility: 'NOT_OBSERVABLE',
 };
 
+/** GET /health. Throws when the API is unreachable - callers show "API offline", never a fake count. */
 export async function getHealth(): Promise<SystemHealth> {
-  try {
-    const res = await fetch(`${API_BASE}/health`, { method: 'GET' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch {
-    return {
-      status: 'offline_mock',
-      read_only: true,
-      uptime_seconds: 0,
-      total_incidents: 6,
-      total_updates: 6,
-      chain_seq: 6,
-      input_mode: 'pcap_replay',
-    };
-  }
+  const res = await fetch(`${API_BASE}/health`, { method: 'GET' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
 }
 
 export async function getCapabilities(): Promise<SensorCapabilities> {

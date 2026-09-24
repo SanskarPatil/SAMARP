@@ -9,6 +9,7 @@ interface IncidentFeedProps {
   selectedIncidentId: string | null;
   onSelectIncident: (id: string) => void;
   severityCounts: Record<Severity, number>;
+  isDemo?: boolean;
   filters: {
     psClassFilter: string | null;
     setPsClassFilter: (val: string | null) => void;
@@ -36,6 +37,7 @@ export const IncidentFeed: React.FC<IncidentFeedProps> = ({
   selectedIncidentId,
   onSelectIncident,
   severityCounts,
+  isDemo = false,
   filters,
 }) => {
   const {
@@ -173,7 +175,9 @@ export const IncidentFeed: React.FC<IncidentFeedProps> = ({
             <CheckCircle2 size={32} className="text-slate-500 mb-2" />
             <p className="empty-title">No matching incidents observed</p>
             <p className="empty-subtitle">
-              Passive sensor is monitoring. Adjust active filters or click &quot;Demo Data&quot; in the header.
+              {isDemo
+                ? 'No demo fixtures match the active filters.'
+                : 'No incidents from the API yet. Live feed shows only real detections; adjust filters or turn on Demo data to see fixtures.'}
             </p>
           </div>
         ) : (
@@ -183,6 +187,7 @@ export const IncidentFeed: React.FC<IncidentFeedProps> = ({
               incident={inc}
               isSelected={inc.incident_id === selectedIncidentId}
               onSelect={() => onSelectIncident(inc.incident_id)}
+              isDemo={isDemo}
             />
           ))
         )}

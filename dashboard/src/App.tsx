@@ -38,7 +38,9 @@ export const App: React.FC = () => {
     isWsConnected,
     severityCounts,
     filters,
-    loadMockFixtures,
+    isDemo,
+    toggleDemoData,
+    reconciliation,
   } = useIncidents();
 
   const [isTourOpen, setIsTourOpen] = useState(false);
@@ -103,8 +105,18 @@ export const App: React.FC = () => {
           isWsConnected={isWsConnected}
           health={health}
           onOpenDemoTour={() => setIsTourOpen(true)}
-          onLoadMockFixtures={loadMockFixtures}
+          isDemo={isDemo}
+          onToggleDemoData={toggleDemoData}
+          reconciliation={reconciliation}
         />
+
+        {isDemo && (
+          <div className="demo-banner" role="alert" data-testid="demo-data-banner">
+            <strong>DEMO DATA</strong>
+            <span>Synthetic fixtures bundled with the dashboard, not from the sensor. The live feed is hidden while this is on.</span>
+            <button className="btn btn-secondary" onClick={toggleDemoData}>Back to live feed</button>
+          </div>
+        )}
 
         <CapabilityBanner capabilities={capabilities} />
 
@@ -152,12 +164,13 @@ export const App: React.FC = () => {
               selectedIncidentId={selectedIncidentId}
               onSelectIncident={(id) => setSelectedIncidentId(id)}
               severityCounts={severityCounts}
+              isDemo={isDemo}
               filters={filters}
             />
           </section>
 
           <section className="drawer-pane" id="evidence-drawer">
-            <EvidenceDrawer incident={selectedIncident} />
+            <EvidenceDrawer incident={selectedIncident} isDemo={isDemo} />
           </section>
         </main>
       </div>
