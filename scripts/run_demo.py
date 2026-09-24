@@ -166,7 +166,7 @@ def run_campaign_replay(
         print("-" * 72)
         print("  DEMONSTRATED PS26145 THREAT CLASSES:")
         for cls_name, count in sorted(class_counts.items()):
-            print(f"    &bull; {cls_name:<36} : {count} incident(s)")
+            print(f"    - {cls_name:<36} : {count} incident(s)")
         print("-" * 72)
         print(f"  Lossless JSON Export : {json_export_file}")
         print(f"  Flattened CSV Export : {csv_export_file}")
