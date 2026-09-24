@@ -1,0 +1,622 @@
+{
+  "machine": {
+    "captured_at_utc": "2026-09-24T06:25:49+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "git_commit": "b071781",
+    "command": "python.exe scripts\\train_eval_dga.py"
+  },
+  "model_version": "dga-lightgbm-0.2.0",
+  "classifier": "lightgbm",
+  "features": [
+    "length",
+    "entropy",
+    "digit_ratio",
+    "vowel_ratio",
+    "label_count",
+    "lm_bigram",
+    "lm_trigram"
+  ],
+  "leakage_note": "nxdomain_rate removed from the per-domain model; features computed from qname only",
+  "data": {
+    "source": "synthetic: models/dga_dataset.build_extended_dga_corpus (seed 26145)",
+    "total": 2868,
+    "benign": 1384,
+    "dga": 1484,
+    "families": [
+      "base32",
+      "dictcat",
+      "hexflux",
+      "numeric_seed",
+      "wordmix"
+    ]
+  },
+  "grouped_validation": {
+    "train_size": 2036,
+    "validation_size": 832,
+    "model": {
+      "count": 832,
+      "threshold": 0.5,
+      "per_class": {
+        "benign": {
+          "precision": 0.9975,
+          "recall": 1.0,
+          "f1": 0.9987,
+          "support": 395,
+          "tp": 395,
+          "fp": 1,
+          "fn": 0
+        },
+        "dga": {
+          "precision": 1.0,
+          "recall": 0.9977,
+          "f1": 0.9989,
+          "support": 437,
+          "tp": 436,
+          "fp": 0,
+          "fn": 1
+        }
+      },
+      "brier_score": 0.0012,
+      "roc_auc": 1.0,
+      "reliability": [
+        {
+          "lower": 0.0,
+          "upper": 0.2,
+          "count": 396,
+          "mean_probability": 3.5964640220370416e-07,
+          "observed_rate": 0.0025252525252525255
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.4,
+          "count": 0,
+          "mean_probability": 0.0,
+          "observed_rate": 0.0
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.6,
+          "count": 0,
+          "mean_probability": 0.0,
+          "observed_rate": 0.0
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.8,
+          "count": 0,
+          "mean_probability": 0.0,
+          "observed_rate": 0.0
+        },
+        {
+          "lower": 0.8,
+          "upper": 1.0,
+          "count": 436,
+          "mean_probability": 0.9999999983961437,
+          "observed_rate": 1.0
+        }
+      ]
+    },
+    "rules_fallback_0.85": {
+      "threshold": 0.85,
+      "per_class": {
+        "benign": {
+          "precision": 0.5111,
+          "recall": 0.9949,
+          "f1": 0.6753,
+          "support": 395,
+          "tp": 393,
+          "fp": 376,
+          "fn": 2
+        },
+        "dga": {
+          "precision": 0.9683,
+          "recall": 0.1396,
+          "f1": 0.244,
+          "support": 437,
+          "tp": 61,
+          "fp": 2,
+          "fn": 376
+        }
+      }
+    },
+    "rules_fallback_0.70": {
+      "threshold": 0.7,
+      "per_class": {
+        "benign": {
+          "precision": 0.6549,
+          "recall": 0.9848,
+          "f1": 0.7867,
+          "support": 395,
+          "tp": 389,
+          "fp": 205,
+          "fn": 6
+        },
+        "dga": {
+          "precision": 0.9748,
+          "recall": 0.5309,
+          "f1": 0.6874,
+          "support": 437,
+          "tp": 232,
+          "fp": 6,
+          "fn": 205
+        }
+      }
+    },
+    "feature_importance": {
+      "length": 229,
+      "entropy": 427,
+      "digit_ratio": 15,
+      "vowel_ratio": 211,
+      "label_count": 120,
+      "lm_bigram": 324,
+      "lm_trigram": 306
+    }
+  },
+  "leave_one_family_out": [
+    {
+      "held_out_family": "numeric_seed",
+      "train_size": 2293,
+      "test_size": 575,
+      "test_dga": 300,
+      "model": {
+        "count": 575,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 275,
+            "tp": 275,
+            "fp": 0,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 300,
+            "tp": 300,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "brier_score": 0.0,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 275,
+            "mean_probability": 2.302337039024805e-09,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 300,
+            "mean_probability": 1.0,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.8262,
+            "recall": 0.9855,
+            "f1": 0.8988,
+            "support": 275,
+            "tp": 271,
+            "fp": 57,
+            "fn": 4
+          },
+          "dga": {
+            "precision": 0.9838,
+            "recall": 0.81,
+            "f1": 0.8885,
+            "support": 300,
+            "tp": 243,
+            "fp": 4,
+            "fn": 57
+          }
+        }
+      }
+    },
+    {
+      "held_out_family": "hexflux",
+      "train_size": 2275,
+      "test_size": 593,
+      "test_dga": 300,
+      "model": {
+        "count": 593,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 0.9966,
+            "recall": 1.0,
+            "f1": 0.9983,
+            "support": 293,
+            "tp": 293,
+            "fp": 1,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 0.9967,
+            "f1": 0.9983,
+            "support": 300,
+            "tp": 299,
+            "fp": 0,
+            "fn": 1
+          }
+        },
+        "brier_score": 0.0017,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 293,
+            "mean_probability": 0.001397236354918109,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 1,
+            "mean_probability": 0.3564786518847086,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 2,
+            "mean_probability": 0.6731502606118573,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 297,
+            "mean_probability": 0.9931430680054792,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.7978,
+            "recall": 0.9829,
+            "f1": 0.8807,
+            "support": 293,
+            "tp": 288,
+            "fp": 73,
+            "fn": 5
+          },
+          "dga": {
+            "precision": 0.9784,
+            "recall": 0.7567,
+            "f1": 0.8534,
+            "support": 300,
+            "tp": 227,
+            "fp": 5,
+            "fn": 73
+          }
+        }
+      }
+    },
+    {
+      "held_out_family": "wordmix",
+      "train_size": 2325,
+      "test_size": 543,
+      "test_dga": 300,
+      "model": {
+        "count": 543,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 243,
+            "tp": 243,
+            "fp": 0,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 300,
+            "tp": 300,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "brier_score": 0.0,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 243,
+            "mean_probability": 1.4050941770083454e-09,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 300,
+            "mean_probability": 0.9999999987004696,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.4752,
+            "recall": 0.9877,
+            "f1": 0.6417,
+            "support": 243,
+            "tp": 240,
+            "fp": 265,
+            "fn": 3
+          },
+          "dga": {
+            "precision": 0.9211,
+            "recall": 0.1167,
+            "f1": 0.2071,
+            "support": 300,
+            "tp": 35,
+            "fp": 3,
+            "fn": 265
+          }
+        }
+      }
+    },
+    {
+      "held_out_family": "dictcat",
+      "train_size": 2286,
+      "test_size": 582,
+      "test_dga": 284,
+      "model": {
+        "count": 582,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 0.9967,
+            "recall": 1.0,
+            "f1": 0.9983,
+            "support": 298,
+            "tp": 298,
+            "fp": 1,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 0.9965,
+            "f1": 0.9982,
+            "support": 284,
+            "tp": 283,
+            "fp": 0,
+            "fn": 1
+          }
+        },
+        "brier_score": 0.0017,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 299,
+            "mean_probability": 2.377284437853014e-09,
+            "observed_rate": 0.0033444816053511705
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 283,
+            "mean_probability": 0.9999999945776129,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.5103,
+            "recall": 0.9933,
+            "f1": 0.6743,
+            "support": 298,
+            "tp": 296,
+            "fp": 284,
+            "fn": 2
+          },
+          "dga": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 284,
+            "tp": 0,
+            "fp": 2,
+            "fn": 284
+          }
+        }
+      }
+    },
+    {
+      "held_out_family": "base32",
+      "train_size": 2293,
+      "test_size": 575,
+      "test_dga": 300,
+      "model": {
+        "count": 575,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 0.9786,
+            "recall": 1.0,
+            "f1": 0.9892,
+            "support": 275,
+            "tp": 275,
+            "fp": 6,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 0.98,
+            "f1": 0.9899,
+            "support": 300,
+            "tp": 294,
+            "fp": 0,
+            "fn": 6
+          }
+        },
+        "brier_score": 0.0104,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 281,
+            "mean_probability": 5.010849518079006e-08,
+            "observed_rate": 0.021352313167259787
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 294,
+            "mean_probability": 1.0,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.8165,
+            "recall": 0.9709,
+            "f1": 0.887,
+            "support": 275,
+            "tp": 267,
+            "fp": 60,
+            "fn": 8
+          },
+          "dga": {
+            "precision": 0.9677,
+            "recall": 0.8,
+            "f1": 0.8759,
+            "support": 300,
+            "tp": 240,
+            "fp": 8,
+            "fn": 60
+          }
+        }
+      }
+    }
+  ]
+}
