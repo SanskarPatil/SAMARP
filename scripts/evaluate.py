@@ -100,8 +100,9 @@ def main() -> int:
     (out / f"evaluation_{stamp}.json").write_text(json.dumps(result, indent=2, default=str), encoding="utf-8")
 
     label = result["data_label"]
+    per_class_counts = ", ".join(f"{k}: {sum(1 for l in labels_per_run[0] if l.ps_letter == k)}" for k in sorted({l.ps_letter for l in labels_per_run[0]}))
     lines = [f"# Detection evaluation ({stamp})", "", f"**Data: {label}.** Seeds {args.seeds}; {len(labels_per_run[0])} labelled attacks per run "
-             f"(5 per PS class, incl. deliberately weak variants); {hours:.2f} h of background in total.", "",
+             f"({per_class_counts}, incl. deliberately weak variants); {hours:.2f} h of background in total.", "",
              "## Machine", "| key | value |", "|---|---|", spec_markdown(result["machine"]), "",
              f"## Per PS class (mixed stream, {len(runs)} run(s))", "",
              "| PS | Class | Attacks | Detected | Missed | Recall | Class alerts | TP | Overlap | False | Precision | False incidents / h |",
