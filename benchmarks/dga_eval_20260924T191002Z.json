@@ -1,0 +1,1012 @@
+{
+  "machine": {
+    "captured_at_utc": "2026-09-24T19:09:38+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "power": {
+      "power_source": "ac",
+      "battery_percent": 100,
+      "battery_saver_on": false,
+      "power_plan": "Normal mode"
+    },
+    "git_commit": "2890620",
+    "command": "python.exe scripts\\train_eval_dga.py --save-model --real-benign intel\\tranco\\top-1m.csv --train-real --real-top 30000"
+  },
+  "model_version": "dga-lightgbm-0.3.0",
+  "classifier": "lightgbm",
+  "features": [
+    "length",
+    "entropy",
+    "digit_ratio",
+    "vowel_ratio",
+    "label_count",
+    "lm_bigram",
+    "lm_trigram"
+  ],
+  "leakage_note": "nxdomain_rate removed; features from qname only; held-out benign WORDS never appear in training",
+  "data": {
+    "source": "synthetic: models/dga_dataset.build_vocab_holdout_corpus (seed 26145)",
+    "benign_in_vocab": 1395,
+    "benign_oov": 551,
+    "dga": 1484,
+    "families": [
+      "base32",
+      "dictcat",
+      "hexflux",
+      "numeric_seed",
+      "wordmix"
+    ],
+    "train_words": 46,
+    "heldout_words": [
+      "tech",
+      "soft",
+      "global",
+      "secure",
+      "learn",
+      "bank",
+      "food",
+      "music",
+      "energy",
+      "power",
+      "open",
+      "field",
+      "digital",
+      "mobile",
+      "social",
+      "science",
+      "labs",
+      "systems",
+      "mozilla",
+      "jsdelivr"
+    ],
+    "benign_training_sources": [
+      "synthetic in-vocabulary",
+      "REAL (Tranco train half)"
+    ],
+    "real_train": 6000,
+    "real_test": 15103
+  },
+  "grouped_validation_in_vocab": {
+    "train_size": 2054,
+    "validation_size": 825,
+    "model": {
+      "count": 825,
+      "threshold": 0.5,
+      "per_class": {
+        "benign": {
+          "precision": 0.9362,
+          "recall": 1.0,
+          "f1": 0.967,
+          "support": 396,
+          "tp": 396,
+          "fp": 27,
+          "fn": 0
+        },
+        "dga": {
+          "precision": 1.0,
+          "recall": 0.9371,
+          "f1": 0.9675,
+          "support": 429,
+          "tp": 402,
+          "fp": 0,
+          "fn": 27
+        }
+      },
+      "brier_score": 0.0226,
+      "roc_auc": 1.0,
+      "reliability": [
+        {
+          "lower": 0.0,
+          "upper": 0.2,
+          "count": 406,
+          "mean_probability": 0.003294743357591911,
+          "observed_rate": 0.024630541871921183
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.4,
+          "count": 11,
+          "mean_probability": 0.31295991189555605,
+          "observed_rate": 1.0
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.6,
+          "count": 15,
+          "mean_probability": 0.5171146342217227,
+          "observed_rate": 1.0
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.8,
+          "count": 22,
+          "mean_probability": 0.7296178678568338,
+          "observed_rate": 1.0
+        },
+        {
+          "lower": 0.8,
+          "upper": 1.0,
+          "count": 371,
+          "mean_probability": 0.9887168406152597,
+          "observed_rate": 1.0
+        }
+      ]
+    },
+    "rules_fallback_0.85": {
+      "threshold": 0.85,
+      "per_class": {
+        "benign": {
+          "precision": 0.5191,
+          "recall": 0.9949,
+          "f1": 0.6823,
+          "support": 396,
+          "tp": 394,
+          "fp": 365,
+          "fn": 2
+        },
+        "dga": {
+          "precision": 0.9697,
+          "recall": 0.1492,
+          "f1": 0.2586,
+          "support": 429,
+          "tp": 64,
+          "fp": 2,
+          "fn": 365
+        }
+      }
+    },
+    "rules_fallback_0.70": {
+      "threshold": 0.7,
+      "per_class": {
+        "benign": {
+          "precision": 0.6582,
+          "recall": 0.9823,
+          "f1": 0.7882,
+          "support": 396,
+          "tp": 389,
+          "fp": 202,
+          "fn": 7
+        },
+        "dga": {
+          "precision": 0.9701,
+          "recall": 0.5291,
+          "f1": 0.6848,
+          "support": 429,
+          "tp": 227,
+          "fp": 7,
+          "fn": 202
+        }
+      }
+    },
+    "feature_importance": {
+      "length": 292,
+      "entropy": 198,
+      "digit_ratio": 148,
+      "vowel_ratio": 155,
+      "label_count": 114,
+      "lm_bigram": 383,
+      "lm_trigram": 390
+    }
+  },
+  "benign_only": {
+    "in_vocab_validation": {
+      "n": 396,
+      "model_threshold": 0.5,
+      "model_false_positives": 0,
+      "model_fpr": 0.0,
+      "model_mean_probability": 0.0005,
+      "model_p95_probability": 0.0008,
+      "rules_fpr_0.85": 0.0051,
+      "rules_fpr_0.70": 0.0177,
+      "example_false_positives": []
+    },
+    "oov_heldout_words": {
+      "n": 551,
+      "model_threshold": 0.5,
+      "model_false_positives": 0,
+      "model_fpr": 0.0,
+      "model_mean_probability": 0.0021,
+      "model_p95_probability": 0.0009,
+      "rules_fpr_0.85": 0.0109,
+      "rules_fpr_0.70": 0.0218,
+      "example_false_positives": []
+    }
+  },
+  "oov_mixed": {
+    "description": "OOV benign + grouped-validation DGA",
+    "model": {
+      "count": 980,
+      "threshold": 0.5,
+      "per_class": {
+        "benign": {
+          "precision": 0.9533,
+          "recall": 1.0,
+          "f1": 0.9761,
+          "support": 551,
+          "tp": 551,
+          "fp": 27,
+          "fn": 0
+        },
+        "dga": {
+          "precision": 1.0,
+          "recall": 0.9371,
+          "f1": 0.9675,
+          "support": 429,
+          "tp": 402,
+          "fp": 0,
+          "fn": 27
+        }
+      },
+      "brier_score": 0.0192,
+      "roc_auc": 0.9998,
+      "reliability": [
+        {
+          "lower": 0.0,
+          "upper": 0.2,
+          "count": 561,
+          "mean_probability": 0.004086319215191361,
+          "observed_rate": 0.017825311942959002
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.4,
+          "count": 11,
+          "mean_probability": 0.31295991189555605,
+          "observed_rate": 1.0
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.6,
+          "count": 15,
+          "mean_probability": 0.5171146342217227,
+          "observed_rate": 1.0
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.8,
+          "count": 22,
+          "mean_probability": 0.7296178678568338,
+          "observed_rate": 1.0
+        },
+        {
+          "lower": 0.8,
+          "upper": 1.0,
+          "count": 371,
+          "mean_probability": 0.9887168406152597,
+          "observed_rate": 1.0
+        }
+      ]
+    },
+    "rules_fallback_0.85": {
+      "threshold": 0.85,
+      "per_class": {
+        "benign": {
+          "precision": 0.5989,
+          "recall": 0.9891,
+          "f1": 0.7461,
+          "support": 551,
+          "tp": 545,
+          "fp": 365,
+          "fn": 6
+        },
+        "dga": {
+          "precision": 0.9143,
+          "recall": 0.1492,
+          "f1": 0.2565,
+          "support": 429,
+          "tp": 64,
+          "fp": 6,
+          "fn": 365
+        }
+      }
+    },
+    "rules_fallback_0.70": {
+      "threshold": 0.7,
+      "per_class": {
+        "benign": {
+          "precision": 0.7274,
+          "recall": 0.9782,
+          "f1": 0.8344,
+          "support": 551,
+          "tp": 539,
+          "fp": 202,
+          "fn": 12
+        },
+        "dga": {
+          "precision": 0.9498,
+          "recall": 0.5291,
+          "f1": 0.6796,
+          "support": 429,
+          "tp": 227,
+          "fp": 12,
+          "fn": 202
+        }
+      }
+    }
+  },
+  "real_benign": {
+    "available": true,
+    "provenance": {
+      "label": "real",
+      "file": "top-1m.csv",
+      "sha256": "e60e32c9089007014d993bef1aa8e39e10f0a88c7e1697d58fcf83ad6963eb94",
+      "bytes": 22622336,
+      "file_mtime_utc": "2026-09-23T16:51:30+00:00",
+      "domains_used": 30000,
+      "top": 30000
+    },
+    "used_for_training": true,
+    "evaluated_on": "disjoint test half (hash split by domain)",
+    "n": 15103,
+    "model_threshold": 0.5,
+    "model_false_positives": 148,
+    "model_fpr": 0.0098,
+    "model_mean_probability": 0.0147,
+    "model_p95_probability": 0.0367,
+    "rules_fpr_0.85": 0.0005,
+    "rules_fpr_0.70": 0.0025,
+    "example_false_positives": [
+      "quickconnect.to",
+      "safebrowsing.apple",
+      "imrworldwide.com",
+      "tiktokpangle.us",
+      "ekstrabladet.dk",
+      "iotcplatform.com",
+      "malwarebytes.com",
+      "threatlocker.com",
+      "tomshardware.com",
+      "dataprivacyframework.gov"
+    ],
+    "note": "rules fallback allowlists ~30 top domains, which favours it on the head of a popularity list"
+  },
+  "leave_one_family_out": [
+    {
+      "held_out_family": "numeric_seed",
+      "train_size": 2287,
+      "test_size": 592,
+      "test_dga": 300,
+      "model": {
+        "count": 592,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 0.9766,
+            "recall": 1.0,
+            "f1": 0.9882,
+            "support": 292,
+            "tp": 292,
+            "fp": 7,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 0.9767,
+            "f1": 0.9882,
+            "support": 300,
+            "tp": 293,
+            "fp": 0,
+            "fn": 7
+          }
+        },
+        "brier_score": 0.0064,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 292,
+            "mean_probability": 0.000859404143644901,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 1,
+            "mean_probability": 0.33130213865132135,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 8,
+            "mean_probability": 0.4870938071649157,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 11,
+            "mean_probability": 0.7133511966021427,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 280,
+            "mean_probability": 0.9848106025587455,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.8275,
+            "recall": 0.9692,
+            "f1": 0.8927,
+            "support": 292,
+            "tp": 283,
+            "fp": 59,
+            "fn": 9
+          },
+          "dga": {
+            "precision": 0.964,
+            "recall": 0.8033,
+            "f1": 0.8764,
+            "support": 300,
+            "tp": 241,
+            "fp": 9,
+            "fn": 59
+          }
+        }
+      },
+      "oov_benign": {
+        "n": 551,
+        "model_threshold": 0.5,
+        "model_false_positives": 1,
+        "model_fpr": 0.0018,
+        "model_mean_probability": 0.0033,
+        "model_p95_probability": 0.0023,
+        "rules_fpr_0.85": 0.0109,
+        "rules_fpr_0.70": 0.0218,
+        "example_false_positives": [
+          "sciencemusic.in"
+        ]
+      },
+      "real_benign_test": {
+        "n": 15103,
+        "model_threshold": 0.5,
+        "model_false_positives": 195,
+        "model_fpr": 0.0129,
+        "model_mean_probability": 0.018,
+        "model_p95_probability": 0.0458,
+        "rules_fpr_0.85": 0.0005,
+        "rules_fpr_0.70": 0.0025,
+        "example_false_positives": [
+          "safebrowsing.apple",
+          "eu-1-id5-sync.com",
+          "singtelchina.cn",
+          "ekstrabladet.dk",
+          "pagibigfundservices.com",
+          "browser-intake-us5-datadoghq.com",
+          "iotcplatform.com",
+          "malwarebytes.com",
+          "threatlocker.com",
+          "tomshardware.com"
+        ]
+      }
+    },
+    {
+      "held_out_family": "hexflux",
+      "train_size": 2296,
+      "test_size": 583,
+      "test_dga": 300,
+      "model": {
+        "count": 583,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 283,
+            "tp": 283,
+            "fp": 0,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 300,
+            "tp": 300,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "brier_score": 0.0014,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 283,
+            "mean_probability": 0.0016565463003771147,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 9,
+            "mean_probability": 0.7724754270924685,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 291,
+            "mean_probability": 0.9769431333388324,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.7983,
+            "recall": 0.9788,
+            "f1": 0.8794,
+            "support": 283,
+            "tp": 277,
+            "fp": 70,
+            "fn": 6
+          },
+          "dga": {
+            "precision": 0.9746,
+            "recall": 0.7667,
+            "f1": 0.8582,
+            "support": 300,
+            "tp": 230,
+            "fp": 6,
+            "fn": 70
+          }
+        }
+      },
+      "oov_benign": {
+        "n": 551,
+        "model_threshold": 0.5,
+        "model_false_positives": 0,
+        "model_fpr": 0.0,
+        "model_mean_probability": 0.0034,
+        "model_p95_probability": 0.0077,
+        "rules_fpr_0.85": 0.0109,
+        "rules_fpr_0.70": 0.0218,
+        "example_false_positives": []
+      },
+      "real_benign_test": {
+        "n": 15103,
+        "model_threshold": 0.5,
+        "model_false_positives": 174,
+        "model_fpr": 0.0115,
+        "model_mean_probability": 0.0174,
+        "model_p95_probability": 0.0507,
+        "rules_fpr_0.85": 0.0005,
+        "rules_fpr_0.70": 0.0025,
+        "example_false_positives": [
+          "tiktokcdn-eu.com",
+          "safebrowsing.apple",
+          "eu-1-id5-sync.com",
+          "ekstrabladet.dk",
+          "entrepreneur.com",
+          "browser-intake-us5-datadoghq.com",
+          "tamilsexvids.net",
+          "iotcplatform.com",
+          "malwarebytes.com",
+          "tomshardware.com"
+        ]
+      }
+    },
+    {
+      "held_out_family": "wordmix",
+      "train_size": 2305,
+      "test_size": 574,
+      "test_dga": 300,
+      "model": {
+        "count": 574,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 0.6716,
+            "recall": 1.0,
+            "f1": 0.8035,
+            "support": 274,
+            "tp": 274,
+            "fp": 134,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 0.5533,
+            "f1": 0.7124,
+            "support": 300,
+            "tp": 166,
+            "fp": 0,
+            "fn": 134
+          }
+        },
+        "brier_score": 0.2333,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 390,
+            "mean_probability": 0.011269895388916783,
+            "observed_rate": 0.29743589743589743
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 18,
+            "mean_probability": 0.37752031099630046,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 9,
+            "mean_probability": 0.5856471626286577,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 157,
+            "mean_probability": 0.6641478514165954,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.5085,
+            "recall": 0.9854,
+            "f1": 0.6708,
+            "support": 274,
+            "tp": 270,
+            "fp": 261,
+            "fn": 4
+          },
+          "dga": {
+            "precision": 0.907,
+            "recall": 0.13,
+            "f1": 0.2274,
+            "support": 300,
+            "tp": 39,
+            "fp": 4,
+            "fn": 261
+          }
+        }
+      },
+      "oov_benign": {
+        "n": 551,
+        "model_threshold": 0.5,
+        "model_false_positives": 1,
+        "model_fpr": 0.0018,
+        "model_mean_probability": 0.0046,
+        "model_p95_probability": 0.0016,
+        "rules_fpr_0.85": 0.0109,
+        "rules_fpr_0.70": 0.0218,
+        "example_false_positives": [
+          "sciencemusic.in"
+        ]
+      },
+      "real_benign_test": {
+        "n": 15103,
+        "model_threshold": 0.5,
+        "model_false_positives": 215,
+        "model_fpr": 0.0142,
+        "model_mean_probability": 0.0182,
+        "model_p95_probability": 0.0359,
+        "rules_fpr_0.85": 0.0005,
+        "rules_fpr_0.70": 0.0025,
+        "example_false_positives": [
+          "quickconnect.to",
+          "safebrowsing.apple",
+          "tamilsexvids.net",
+          "iotcplatform.com",
+          "sproutsocial.com",
+          "malwarebytes.com",
+          "tomshardware.com",
+          "prismaaccess.com",
+          "twinrdengine.com",
+          "bounceexchange.com"
+        ]
+      }
+    },
+    {
+      "held_out_family": "dictcat",
+      "train_size": 2329,
+      "test_size": 550,
+      "test_dga": 284,
+      "model": {
+        "count": 550,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 0.4836,
+            "recall": 1.0,
+            "f1": 0.652,
+            "support": 266,
+            "tp": 266,
+            "fp": 284,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 284,
+            "tp": 0,
+            "fp": 0,
+            "fn": 284
+          }
+        },
+        "brier_score": 0.5164,
+        "roc_auc": 0.5794,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 550,
+            "mean_probability": 6.223466782533493e-26,
+            "observed_rate": 0.5163636363636364
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 0,
+            "mean_probability": 0.0,
+            "observed_rate": 0.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.4789,
+            "recall": 0.9812,
+            "f1": 0.6436,
+            "support": 266,
+            "tp": 261,
+            "fp": 284,
+            "fn": 5
+          },
+          "dga": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 284,
+            "tp": 0,
+            "fp": 5,
+            "fn": 284
+          }
+        }
+      },
+      "oov_benign": {
+        "n": 551,
+        "model_threshold": 0.5,
+        "model_false_positives": 0,
+        "model_fpr": 0.0,
+        "model_mean_probability": 0.0,
+        "model_p95_probability": 0.0,
+        "rules_fpr_0.85": 0.0109,
+        "rules_fpr_0.70": 0.0218,
+        "example_false_positives": []
+      },
+      "real_benign_test": {
+        "n": 15103,
+        "model_threshold": 0.5,
+        "model_false_positives": 26,
+        "model_fpr": 0.0017,
+        "model_mean_probability": 0.0017,
+        "model_p95_probability": 0.0,
+        "rules_fpr_0.85": 0.0005,
+        "rules_fpr_0.70": 0.0025,
+        "example_false_positives": [
+          "xn--ngstr-lra8j.com",
+          "xn--pckua2a7gp15o89zb.com",
+          "xn--72caa3cygoc0d9c.com",
+          "xn--72c0anj1fqy6jqa7ei.net",
+          "bhavyabiharhealth.in",
+          "aliyunga0019.com",
+          "sizzling-hot-deluxe-777.com",
+          "aliyunga0017.com",
+          "xn--4-wxfc3gwbi.net",
+          "ffbbbdc6d3c353211fe2ba39c9f744cd.com"
+        ]
+      }
+    },
+    {
+      "held_out_family": "base32",
+      "train_size": 2299,
+      "test_size": 580,
+      "test_dga": 300,
+      "model": {
+        "count": 580,
+        "threshold": 0.5,
+        "per_class": {
+          "benign": {
+            "precision": 0.6527,
+            "recall": 1.0,
+            "f1": 0.7898,
+            "support": 280,
+            "tp": 280,
+            "fp": 149,
+            "fn": 0
+          },
+          "dga": {
+            "precision": 1.0,
+            "recall": 0.5033,
+            "f1": 0.6696,
+            "support": 300,
+            "tp": 151,
+            "fp": 0,
+            "fn": 149
+          }
+        },
+        "brier_score": 0.1835,
+        "roc_auc": 1.0,
+        "reliability": [
+          {
+            "lower": 0.0,
+            "upper": 0.2,
+            "count": 389,
+            "mean_probability": 0.034937982878708536,
+            "observed_rate": 0.2802056555269923
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.4,
+            "count": 37,
+            "mean_probability": 0.3091401401022148,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.6,
+            "count": 13,
+            "mean_probability": 0.5435361282185354,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.8,
+            "count": 16,
+            "mean_probability": 0.7193696636320045,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.8,
+            "upper": 1.0,
+            "count": 125,
+            "mean_probability": 0.9465160774845853,
+            "observed_rate": 1.0
+          }
+        ]
+      },
+      "rules_fallback_0.70": {
+        "threshold": 0.7,
+        "per_class": {
+          "benign": {
+            "precision": 0.8452,
+            "recall": 0.975,
+            "f1": 0.9055,
+            "support": 280,
+            "tp": 273,
+            "fp": 50,
+            "fn": 7
+          },
+          "dga": {
+            "precision": 0.9728,
+            "recall": 0.8333,
+            "f1": 0.8977,
+            "support": 300,
+            "tp": 250,
+            "fp": 7,
+            "fn": 50
+          }
+        }
+      },
+      "oov_benign": {
+        "n": 551,
+        "model_threshold": 0.5,
+        "model_false_positives": 1,
+        "model_fpr": 0.0018,
+        "model_mean_probability": 0.0029,
+        "model_p95_probability": 0.0014,
+        "rules_fpr_0.85": 0.0109,
+        "rules_fpr_0.70": 0.0218,
+        "example_false_positives": [
+          "sciencemusic.in"
+        ]
+      },
+      "real_benign_test": {
+        "n": 15103,
+        "model_threshold": 0.5,
+        "model_false_positives": 179,
+        "model_fpr": 0.0119,
+        "model_mean_probability": 0.0166,
+        "model_p95_probability": 0.0492,
+        "rules_fpr_0.85": 0.0005,
+        "rules_fpr_0.70": 0.0025,
+        "example_false_positives": [
+          "safebrowsing.apple",
+          "eu-1-id5-sync.com",
+          "ekstrabladet.dk",
+          "tamilsexvids.net",
+          "iotcplatform.com",
+          "malwarebytes.com",
+          "threatlocker.com",
+          "tomshardware.com",
+          "pantheonsite.io",
+          "prismaaccess.com"
+        ]
+      }
+    }
+  ],
+  "saved_artifact": {
+    "booster": {
+      "path": "models/artifact/dga_lightgbm.txt",
+      "sha256": "6fb2f58dfc1b0b91e0b46b4cfe4b520eb67c56316aba25eeb6f39c7aa745396f",
+      "bytes": 209741
+    },
+    "meta": {
+      "path": "models/artifact/dga_model_meta.json",
+      "sha256": "43496e114def9dcb7c58d346b8193e52d87a8ac47edace46be35d6a2bb16c4c8",
+      "bytes": 381321
+    },
+    "git": "models/artifact/ is .gitignored by project policy (vendored into the offline bundle); hashes above identify it"
+  }
+}
