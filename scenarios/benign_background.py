@@ -187,7 +187,8 @@ def _resolver_traffic(cfg: BackgroundConfig, cap: CapabilityState) -> list[Norma
     return out
 
 
-def load_background(source: str | Path = "synthetic", cfg: BackgroundConfig = BackgroundConfig()) -> tuple[list[NormalizedEvent], str]:
+def load_background(source: str | Path = "synthetic", cfg: BackgroundConfig = BackgroundConfig(),
+                    address_plan=None) -> tuple[list[NormalizedEvent], str]:
     """Return (events, provenance label).
 
     ``source="synthetic"`` -> generated stream, label "synthetic benign replay".
@@ -199,7 +200,7 @@ def load_background(source: str | Path = "synthetic", cfg: BackgroundConfig = Ba
     from ingest.replay import replay_to_events
 
     path = Path(source)
-    events, _stats = replay_to_events(path)
+    events, _stats = replay_to_events(path, address_plan=address_plan)
     return events, f"pcap:{path.name}"
 
 

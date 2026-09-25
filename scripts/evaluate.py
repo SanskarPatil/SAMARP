@@ -36,6 +36,11 @@ from scenarios.benign_background import BackgroundConfig, load_background  # noq
 from scenarios.evaluation import false_alerts_benign_only, run_stream, score  # noqa: E402
 
 
+PCAP_OBSERVABILITY = ("header-only PCAP replay: DNS names and TLS / JA3 / JA4 fields are not parsed from raw packets, so the "
+                      "dga, dns and tls_quic detectors receive no input (NOT_OBSERVABLE, never 'benign'); scan, c2, ddos, "
+                      "reflection and exfil run on the real headers")
+
+
 def brier_by_detector(runs) -> dict[str, dict[str, float]]:
     buckets = defaultdict(list)
     for run in runs:
@@ -54,7 +59,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--seeds", type=int, nargs="+", default=[1, 2, 3])
     parser.add_argument("--duration", type=float, default=8400.0, help="background seconds per seed (attack suite needs ~8,000 s)")
-    parser.add_argument("--background", default="synthetic", help='"synthetic" or a path to a benign .pcap')
+    parser.add_argument("--background", default="synthetic", help='"synthetic" or a path to a benign classic .pcap')
+    parser.add_argument("--address-plan", default=None,
+                        help="address plan YAML for a pcap background (which prefixes are internal); "
+                             "e.g. config/address_plan_home.example.yaml for a home / office capture")
     parser.add_argument("--attack-seed", type=int, default=11)
     parser.add_argument("--out-dir", default=str(ROOT / "benchmarks"))
     args = parser.parse_args()
@@ -63,7 +71,11 @@ def main() -> int:
     runs, labels_per_run, benign_only = [], [], []
     provenance = None
     for seed in args.seeds:
-        background, provenance = load_background(args.background, BackgroundConfig(seed=seed, duration_s=args.duration))
+        plan = None
+        if args.address_plan:
+            from ingest.address_plan import AddressPlan
+            plan = AddressPlan.load(args.address_plan)
+        background, provenance = load_background(args.background, BackgroundConfig(seed=seed, duration_s=args.duration), address_plan=plan)
         start = min(float(e.observed_time) for e in background)
         duration = max(float(e.observed_time) for e in background) - start
         print(f"seed {seed}: {len(background):,} background events ({provenance}), {duration / 3600:.2f} h", flush=True)
@@ -84,7 +96,10 @@ def main() -> int:
             by_class_fp[letter] += row["incidents"]
     result = {
         "machine": machine_spec(),
-        "data_label": provenance if provenance != "synthetic benign replay" else "synthetic benign replay + synthetic attack suite",
+        "data_label": (f"REAL benign capture {provenance} + synthetic attack suite" if provenance.startswith("pcap:")
+                       else "synthetic benign replay + synthetic attack suite"),
+        "observability": (PCAP_OBSERVABILITY if provenance.startswith("pcap:") else "synthetic events carry DNS / TLS metadata; all 8 detectors see input"),
+        "address_plan": args.address_plan or ("none: traffic direction unknown" if provenance.startswith("pcap:") else "config/address_plan.yaml"),
         "config": {"seeds": args.seeds, "background_seconds_per_seed": args.duration, "attack_suite_seed_base": args.attack_seed,
                    "attacks_per_run": len(labels_per_run[0]), "attribution": "shared address + time overlap (grace 120 s)"},
         "benign_only": {"label": provenance, "hours": round(hours, 3), "false_incidents": total_false_incidents,
@@ -101,7 +116,7 @@ def main() -> int:
 
     label = result["data_label"]
     per_class_counts = ", ".join(f"{k}: {sum(1 for l in labels_per_run[0] if l.ps_letter == k)}" for k in sorted({l.ps_letter for l in labels_per_run[0]}))
-    lines = [f"# Detection evaluation ({stamp})", "", f"**Data: {label}.** Seeds {args.seeds}; {len(labels_per_run[0])} labelled attacks per run "
+    lines = [f"# Detection evaluation ({stamp})", "", f"Observability: {result['observability']}. Address plan: {result['address_plan']}.", "", f"**Data: {label}.** Seeds {args.seeds}; {len(labels_per_run[0])} labelled attacks per run "
              f"({per_class_counts}, incl. deliberately weak variants); {hours:.2f} h of background in total.", "",
              "## Machine", "| key | value |", "|---|---|", spec_markdown(result["machine"]), "",
              f"## Per PS class (mixed stream, {len(runs)} run(s))", "",
