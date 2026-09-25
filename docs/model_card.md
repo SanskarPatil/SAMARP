@@ -20,7 +20,7 @@ NXDOMAIN evidence is still used by the burst rule in `detectors/dga.py`, from ob
 
 * Benign: 1,395 synthetic names from 46 vocabulary words (20 more words held out entirely for testing) **plus 6,000 real
   domains** from one half of the Tranco top-30,000 list (hash split by domain; list sha256 `e60e32c9...`).
-* DGA: 1,484 synthetic names from 5 locally reimplemented families (numeric_seed, hexflux, wordmix, dictcat, base32). No real DGA samples.
+* DGA: 1,484 synthetic names from 5 generic DGA styles written locally (numeric_seed, hexflux, wordmix, dictcat, base32); they are not copies of DGArchive families. No real DGA samples.
 * The benign n-gram model is built from training benign names with out-of-fold scores, so no name is scored against its own n-grams.
 * The deployed artifact is refit on all of the above after evaluation.
 

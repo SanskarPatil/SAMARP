@@ -53,7 +53,7 @@ read-only 405 proof, no write routes, replay 12,137 events -> 8 incidents with a
 ## Could not do, and why
 
 1. **No real network traffic.** All detection metrics except the DGA benign set are from synthetic replay. The PS tools (hping3, Slowloris, dnscat2, iodine, iperf3, TRex/Ostinato) need an isolated Linux lab network; this work ran on a Windows laptop and a cloud workspace without one. The loader already takes a `.pcap` path: `python scripts/evaluate.py --background capture.pcap`.
-2. **No real DGA samples.** DGArchive needs registration; the DGA side of the model is 5 locally reimplemented families. Real-domain false positives were measured (Tranco), real DGA recall was not.
+2. **No real DGA samples.** DGArchive needs registration; the DGA side of the model is 5 generic DGA styles written locally (not DGArchive copies). Real-domain false positives were measured (Tranco), real DGA recall was not.
 3. **Confidence calibration.** After the detector fixes, no detector has >= 5 true and >= 5 false alerts on the synthetic replay, so every alert is `calibrated_on: "uncalibrated"`. Calibrating needs real benign traffic with real false alerts.
 4. **LightGBM not switched on.** It runs in shadow. Real-domain false-positive rate 0.98 % vs rules 0.05-0.25 %, and unseen word-based families are missed once real benign names are in training (dictcat recall 0.00, wordmix 0.55, base32 0.50).
 5. **Capture-level throughput.** The benchmark starts at normalized events; the Suricata/NIC sensor path is not built, so packets/s and Mbps at the wire are not measured.

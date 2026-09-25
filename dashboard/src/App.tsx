@@ -146,7 +146,7 @@ export const App: React.FC = () => {
               <div className="hud hud-bottomleft">
                 <span className="hud-label">PS classes observed</span>
                 <span className="hud-value">{observedClasses}<span className="hud-of"> / 6</span></span>
-                <span className="hud-foot">Seven detector modules</span>
+                <span className="hud-foot">Eight detector modules</span>
               </div>
 
               <div className="hud hud-bottomright">
