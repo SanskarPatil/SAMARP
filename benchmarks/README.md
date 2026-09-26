@@ -67,6 +67,8 @@ Machine for every run below unless stated: 12th Gen Intel Core i5-12450H, 12 log
 |---|---|---|---|---|
 | `verify_20260924T193037Z.json` `verify_20260924T193037Z.log` `verify_20260924T193037Z.md` | `python.exe scripts\verify_all.py` | ac, Normal mode | `af003e1` | CURRENT: all 8 checks pass - 412 tests (10 API/integration), read-only 405, no write routes, replay 8 incidents + chain verified, dashboard 7/7 + build |
 | `verify_20260925T032258Z.json` `verify_20260925T032258Z.log` `verify_20260925T032258Z.md` | `python.exe scripts\verify_all.py` | battery, Normal mode, battery 91 % | `5b98b55` |  |
+| `verify_20260926T190827Z.json` `verify_20260926T190827Z.log` `verify_20260926T190827Z.md` | `python.exe scripts\verify_all.py` | ac, Ultimate Performance | `cb38cfa` |  |
+| `verify_20260926T191219Z.json` `verify_20260926T191219Z.log` `verify_20260926T191219Z.md` | `python.exe scripts\verify_all.py` | ac, Ultimate Performance | `cb38cfa` |  |
 
 ## Other files
 
