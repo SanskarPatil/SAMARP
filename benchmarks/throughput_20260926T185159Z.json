@@ -1,0 +1,248 @@
+{
+  "machine": {
+    "captured_at_utc": "2026-09-26T18:45:55+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "power": {
+      "power_source": "ac",
+      "battery_percent": 80,
+      "battery_saver_on": false,
+      "power_plan": "Ultimate Performance"
+    },
+    "git_commit": "08dbe43",
+    "command": "python.exe scripts\\bench_throughput.py --rates 1000 5000 10000 15000 25000 50000 --duration 60"
+  },
+  "config": {
+    "rates": [
+      1000,
+      5000,
+      10000,
+      15000,
+      25000,
+      50000
+    ],
+    "duration_s_per_step": 60.0,
+    "buffer_events": 50000,
+    "db": "file",
+    "loss_ceiling_pct": 1.0,
+    "pass_rule": "dropped < 1 % AND backlog when the sender stops <= 1 s of traffic (the consumer kept up)",
+    "event_source": "scenarios/canonical_campaign.py (attack-heavy, time-shifted per loop)",
+    "metric": "normalized flow events per second",
+    "scope": "pipeline + dedup + scoring + hash chain + SQLite; excludes capture, NIC, WebSocket",
+    "smoke_run": false
+  },
+  "steps": [
+    {
+      "target_rate_eps": 1000,
+      "duration_s": 60.0,
+      "offered_events": 59999,
+      "processed_events": 59999,
+      "dropped_events": 0,
+      "dropped_pct": 0.0,
+      "sustained_processed_eps": 1000.0,
+      "worst_1s_processed_eps": 999,
+      "median_1s_processed_eps": 999,
+      "cpu_pct_of_one_core": 20.0,
+      "rss_mb_end_of_step": 133.5,
+      "peak_rss_mb_process": 149.9,
+      "alerts_emitted": 35,
+      "incidents": 8,
+      "hash_chain_entries": 36,
+      "event_to_alert_latency_ms": {
+        "p50": 0.3832,
+        "p95": 0.5903,
+        "p99": 0.6174,
+        "max": 0.6174,
+        "n": 35
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 0.0699,
+        "p95": 0.0989,
+        "p99": 0.1489,
+        "max": 7.4396,
+        "n": 59999
+      },
+      "backlog_at_end_events": 0,
+      "keeps_up": true,
+      "passes_loss_ceiling": true
+    },
+    {
+      "target_rate_eps": 5000,
+      "duration_s": 60.0,
+      "offered_events": 299996,
+      "processed_events": 299996,
+      "dropped_events": 0,
+      "dropped_pct": 0.0,
+      "sustained_processed_eps": 5000.1,
+      "worst_1s_processed_eps": 4996,
+      "median_1s_processed_eps": 4999,
+      "cpu_pct_of_one_core": 66.5,
+      "rss_mb_end_of_step": 138.0,
+      "peak_rss_mb_process": 153.1,
+      "alerts_emitted": 172,
+      "incidents": 8,
+      "hash_chain_entries": 173,
+      "event_to_alert_latency_ms": {
+        "p50": 0.6611,
+        "p95": 2.7671,
+        "p99": 4.3861,
+        "max": 5.92,
+        "n": 172
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 0.1606,
+        "p95": 0.2429,
+        "p99": 0.3122,
+        "max": 6.3083,
+        "n": 299996
+      },
+      "backlog_at_end_events": 0,
+      "keeps_up": true,
+      "passes_loss_ceiling": true
+    },
+    {
+      "target_rate_eps": 10000,
+      "duration_s": 60.0,
+      "offered_events": 599999,
+      "processed_events": 599999,
+      "dropped_events": 0,
+      "dropped_pct": 0.0,
+      "sustained_processed_eps": 10000.1,
+      "worst_1s_processed_eps": 9950,
+      "median_1s_processed_eps": 9999,
+      "cpu_pct_of_one_core": 127.2,
+      "rss_mb_end_of_step": 152.4,
+      "peak_rss_mb_process": 165.9,
+      "alerts_emitted": 345,
+      "incidents": 8,
+      "hash_chain_entries": 345,
+      "event_to_alert_latency_ms": {
+        "p50": 0.965,
+        "p95": 4.7095,
+        "p99": 5.9429,
+        "max": 7.6741,
+        "n": 345
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 0.2535,
+        "p95": 0.4187,
+        "p99": 0.6243,
+        "max": 8.8802,
+        "n": 599999
+      },
+      "backlog_at_end_events": 0,
+      "keeps_up": true,
+      "passes_loss_ceiling": true
+    },
+    {
+      "target_rate_eps": 15000,
+      "duration_s": 60.0,
+      "offered_events": 899998,
+      "processed_events": 899998,
+      "dropped_events": 0,
+      "dropped_pct": 0.0,
+      "sustained_processed_eps": 15000.2,
+      "worst_1s_processed_eps": 14970,
+      "median_1s_processed_eps": 15000,
+      "cpu_pct_of_one_core": 187.9,
+      "rss_mb_end_of_step": 157.4,
+      "peak_rss_mb_process": 175.3,
+      "alerts_emitted": 517,
+      "incidents": 8,
+      "hash_chain_entries": 517,
+      "event_to_alert_latency_ms": {
+        "p50": 1.2028,
+        "p95": 5.3183,
+        "p99": 6.4816,
+        "max": 8.9409,
+        "n": 517
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 0.3477,
+        "p95": 0.61,
+        "p99": 1.3819,
+        "max": 9.4901,
+        "n": 899998
+      },
+      "backlog_at_end_events": 0,
+      "keeps_up": true,
+      "passes_loss_ceiling": true
+    },
+    {
+      "target_rate_eps": 25000,
+      "duration_s": 60.0,
+      "offered_events": 1499965,
+      "processed_events": 1499965,
+      "dropped_events": 0,
+      "dropped_pct": 0.0,
+      "sustained_processed_eps": 25000.5,
+      "worst_1s_processed_eps": 24821,
+      "median_1s_processed_eps": 24999,
+      "cpu_pct_of_one_core": 309.9,
+      "rss_mb_end_of_step": 163.5,
+      "peak_rss_mb_process": 183.1,
+      "alerts_emitted": 857,
+      "incidents": 8,
+      "hash_chain_entries": 858,
+      "event_to_alert_latency_ms": {
+        "p50": 1.3658,
+        "p95": 7.2254,
+        "p99": 7.9487,
+        "max": 9.3584,
+        "n": 857
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 0.5917,
+        "p95": 1.1811,
+        "p99": 5.2418,
+        "max": 10.8652,
+        "n": 1499965
+      },
+      "backlog_at_end_events": 0,
+      "keeps_up": true,
+      "passes_loss_ceiling": true
+    },
+    {
+      "target_rate_eps": 50000,
+      "duration_s": 60.0,
+      "offered_events": 2999973,
+      "processed_events": 2323740,
+      "dropped_events": 676233,
+      "dropped_pct": 22.541,
+      "sustained_processed_eps": 37995.0,
+      "worst_1s_processed_eps": 36381,
+      "median_1s_processed_eps": 37623,
+      "cpu_pct_of_one_core": 516.9,
+      "rss_mb_end_of_step": 174.2,
+      "peak_rss_mb_process": 211.6,
+      "alerts_emitted": 1532,
+      "incidents": 8,
+      "hash_chain_entries": 1532,
+      "event_to_alert_latency_ms": {
+        "p50": 1282.9999,
+        "p95": 1324.8745,
+        "p99": 1332.665,
+        "max": 1340.7574,
+        "n": 1532
+      },
+      "event_to_processed_latency_ms": {
+        "p50": 1293.2715,
+        "p95": 1344.9639,
+        "p99": 1358.0694,
+        "max": 1378.9562,
+        "n": 2323740
+      },
+      "backlog_at_end_events": 49749,
+      "keeps_up": true,
+      "passes_loss_ceiling": false
+    }
+  ],
+  "summary": {
+    "max_offered_rate_with_loss_below_ceiling": 25000,
+    "kpi_1000_eps_60s_below_1pct_loss": true
+  }
+}

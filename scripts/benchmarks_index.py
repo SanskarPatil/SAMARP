@@ -17,7 +17,10 @@ STATUS = {
     "throughput_20260924T072338Z": "SUPERSEDED - first ladder; steps above 10k invalid (sender copied dropped events, fixed in bf04cb1)",
     "throughput_20260924T073116Z": "valid (5k-9k all pass); battery, see NOTES.md",
     "throughput_20260924T074054Z": "CEILING: 10k passes, 15k fails (backlog); battery 82 %, Ultimate Performance",
-    "throughput_20260924T185020Z": "CURRENT: 10k passes with LightGBM DGA shadow scoring (CPU 91 %)",
+    "throughput_20260924T185020Z": "10k passes with LightGBM DGA shadow scoring (CPU 91 %); AC, Normal power plan",
+    "throughput_20260926T185159Z": "CURRENT scaling curve: 1k-25k pass (0 drops, p95 <= 7.3 ms), 50k fails (22.5 % dropped); AC, Ultimate Performance plan. CPU % is summed over cores",
+    "c2_jitter_20260926T183941Z": "CURRENT: synthetic beacons, 40 trials/cell; >= 97 % detected up to +-20 % jitter, 62-80 % at +-25 %, <= 45 % from +-30 %",
+    "thresholds_20260926T184406Z": "CURRENT: one-at-a-time threshold sweep, seeds 4-6 (synthetic benign + synthetic attacks); recall vs false incidents/h per detector",
     "dga_eval_20260924T062601Z": "task 1 leakage fix (grouped split, leave-one-family-out); synthetic only",
     "dga_eval_20260924T184620Z": "task 8, synthetic-only training + REAL Tranco test: real FPR 11.7 % (negative finding)",
     "dga_eval_20260924T191002Z": "CURRENT task 8: trained with real Tranco half; real FPR 0.98 %; model stays in shadow",
@@ -39,6 +42,8 @@ LABELS = {
     "evaluation": "Per-class detection metrics - synthetic benign replay + synthetic attack suite",
     "calibration": "Confidence calibration fit (synthetic benign replay, seed 101)",
     "sample_alert": "Sample alert JSON from the canonical replay",
+    "c2_jitter": "C2 beacon detection vs timing jitter (synthetic beacons, C2Detector only)",
+    "thresholds": "Threshold sensitivity - recall vs false incidents/h (synthetic benign replay + synthetic attack suite)",
     "verify": "Final verification: all test suites, replay, chain, read-only, dashboard",
 }
 
@@ -66,7 +71,7 @@ def main() -> int:
              "re-run them from the project root with the venv active.", "",
              "**Data labels.** *synthetic benign replay* = `scenarios/benign_background.py`; attack suite = `scenarios/attack_suite.py`; "
              "*real* = Tranco top-1m list (sha256 in the DGA JSON). No real network capture has been evaluated yet; "
-             "`load_background()` accepts a `.pcap` path when one is available.", "",
+             "the harness is ready (`scripts/evaluate.py --background <file>.pcap --address-plan ...`, `scripts/evaluate_pcap.py`; see docs/lab_capture.md).", "",
              "Machine for every run below unless stated: 12th Gen Intel Core i5-12450H, 12 logical CPUs, 15.7 GB RAM, Windows 11 (10.0.26200), CPython 3.13.14.", ""]
     for kind, label in LABELS.items():
         group = [r for r in rows if r[0] == kind]

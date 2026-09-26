@@ -1,0 +1,411 @@
+{
+  "machine": {
+    "captured_at_utc": "2026-09-26T18:44:06+00:00",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "logical_cpus": 12,
+    "ram_gb": 15.7,
+    "python": "3.13.14",
+    "python_impl": "CPython",
+    "power": {
+      "power_source": "ac",
+      "battery_percent": 80,
+      "battery_saver_on": false,
+      "power_plan": "Ultimate Performance"
+    },
+    "git_commit": "08dbe43",
+    "command": "python.exe scripts\\sweep_thresholds.py"
+  },
+  "seeds": [
+    4,
+    5,
+    6
+  ],
+  "rows": [
+    {
+      "detector": "scan",
+      "ps_letter": "e",
+      "parameter": "unique_port_min (vertical)",
+      "value": 25,
+      "shipped": false,
+      "recall": 0.8,
+      "detected": 12,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "scan",
+      "ps_letter": "e",
+      "parameter": "unique_port_min (vertical)",
+      "value": 50,
+      "shipped": false,
+      "recall": 0.6,
+      "detected": 9,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "scan",
+      "ps_letter": "e",
+      "parameter": "unique_port_min (vertical)",
+      "value": 100,
+      "shipped": true,
+      "recall": 0.6,
+      "detected": 9,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "scan",
+      "ps_letter": "e",
+      "parameter": "unique_port_min (vertical)",
+      "value": 150,
+      "shipped": false,
+      "recall": 0.4,
+      "detected": 6,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "scan",
+      "ps_letter": "e",
+      "parameter": "unique_port_min (vertical)",
+      "value": 200,
+      "shipped": false,
+      "recall": 0.2,
+      "detected": 3,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "scan",
+      "ps_letter": "e",
+      "parameter": "unique_dst_min (horizontal)",
+      "value": 10,
+      "shipped": false,
+      "recall": 0.8,
+      "detected": 12,
+      "attacks": 15,
+      "false_incidents_per_hour": 16.571
+    },
+    {
+      "detector": "scan",
+      "ps_letter": "e",
+      "parameter": "unique_dst_min (horizontal)",
+      "value": 25,
+      "shipped": false,
+      "recall": 0.6,
+      "detected": 9,
+      "attacks": 15,
+      "false_incidents_per_hour": 1.429
+    },
+    {
+      "detector": "scan",
+      "ps_letter": "e",
+      "parameter": "unique_dst_min (horizontal)",
+      "value": 50,
+      "shipped": true,
+      "recall": 0.6,
+      "detected": 9,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "scan",
+      "ps_letter": "e",
+      "parameter": "unique_dst_min (horizontal)",
+      "value": 75,
+      "shipped": false,
+      "recall": 0.6,
+      "detected": 9,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "scan",
+      "ps_letter": "e",
+      "parameter": "unique_dst_min (horizontal)",
+      "value": 100,
+      "shipped": false,
+      "recall": 0.4,
+      "detected": 6,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "c2",
+      "ps_letter": "b",
+      "parameter": "cv_max",
+      "value": 0.05,
+      "shipped": false,
+      "recall": 0.6,
+      "detected": 9,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "c2",
+      "ps_letter": "b",
+      "parameter": "cv_max",
+      "value": 0.1,
+      "shipped": false,
+      "recall": 0.867,
+      "detected": 13,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "c2",
+      "ps_letter": "b",
+      "parameter": "cv_max",
+      "value": 0.15,
+      "shipped": true,
+      "recall": 0.933,
+      "detected": 14,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "c2",
+      "ps_letter": "b",
+      "parameter": "cv_max",
+      "value": 0.2,
+      "shipped": false,
+      "recall": 1.0,
+      "detected": 15,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "c2",
+      "ps_letter": "b",
+      "parameter": "cv_max",
+      "value": 0.3,
+      "shipped": false,
+      "recall": 1.0,
+      "detected": 15,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "c2",
+      "ps_letter": "b",
+      "parameter": "cv_max",
+      "value": 0.4,
+      "shipped": false,
+      "recall": 1.0,
+      "detected": 15,
+      "attacks": 15,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "exfil",
+      "ps_letter": "f",
+      "parameter": "outbound_ratio_min",
+      "value": 2.0,
+      "shipped": false,
+      "recall": 1.0,
+      "detected": 15,
+      "attacks": 15,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "exfil",
+      "ps_letter": "f",
+      "parameter": "outbound_ratio_min",
+      "value": 5.0,
+      "shipped": false,
+      "recall": 1.0,
+      "detected": 15,
+      "attacks": 15,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "exfil",
+      "ps_letter": "f",
+      "parameter": "outbound_ratio_min",
+      "value": 10.0,
+      "shipped": true,
+      "recall": 1.0,
+      "detected": 15,
+      "attacks": 15,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "exfil",
+      "ps_letter": "f",
+      "parameter": "outbound_ratio_min",
+      "value": 20.0,
+      "shipped": false,
+      "recall": 1.0,
+      "detected": 15,
+      "attacks": 15,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "exfil",
+      "ps_letter": "f",
+      "parameter": "outbound_ratio_min",
+      "value": 50.0,
+      "shipped": false,
+      "recall": 0.6,
+      "detected": 9,
+      "attacks": 15,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "exfil",
+      "ps_letter": "f",
+      "parameter": "min_outbound_bytes",
+      "value": 50000,
+      "shipped": false,
+      "recall": 1.0,
+      "detected": 15,
+      "attacks": 15,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "exfil",
+      "ps_letter": "f",
+      "parameter": "min_outbound_bytes",
+      "value": 250000,
+      "shipped": true,
+      "recall": 1.0,
+      "detected": 15,
+      "attacks": 15,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "exfil",
+      "ps_letter": "f",
+      "parameter": "min_outbound_bytes",
+      "value": 1000000,
+      "shipped": false,
+      "recall": 0.8,
+      "detected": 12,
+      "attacks": 15,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "exfil",
+      "ps_letter": "f",
+      "parameter": "min_outbound_bytes",
+      "value": 5000000,
+      "shipped": false,
+      "recall": 0.6,
+      "detected": 9,
+      "attacks": 15,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "ddos",
+      "ps_letter": "a",
+      "parameter": "min_pps",
+      "value": 1000,
+      "shipped": false,
+      "recall": 0.917,
+      "detected": 22,
+      "attacks": 24,
+      "false_incidents_per_hour": 13.714
+    },
+    {
+      "detector": "ddos",
+      "ps_letter": "a",
+      "parameter": "min_pps",
+      "value": 2500,
+      "shipped": false,
+      "recall": 0.792,
+      "detected": 19,
+      "attacks": 24,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "ddos",
+      "ps_letter": "a",
+      "parameter": "min_pps",
+      "value": 5000,
+      "shipped": true,
+      "recall": 0.792,
+      "detected": 19,
+      "attacks": 24,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "ddos",
+      "ps_letter": "a",
+      "parameter": "min_pps",
+      "value": 8000,
+      "shipped": false,
+      "recall": 0.792,
+      "detected": 19,
+      "attacks": 24,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "ddos",
+      "ps_letter": "a",
+      "parameter": "min_pps",
+      "value": 12000,
+      "shipped": false,
+      "recall": 0.792,
+      "detected": 19,
+      "attacks": 24,
+      "false_incidents_per_hour": 1.286
+    },
+    {
+      "detector": "reflection",
+      "ps_letter": "a",
+      "parameter": "min_fan_in",
+      "value": 3,
+      "shipped": false,
+      "recall": 0.667,
+      "detected": 6,
+      "attacks": 9,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "reflection",
+      "ps_letter": "a",
+      "parameter": "min_fan_in",
+      "value": 5,
+      "shipped": false,
+      "recall": 0.667,
+      "detected": 6,
+      "attacks": 9,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "reflection",
+      "ps_letter": "a",
+      "parameter": "min_fan_in",
+      "value": 10,
+      "shipped": true,
+      "recall": 0.667,
+      "detected": 6,
+      "attacks": 9,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "reflection",
+      "ps_letter": "a",
+      "parameter": "min_fan_in",
+      "value": 20,
+      "shipped": false,
+      "recall": 0.667,
+      "detected": 6,
+      "attacks": 9,
+      "false_incidents_per_hour": 0.0
+    },
+    {
+      "detector": "reflection",
+      "ps_letter": "a",
+      "parameter": "min_fan_in",
+      "value": 40,
+      "shipped": false,
+      "recall": 0.333,
+      "detected": 3,
+      "attacks": 9,
+      "false_incidents_per_hour": 0.0
+    }
+  ]
+}
